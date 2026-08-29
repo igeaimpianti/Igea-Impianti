@@ -2,17 +2,16 @@
 <html lang="it">
 <head>
 
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
 <link rel="manifest" href="manifest.json">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Igea Impianti">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#ffffff">
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 <title>Igea Impianti V8</title>
 
@@ -37,8 +36,6 @@ body{
     padding-bottom:100px;
 }
 
-/* HEADER */
-
 header{
     padding:calc(18px + env(safe-area-inset-top)) 18px 15px;
     position:sticky;
@@ -60,7 +57,6 @@ header{
     height:42px;
     object-fit:contain;
     border-radius:10px;
-    flex-shrink:0;
 }
 
 .brand-text h1{
@@ -74,8 +70,6 @@ header p{
     color:#777;
     font-size:14px;
 }
-
-/* MAIN */
 
 main{
     padding:14px 16px;
@@ -94,8 +88,6 @@ main{
     margin:0 0 15px;
     font-size:18px;
 }
-
-/* STATS */
 
 .stats{
     display:grid;
@@ -126,8 +118,6 @@ main{
 .blue{color:#1769aa}
 .orange{color:#b56a00}
 
-/* FORM */
-
 input,
 select,
 textarea{
@@ -141,6 +131,10 @@ textarea{
     outline:none;
     margin-bottom:10px;
     -webkit-appearance:none;
+}
+
+select{
+    appearance:auto;
 }
 
 input:focus,
@@ -160,8 +154,6 @@ label{
     font-size:13px;
     margin:8px 0 6px;
 }
-
-/* BUTTON */
 
 button{
     border:0;
@@ -218,8 +210,6 @@ button{
     display:none!important;
 }
 
-/* NAV */
-
 .nav{
     position:fixed;
     bottom:0;
@@ -262,8 +252,6 @@ button{
     line-height:24px;
     margin-bottom:4px;
 }
-
-/* ITEMS */
 
 .item{
     background:#fafafa;
@@ -308,30 +296,6 @@ button{
     font-size:15px;
 }
 
-.row{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-}
-
-.filter-date{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-}
-
-.empty{
-    text-align:center;
-    color:#888;
-    padding:25px 8px;
-}
-
-.total-big{
-    font-size:32px;
-    font-weight:800;
-    margin-top:4px;
-}
-
 .badge{
     display:inline-block;
     padding:5px 9px;
@@ -353,8 +317,20 @@ button{
 }
 
 .badge.blue-badge{
-    background:#edf5fc;
+    background:#edf5fb;
     color:#1769aa;
+}
+
+.empty{
+    text-align:center;
+    color:#888;
+    padding:25px 8px;
+}
+
+.total-big{
+    font-size:32px;
+    font-weight:800;
+    margin-top:4px;
 }
 
 .search{
@@ -400,7 +376,11 @@ hr{
     font-size:18px;
 }
 
-/* PAGAMENTI */
+.filter-date{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
 
 .payment-summary{
     background:#f6f6f6;
@@ -429,7 +409,6 @@ hr{
     height:100%;
     background:#16834b;
     border-radius:99px;
-    transition:width .25s;
 }
 
 .installment{
@@ -467,164 +446,96 @@ hr{
     width:100%;
 }
 
-.future{
-    border-left:4px solid #1769aa;
-}
-
-.completed{
-    border-left:4px solid #16834b;
-}
-
-/* STORICO CLIENTE */
-
-.history-client{
-    background:#fafafa;
-    border:1px solid #dedede;
-    border-radius:16px;
-    padding:16px;
-    margin-bottom:10px;
-    cursor:pointer;
-}
-
-.history-client:active{
-    background:#f2f2f2;
-}
-
-.history-client-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-}
-
-.history-client-name{
-    font-size:17px;
-    font-weight:700;
-}
-
-.history-arrow{
-    font-size:20px;
-    color:#888;
-}
-
-.history-count{
-    color:#777;
-    font-size:12px;
-    margin-top:5px;
-}
-
-.history-details{
-    margin-top:10px;
-}
-
-.history-appointment{
-    background:#fff;
-    border:1px solid #ddd;
-    border-radius:13px;
-    padding:13px;
-    margin-top:8px;
-}
-
-.history-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:8px;
-}
-
-.history-date{
-    font-weight:700;
-}
-
-.history-finance{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:7px;
-    margin-top:10px;
-}
-
-.history-finance-box{
-    background:#f6f6f6;
-    border-radius:10px;
-    padding:9px 5px;
-    text-align:center;
-}
-
-.history-finance-box small{
-    display:block;
-    font-size:9px;
-    color:#888;
-    margin-bottom:4px;
-}
-
-.history-finance-box strong{
-    font-size:12px;
-}
-
-/* MODAL */
-
 .modal{
     position:fixed;
     inset:0;
-    z-index:100;
-    background:rgba(0,0,0,.48);
+    background:rgba(0,0,0,.45);
+    backdrop-filter:blur(5px);
     display:flex;
     align-items:flex-end;
     justify-content:center;
+    z-index:100;
     padding:0;
 }
 
 .modal-box{
+    background:#fff;
     width:100%;
     max-width:680px;
     max-height:92vh;
     overflow-y:auto;
-    background:#fff;
     border-radius:24px 24px 0 0;
-    padding:20px 17px calc(24px + env(safe-area-inset-bottom));
-    animation:slideUp .2s ease;
-}
-
-@keyframes slideUp{
-    from{
-        transform:translateY(100%);
-    }
-    to{
-        transform:translateY(0);
-    }
+    padding:22px 18px calc(22px + env(safe-area-inset-bottom));
 }
 
 .modal-title{
     font-size:21px;
     font-weight:800;
-    margin-bottom:4px;
+    margin-bottom:5px;
 }
 
 .modal-subtitle{
     color:#777;
     font-size:13px;
-    margin-bottom:15px;
+    margin-bottom:18px;
 }
 
-.modal-actions{
-    display:flex;
-    gap:8px;
-    margin-top:15px;
+.rate-list{
+    background:#f7f7f7;
+    border:1px solid #ddd;
+    border-radius:15px;
+    padding:12px;
+    margin-top:8px;
 }
 
-.modal-actions button{
-    flex:1;
-}
-
-.installment-input{
+.rate-row{
+    display:grid;
+    grid-template-columns:70px 1fr;
+    gap:9px;
+    align-items:center;
     margin-bottom:8px;
 }
 
-.installment-input label{
-    margin-top:6px;
+.rate-row:last-child{
+    margin-bottom:0;
 }
 
-/* RESPONSIVE */
+.rate-label{
+    font-size:13px;
+    font-weight:700;
+}
+
+.rate-row input{
+    margin:0;
+}
+
+.calculated-box{
+    background:#f6f6f6;
+    border:1px solid #ddd;
+    border-radius:14px;
+    padding:13px;
+    margin:10px 0;
+}
+
+.calculated-row{
+    display:flex;
+    justify-content:space-between;
+    padding:4px 0;
+    font-size:14px;
+}
+
+.client-history{
+    cursor:pointer;
+}
+
+.client-history:active{
+    transform:scale(.99);
+}
+
+.chevron{
+    color:#999;
+    font-size:22px;
+}
 
 @media(max-width:400px){
 
@@ -656,623 +567,581 @@ hr{
 
 <header>
 
-    <div class="brand">
+<div class="brand">
 
-        <img src="icon.png" alt="Igea Impianti">
+<img src="icon.png" alt="Igea Impianti">
 
-        <div class="brand-text">
+<div class="brand-text">
 
-            <h1>Igea Impianti</h1>
+<h1>Igea Impianti</h1>
 
-            <p id="pageSubtitle">Dashboard</p>
+<p id="pageSubtitle">Dashboard</p>
 
-        </div>
+</div>
 
-    </div>
+</div>
 
 </header>
 
+
 <main>
 
-<!-- =========================
-     DASHBOARD
-========================= -->
+
+<!-- DASHBOARD -->
 
 <section id="dashboard">
 
-    <div class="card">
+<div class="card">
 
-        <h2>📊 Riepilogo</h2>
+<h2>📊 Riepilogo</h2>
 
-        <label>Periodo</label>
+<label>Periodo</label>
 
-        <select id="periodFilter"
-                onchange="updateDashboard()">
+<select id="periodFilter" onchange="updateDashboard()">
 
-            <option value="today">Oggi</option>
-            <option value="yesterday">Ieri</option>
-            <option value="week">Questa settimana</option>
-            <option value="month">Questo mese</option>
-            <option value="lastMonth">Mese precedente</option>
-            <option value="custom">Personalizzato</option>
+<option value="today">Oggi</option>
+<option value="yesterday">Ieri</option>
+<option value="week">Questa settimana</option>
+<option value="month">Questo mese</option>
+<option value="lastMonth">Mese precedente</option>
+<option value="custom">Personalizzato</option>
 
-        </select>
+</select>
 
-        <div id="customDates"
-             class="filter-date hidden">
+<div id="customDates" class="filter-date hidden">
 
-            <div>
+<div>
 
-                <label>Dal</label>
+<label>Dal</label>
 
-                <input type="date"
-                       id="dateFrom"
-                       onchange="updateDashboard()">
+<input type="date" id="dateFrom" onchange="updateDashboard()">
 
-            </div>
+</div>
 
-            <div>
+<div>
 
-                <label>Al</label>
+<label>Al</label>
 
-                <input type="date"
-                       id="dateTo"
-                       onchange="updateDashboard()">
+<input type="date" id="dateTo" onchange="updateDashboard()">
 
-            </div>
+</div>
 
-        </div>
+</div>
 
-    </div>
+</div>
 
-    <div class="stats">
 
-        <div class="stat">
+<div class="stats">
 
-            <small>💰 Incassato</small>
+<div class="stat">
 
-            <strong id="dashIncome"
-                    class="green">
-                €0,00
-            </strong>
+<small>💰 Incassato</small>
 
-        </div>
+<strong id="dashIncome" class="green">€0,00</strong>
 
-        <div class="stat">
+</div>
 
-            <small>💸 Spese</small>
+<div class="stat">
 
-            <strong id="dashExpenses"
-                    class="red">
-                €0,00
-            </strong>
+<small>💸 Spese</small>
 
-        </div>
+<strong id="dashExpenses" class="red">€0,00</strong>
 
-        <div class="stat">
+</div>
 
-            <small>🟢 Netto</small>
+<div class="stat">
 
-            <strong id="dashNet"
-                    class="blue">
-                €0,00
-            </strong>
+<small>🟢 Netto</small>
 
-        </div>
+<strong id="dashNet" class="blue">€0,00</strong>
 
-    </div>
+</div>
 
-    <div class="card"
-         style="margin-top:14px">
+</div>
 
-        <h2>📈 Anno corrente</h2>
 
-        <div class="year-box">
+<div class="card" style="margin-top:14px">
 
-            <div class="year-stat">
+<h2>📈 Anno corrente</h2>
 
-                <small>💰 Incassato</small>
+<div class="year-box">
 
-                <strong id="yearIncome"
-                        class="green">
-                    €0,00
-                </strong>
+<div class="year-stat">
 
-            </div>
+<small>💰 Incassato</small>
 
-            <div class="year-stat">
+<strong id="yearIncome" class="green">€0,00</strong>
 
-                <small>💸 Spese</small>
+</div>
 
-                <strong id="yearExpenses"
-                        class="red">
-                    €0,00
-                </strong>
+<div class="year-stat">
 
-            </div>
+<small>💸 Spese</small>
 
-            <div class="year-stat">
+<strong id="yearExpenses" class="red">€0,00</strong>
 
-                <small>🟢 Netto</small>
+</div>
 
-                <strong id="yearNet"
-                        class="blue">
-                    €0,00
-                </strong>
+<div class="year-stat">
 
-            </div>
+<small>🟢 Netto</small>
 
-            <div class="year-stat">
+<strong id="yearNet" class="blue">€0,00</strong>
 
-                <small>📅 Appuntamenti</small>
+</div>
 
-                <strong id="yearAppointments">
-                    0
-                </strong>
+<div class="year-stat">
 
-            </div>
+<small>📅 Appuntamenti</small>
 
-        </div>
+<strong id="yearAppointments">0</strong>
 
-    </div>
+</div>
 
-    <!-- PROSSIMI APPUNTAMENTI -->
+</div>
 
-    <div class="card">
+</div>
 
-        <h2>📅 Prossimi appuntamenti</h2>
 
-        <div id="futureAppointments"></div>
+<div class="card">
 
-    </div>
+<h2>📅 Prossimi appuntamenti</h2>
 
-    <!-- DETTAGLIO PERIODO -->
+<div id="futureAppointments"></div>
 
-    <div class="card">
+</div>
 
-        <h2>📋 Appuntamenti del periodo</h2>
 
-        <div id="dashboardAppointments"></div>
+<div class="card">
 
-    </div>
+<h2>📋 Dettaglio periodo</h2>
+
+<div id="dashboardAppointments"></div>
+
+</div>
 
 </section>
 
 
-<!-- =========================
-     CLIENTI
-========================= -->
+<!-- CLIENTI -->
 
-<section id="clients"
-         class="hidden">
+<section id="clients" class="hidden">
 
-    <div class="card">
+<div class="card">
 
-        <h2>👥 Nuovo cliente</h2>
+<h2>👥 Nuovo cliente</h2>
 
-        <input id="clientName"
-               placeholder="Nome e cognome">
+<input id="clientName" placeholder="Nome e cognome">
 
-        <input id="clientPhone"
-               type="tel"
-               placeholder="Telefono">
+<input id="clientPhone" type="tel" placeholder="Telefono">
 
-        <input id="clientEmail"
-               type="email"
-               placeholder="Email">
+<input id="clientEmail" type="email" placeholder="Email">
 
-        <textarea id="clientNotes"
-                  placeholder="Note"></textarea>
+<textarea id="clientNotes" placeholder="Note"></textarea>
 
-        <button class="primary"
-                onclick="saveClient()">
+<button class="primary" onclick="saveClient()">
+Salva cliente
+</button>
 
-            Salva cliente
+</div>
 
-        </button>
 
-    </div>
+<div class="card">
 
-    <div class="card">
+<h2>👥 Clienti</h2>
 
-        <h2>👥 Clienti</h2>
+<input
+class="search"
+id="clientSearch"
+placeholder="🔎 Cerca cliente..."
+oninput="renderClients()">
 
-        <input class="search"
-               id="clientSearch"
-               placeholder="🔎 Cerca cliente..."
-               oninput="renderClients()">
+<div id="clientsList"></div>
 
-        <div id="clientsList"></div>
-
-    </div>
+</div>
 
 </section>
 
 
-<!-- =========================
-     APPUNTAMENTI
-========================= -->
+<!-- APPUNTAMENTI -->
 
-<section id="appointments"
-         class="hidden">
+<section id="appointments" class="hidden">
 
-    <div class="card">
+<div class="card">
 
-        <h2>📅 Nuovo appuntamento</h2>
+<h2>📅 Nuovo appuntamento</h2>
 
-        <label>Cliente</label>
+<label>Cliente</label>
 
-        <select id="appointmentClient"></select>
+<select id="appointmentClient"></select>
 
-        <label>Data</label>
+<label>Data</label>
 
-        <input type="date"
-               id="appointmentDate">
+<input type="date" id="appointmentDate">
 
-        <label>Ora</label>
+<label>Ora</label>
 
-        <input type="time"
-               id="appointmentTime">
+<input type="time" id="appointmentTime">
 
-        <label>Tipo di intervento / Note</label>
+<label>Tipo di intervento / Note</label>
 
-        <textarea id="appointmentNotes"
-                  placeholder="Es. Installazione impianto, manutenzione, sopralluogo..."></textarea>
+<textarea
+id="appointmentNotes"
+placeholder="Es. Installazione impianto, sopralluogo, manutenzione..."></textarea>
 
-        <button class="primary"
-                onclick="saveAppointment()">
+<button class="primary" onclick="saveAppointment()">
+Salva appuntamento
+</button>
 
-            Salva appuntamento
+</div>
 
-        </button>
 
-    </div>
+<div class="card">
 
-    <!-- STORICO -->
+<h2>📚 Storico appuntamenti</h2>
 
-    <div class="card">
+<input
+class="search"
+id="appointmentSearch"
+placeholder="🔎 Cerca cliente..."
+oninput="renderAppointments()">
 
-        <h2>📚 Storico appuntamenti</h2>
+<div id="appointmentsList"></div>
 
-        <input class="search"
-               id="historySearch"
-               placeholder="🔎 Cerca cliente..."
-               oninput="renderHistory()">
-
-        <div id="historyList"></div>
-
-    </div>
+</div>
 
 </section>
 
 
-<!-- =========================
-     PAGAMENTI
-========================= -->
+<!-- PAGAMENTI -->
 
-<section id="payments"
-         class="hidden">
+<section id="payments" class="hidden">
 
-    <div class="card">
+<div class="card">
 
-        <h2>💳 Pagamenti</h2>
+<h2>💳 Pagamenti</h2>
 
-        <div class="stats">
+<div class="stats">
 
-            <div class="stat">
+<div class="stat">
 
-                <small>💰 Incassato</small>
+<small>💰 Incassato</small>
 
-                <strong id="paymentsReceived"
-                        class="green">
-                    €0,00
-                </strong>
+<strong id="paymentsReceived" class="green">
+€0,00
+</strong>
 
-            </div>
+</div>
 
-            <div class="stat">
+<div class="stat">
 
-                <small>⏳ Da incassare</small>
+<small>⏳ Da incassare</small>
 
-                <strong id="paymentsRemaining"
-                        class="orange">
-                    €0,00
-                </strong>
+<strong id="paymentsRemaining" class="orange">
+€0,00
+</strong>
 
-            </div>
+</div>
 
-            <div class="stat">
+<div class="stat">
 
-                <small>👥 Clienti</small>
+<small>👥 Clienti</small>
 
-                <strong id="paymentsClients">
-                    0
-                </strong>
+<strong id="paymentsClients">
+0
+</strong>
 
-            </div>
+</div>
 
-        </div>
+</div>
 
-    </div>
+</div>
 
-    <div class="card">
 
-        <input class="search"
-               id="paymentSearch"
-               placeholder="🔎 Cerca cliente..."
-               oninput="renderPayments()">
+<div class="card">
 
-        <div id="paymentsList"></div>
+<input
+class="search"
+id="paymentSearch"
+placeholder="🔎 Cerca cliente..."
+oninput="renderPayments()">
 
-    </div>
+<div id="paymentsList"></div>
+
+</div>
 
 </section>
 
 
-<!-- =========================
-     ALTRO
-========================= -->
+<!-- ALTRO -->
 
-<section id="settings"
-         class="hidden">
+<section id="settings" class="hidden">
 
-    <div class="card">
+<div class="card">
 
-        <h2>⚙️ Impostazioni e dati</h2>
+<h2>⚙️ Impostazioni e dati</h2>
 
-        <div class="notice">
+<div class="notice">
 
-            I dati vengono salvati automaticamente
-            sul dispositivo.
+I dati vengono salvati automaticamente sul dispositivo.
 
-            Usa il backup per conservare una copia
-            di clienti, appuntamenti e pagamenti.
+Usa il backup per conservare una copia di clienti,
+appuntamenti e pagamenti.
 
-        </div>
+</div>
 
-        <hr>
+<hr>
 
-        <h2>💾 Backup</h2>
+<h2>💾 Backup</h2>
 
-        <button class="primary"
-                onclick="exportBackup()">
+<button class="primary" onclick="exportBackup()">
+📤 Esporta backup
+</button>
 
-            📤 Esporta backup
+<p style="color:#777;font-size:12px">
+Verrà creato un file JSON contenente tutti i dati dell'app.
+</p>
 
-        </button>
+<hr>
 
-        <p style="color:#777;font-size:12px">
+<h2>📥 Importazione</h2>
 
-            Verrà creato un file JSON contenente
-            tutti i dati dell'app.
+<label
+style="display:block;text-align:center;background:#eee;border:1px solid #ddd;border-radius:12px;padding:13px">
 
-        </p>
+📥 Importa backup
 
-        <hr>
+<input
+type="file"
+id="backupFile"
+accept=".json,application/json"
+onchange="importBackup(event)"
+style="display:none">
 
-        <h2>📥 Importazione</h2>
+</label>
 
-        <label class="file-label"
-               style="display:block;text-align:center;background:#eee;border:1px solid #ddd;border-radius:12px;padding:13px">
+<hr>
 
-            📥 Importa backup
+<h2>🗑️ Zona pericolosa</h2>
 
-            <input type="file"
-                   id="backupFile"
-                   accept=".json,application/json"
-                   onchange="importBackup(event)"
-                   style="display:none">
+<button class="danger"
+style="width:100%"
+onclick="deleteAllData()">
 
-        </label>
+Elimina tutti i dati
 
-        <p style="color:#777;font-size:12px">
+</button>
 
-            L'importazione sostituirà i dati attuali
-            con quelli presenti nel backup.
-
-        </p>
-
-        <hr>
-
-        <h2>🗑️ Zona pericolosa</h2>
-
-        <button class="danger"
-                style="width:100%"
-                onclick="deleteAllData()">
-
-            Elimina tutti i dati
-
-        </button>
-
-    </div>
+</div>
 
 </section>
 
 </main>
 
 
-<!-- =========================
-     POPUP COMPLETAMENTO
-========================= -->
+<!-- NAV -->
 
-<div id="completionModal"
-     class="modal hidden">
+<nav class="nav">
 
-    <div class="modal-box">
+<button id="navDashboard"
+class="active"
+onclick="showPage('dashboard',this)">
 
-        <div class="modal-title">
-            ✅ Completa appuntamento
-        </div>
+<span class="nav-icon">📊</span>
+<span>Dashboard</span>
 
-        <div class="modal-subtitle"
-             id="completionClientName">
-        </div>
+</button>
 
-        <label>Guadagno totale (€)</label>
+<button onclick="showPage('clients',this)">
 
-        <input type="number"
-               id="completionIncome"
-               min="0"
-               step="0.01"
-               placeholder="0,00"
-               oninput="updateCompletionNet()">
+<span class="nav-icon">👥</span>
+<span>Clienti</span>
 
-        <label>Spese (€)</label>
+</button>
 
-        <input type="number"
-               id="completionExpense"
-               min="0"
-               step="0.01"
-               placeholder="0,00"
-               oninput="updateCompletionNet()">
+<button onclick="showPage('appointments',this)">
 
-        <label>Tipo di pagamento</label>
+<span class="nav-icon">📅</span>
+<span>Appuntamenti</span>
 
-        <select id="completionPaymentMode"
-                onchange="toggleCompletionPayment()">
+</button>
 
-            <option value="single">
-                Pagamento unico
-            </option>
+<button onclick="showPage('payments',this)">
 
-            <option value="installments">
-                Pagamento dilazionato
-            </option>
+<span class="nav-icon">💳</span>
+<span>Pagamenti</span>
 
-        </select>
+</button>
 
-        <!-- PAGAMENTO DILAZIONATO -->
+<button onclick="showPage('settings',this)">
 
-        <div id="completionInstallments"
-             class="hidden">
+<span class="nav-icon">⚙️</span>
+<span>Altro</span>
 
-            <label>Numero rate</label>
+</button>
 
-            <select id="completionInstallmentCount"
-                    onchange="buildInstallmentInputs()">
-
-                <option value="2">2 rate</option>
-                <option value="3">3 rate</option>
-                <option value="4">4 rate</option>
-                <option value="5">5 rate</option>
-                <option value="6">6 rate</option>
-                <option value="7">7 rate</option>
-                <option value="8">8 rate</option>
-                <option value="9">9 rate</option>
-                <option value="10">10 rate</option>
-
-            </select>
-
-            <label>Acconto (€)</label>
-
-            <input type="number"
-                   id="completionDeposit"
-                   min="0"
-                   step="0.01"
-                   placeholder="0,00"
-                   oninput="updateCompletionNet()">
-
-            <div class="notice"
-                 style="margin-bottom:10px">
-
-                Inserisci manualmente l'importo di ogni rata.
-
-                <br>
-
-                L'app calcolerà automaticamente il totale
-                incassato e il residuo.
-
-            </div>
-
-            <div id="manualInstallments"></div>
-
-        </div>
-
-        <!-- NETTO -->
-
-        <div class="card"
-             style="background:#f7f7f7;margin:12px 0 0">
-
-            <small style="color:#777">
-                🟢 NETTO
-            </small>
-
-            <div id="completionNet"
-                 class="total-big green">
-
-                €0,00
-
-            </div>
-
-        </div>
-
-        <div class="modal-actions">
-
-            <button class="secondary"
-                    onclick="closeCompletionModal()">
-
-                Annulla
-
-            </button>
-
-            <button class="success"
-                    onclick="completeAppointment()">
-
-                Conferma completamento
-
-            </button>
-
-        </div>
-
-    </div>
+</nav>
 
 </div>
 
 
-<!-- =========================
-     NAVIGAZIONE
-========================= -->
+<!-- POPUP COMPLETAMENTO -->
 
-<nav class="nav">
+<div id="completionModal" class="modal hidden">
 
-    <button id="navDashboard"
-            class="active"
-            onclick="showPage('dashboard',this)">
+<div class="modal-box">
 
-        <span class="nav-icon">📊</span>
-        <span>Dashboard</span>
+<div class="modal-title">
+✅ Completa appuntamento
+</div>
 
-    </button>
+<div id="completionClient" class="modal-subtitle"></div>
 
-    <button onclick="showPage('clients',this)">
 
-        <span class="nav-icon">👥</span>
-        <span>Clienti</span>
+<label>Guadagno totale (€)</label>
 
-    </button>
+<input
+type="number"
+id="completionIncome"
+min="0"
+step="0.01"
+placeholder="0,00"
+oninput="updateCompletion()">
 
-    <button onclick="showPage('appointments',this)">
 
-        <span class="nav-icon">📅</span>
-        <span>Appuntamenti</span>
+<label>Spese (€)</label>
 
-    </button>
+<input
+type="number"
+id="completionExpense"
+min="0"
+step="0.01"
+placeholder="0,00"
+oninput="updateCompletion()">
 
-    <button onclick="showPage('payments',this)">
 
-        <span class="nav-icon">💳</span>
-        <span>Pagamenti</span>
+<label>Tipo di pagamento</label>
 
-    </button>
+<select
+id="completionPaymentMode"
+onchange="toggleCompletionInstallments()">
 
-    <button onclick="showPage('settings',this)">
+<option value="single">
+Pagamento unico
+</option>
 
-        <span class="nav-icon">⚙️</span>
-        <span>Altro</span>
+<option value="installments">
+Pagamento dilazionato
+</option>
 
-    </button>
+</select>
 
-</nav>
+
+<div id="completionInstallments" class="hidden">
+
+<label>Acconto (€)</label>
+
+<input
+type="number"
+id="completionDeposit"
+min="0"
+step="0.01"
+placeholder="0,00"
+oninput="updateCompletion()">
+
+
+<label>Numero di rate</label>
+
+<!-- ELENCO A TENDINA, MASSIMO 10 -->
+
+<select
+id="completionInstallmentCount"
+onchange="buildInstallmentInputs()">
+
+<option value="2">2 rate</option>
+<option value="3">3 rate</option>
+<option value="4">4 rate</option>
+<option value="5">5 rate</option>
+<option value="6">6 rate</option>
+<option value="7">7 rate</option>
+<option value="8">8 rate</option>
+<option value="9">9 rate</option>
+<option value="10">10 rate</option>
+
+</select>
+
+
+<div id="installmentInputs" class="rate-list"></div>
+
+</div>
+
+
+<div class="calculated-box">
+
+<div class="calculated-row">
+
+<span>Totale</span>
+
+<strong id="completionTotal">
+€0,00
+</strong>
+
+</div>
+
+<div class="calculated-row">
+
+<span>Acconto</span>
+
+<strong id="completionDepositView" class="green">
+€0,00
+</strong>
+
+</div>
+
+<div class="calculated-row">
+
+<span>Totale rate</span>
+
+<strong id="completionInstallmentsView">
+€0,00
+</strong>
+
+</div>
+
+<div class="calculated-row">
+
+<span>Netto</span>
+
+<strong id="completionNet" class="blue">
+€0,00
+</strong>
+
+</div>
+
+</div>
+
+
+<div class="actions">
+
+<button
+class="secondary"
+onclick="closeCompletionModal()">
+
+Annulla
+
+</button>
+
+<button
+class="success"
+onclick="completeAppointment()">
+
+Completa
+
+</button>
+
+</div>
+
+</div>
 
 </div>
 
@@ -1281,123 +1150,22 @@ hr{
 
 "use strict";
 
+
 /* =========================
    DATI
 ========================= */
 
 let clients =
-    JSON.parse(
-        localStorage.getItem(
-            "gestionePro_clients"
-        ) || "[]"
-    );
+JSON.parse(
+localStorage.getItem("gestionePro_clients") || "[]"
+);
 
 let appointments =
-    JSON.parse(
-        localStorage.getItem(
-            "gestionePro_appointments"
-        ) || "[]"
-    );
+JSON.parse(
+localStorage.getItem("gestionePro_appointments") || "[]"
+);
 
 let completionAppointmentId = null;
-
-let openHistoryClients = {};
-
-
-/* =========================
-   MIGRAZIONE
-========================= */
-
-function migrateData(){
-
-    appointments =
-        appointments.map(a => {
-
-            const normalized = {
-
-                id:
-                    a.id ||
-                    Date.now()+Math.random(),
-
-                clientId:
-                    Number(a.clientId || 0),
-
-                date:
-                    a.date ||
-                    todayString(),
-
-                time:
-                    a.time || "",
-
-                notes:
-                    a.notes ||
-                    a.work ||
-                    "",
-
-                income:
-                    Number(a.income || 0),
-
-                expense:
-                    Number(a.expense || 0),
-
-                net:
-                    Number(a.net || 0),
-
-                paymentMode:
-                    a.paymentMode ||
-                    "single",
-
-                installmentCount:
-                    Number(
-                        a.installmentCount || 1
-                    ),
-
-                payments:
-                    Array.isArray(a.payments)
-                    ? a.payments
-                    : [],
-
-                completed:
-                    Boolean(a.completed)
-
-            };
-
-            /*
-             * Compatibilità con vecchi dati:
-             * se un vecchio appuntamento era
-             * già completato, lo manteniamo.
-             */
-
-            if(
-                normalized.completed &&
-                normalized.payments.length === 0 &&
-                normalized.income > 0
-            ){
-
-                normalized.payments = [{
-                    id:
-                        Date.now()+Math.random(),
-
-                    number:1,
-
-                    amount:
-                        normalized.income,
-
-                    date:
-                        normalized.date
-                }];
-
-            }
-
-            normalized.net =
-                normalized.income -
-                normalized.expense;
-
-            return normalized;
-
-        });
-
-}
 
 
 /* =========================
@@ -1406,15 +1174,15 @@ function migrateData(){
 
 function saveData(){
 
-    localStorage.setItem(
-        "gestionePro_clients",
-        JSON.stringify(clients)
-    );
+localStorage.setItem(
+"gestionePro_clients",
+JSON.stringify(clients)
+);
 
-    localStorage.setItem(
-        "gestionePro_appointments",
-        JSON.stringify(appointments)
-    );
+localStorage.setItem(
+"gestionePro_appointments",
+JSON.stringify(appointments)
+);
 
 }
 
@@ -1425,14 +1193,13 @@ function saveData(){
 
 function euro(value){
 
-    return Number(value || 0)
-        .toLocaleString(
-            "it-IT",
-            {
-                style:"currency",
-                currency:"EUR"
-            }
-        );
+return Number(value || 0).toLocaleString(
+"it-IT",
+{
+style:"currency",
+currency:"EUR"
+}
+);
 
 }
 
@@ -1443,47 +1210,101 @@ function euro(value){
 
 function todayString(){
 
-    return dateToString(
-        new Date()
-    );
+const d = new Date();
+
+return dateToString(d);
 
 }
 
 
 function dateToString(date){
 
-    const y =
-        date.getFullYear();
+const y = date.getFullYear();
 
-    const m =
-        String(
-            date.getMonth()+1
-        ).padStart(2,"0");
+const m = String(
+date.getMonth()+1
+).padStart(2,"0");
 
-    const d =
-        String(
-            date.getDate()
-        ).padStart(2,"0");
+const d = String(
+date.getDate()
+).padStart(2,"0");
 
-    return `${y}-${m}-${d}`;
+return `${y}-${m}-${d}`;
 
 }
 
 
 function formatDate(date){
 
-    if(!date) return "";
+if(!date) return "";
 
-    return new Date(
-        date+"T00:00:00"
-    ).toLocaleDateString(
-        "it-IT",
-        {
-            day:"2-digit",
-            month:"2-digit",
-            year:"numeric"
-        }
-    );
+return new Date(
+date+"T00:00:00"
+).toLocaleDateString(
+"it-IT",
+{
+day:"2-digit",
+month:"2-digit",
+year:"numeric"
+}
+);
+
+}
+
+
+/* =========================
+   SICUREZZA
+========================= */
+
+function escapeHTML(value){
+
+return String(value || "")
+.replaceAll("&","&amp;")
+.replaceAll("<","&lt;")
+.replaceAll(">","&gt;")
+.replaceAll('"',"&quot;")
+.replaceAll("'","&#039;");
+
+}
+
+
+/* =========================
+   MIGRAZIONE
+========================= */
+
+function migrateData(){
+
+appointments = appointments.map(a => {
+
+if(!Array.isArray(a.payments)){
+a.payments = [];
+}
+
+if(!Array.isArray(a.installments)){
+a.installments = [];
+}
+
+if(a.income === undefined){
+a.income = 0;
+}
+
+if(a.expense === undefined){
+a.expense = 0;
+}
+
+if(a.completed === undefined){
+a.completed = false;
+}
+
+if(!a.paymentMode){
+a.paymentMode = "single";
+}
+
+return a;
+
+});
+
+saveData();
 
 }
 
@@ -1494,75 +1315,56 @@ function formatDate(date){
 
 function showPage(page,button){
 
-    document
-        .querySelectorAll(
-            "main > section"
-        )
-        .forEach(
-            section =>
-                section.classList.add(
-                    "hidden"
-                )
-        );
+document
+.querySelectorAll("main > section")
+.forEach(
+section => section.classList.add("hidden")
+);
 
-    document
-        .getElementById(page)
-        .classList.remove("hidden");
+document
+.getElementById(page)
+.classList.remove("hidden");
 
-    document
-        .querySelectorAll(
-            ".nav button"
-        )
-        .forEach(
-            btn =>
-                btn.classList.remove(
-                    "active"
-                )
-        );
+document
+.querySelectorAll(".nav button")
+.forEach(
+btn => btn.classList.remove("active")
+);
 
-    if(button){
+if(button){
+button.classList.add("active");
+}
 
-        button.classList.add(
-            "active"
-        );
+const titles = {
 
-    }
+dashboard:"Dashboard",
+clients:"Clienti",
+appointments:"Appuntamenti",
+payments:"Pagamenti",
+settings:"Impostazioni"
 
-    const titles = {
+};
 
-        dashboard:"Dashboard",
-        clients:"Clienti",
-        appointments:"Appuntamenti",
-        payments:"Pagamenti",
-        settings:"Impostazioni"
+document.getElementById(
+"pageSubtitle"
+).textContent = titles[page];
 
-    };
+if(page==="dashboard"){
+updateDashboard();
+}
 
-    document
-        .getElementById(
-            "pageSubtitle"
-        )
-        .textContent =
-            titles[page];
+if(page==="clients"){
+renderClients();
+}
 
-    if(page==="dashboard"){
-        updateDashboard();
-    }
+if(page==="appointments"){
+populateClientSelect();
+renderAppointments();
+}
 
-    if(page==="clients"){
-        renderClients();
-    }
-
-    if(page==="appointments"){
-
-        populateClientSelect();
-        renderHistory();
-
-    }
-
-    if(page==="payments"){
-        renderPayments();
-    }
+if(page==="payments"){
+renderPayments();
+}
 
 }
 
@@ -1573,310 +1375,221 @@ function showPage(page,button){
 
 function saveClient(){
 
-    const name =
-        document
-            .getElementById(
-                "clientName"
-            )
-            .value
-            .trim();
+const name =
+document.getElementById(
+"clientName"
+).value.trim();
 
-    if(!name){
+if(!name){
 
-        alert(
-            "Inserisci il nome del cliente."
-        );
+alert("Inserisci il nome del cliente.");
 
-        return;
+return;
 
-    }
+}
 
-    clients.push({
+clients.push({
 
-        id:
-            Date.now(),
+id:Date.now(),
 
-        name:name,
+name:name,
 
-        phone:
-            document
-                .getElementById(
-                    "clientPhone"
-                )
-                .value
-                .trim(),
+phone:
+document.getElementById(
+"clientPhone"
+).value.trim(),
 
-        email:
-            document
-                .getElementById(
-                    "clientEmail"
-                )
-                .value
-                .trim(),
+email:
+document.getElementById(
+"clientEmail"
+).value.trim(),
 
-        notes:
-            document
-                .getElementById(
-                    "clientNotes"
-                )
-                .value
-                .trim()
+notes:
+document.getElementById(
+"clientNotes"
+).value.trim()
 
-    });
+});
 
-    saveData();
+saveData();
 
-    document.getElementById(
-        "clientName"
-    ).value="";
+document.getElementById("clientName").value="";
+document.getElementById("clientPhone").value="";
+document.getElementById("clientEmail").value="";
+document.getElementById("clientNotes").value="";
 
-    document.getElementById(
-        "clientPhone"
-    ).value="";
+populateClientSelect();
+renderClients();
 
-    document.getElementById(
-        "clientEmail"
-    ).value="";
-
-    document.getElementById(
-        "clientNotes"
-    ).value="";
-
-    renderClients();
-
-    populateClientSelect();
-
-    alert(
-        "Cliente salvato."
-    );
+alert("Cliente salvato.");
 
 }
 
 
 function renderClients(){
 
-    const container =
-        document.getElementById(
-            "clientsList"
-        );
+const container =
+document.getElementById(
+"clientsList"
+);
 
-    const search =
-        (
-            document.getElementById(
-                "clientSearch"
-            )?.value || ""
-        ).toLowerCase();
+const search =
+(
+document.getElementById(
+"clientSearch"
+)?.value || ""
+).toLowerCase();
 
-    const filtered =
-        clients.filter(
-            c =>
-                (c.name || "")
-                    .toLowerCase()
-                    .includes(search)
-        );
+const filtered =
+clients.filter(
+c =>
+(c.name || "")
+.toLowerCase()
+.includes(search)
+);
 
-    if(!filtered.length){
+if(!filtered.length){
 
-        container.innerHTML =
-            '<div class="empty">Nessun cliente trovato.</div>';
+container.innerHTML =
+'<div class="empty">Nessun cliente trovato.</div>';
 
-        return;
+return;
 
-    }
+}
 
-    container.innerHTML =
-        filtered.map(
-            client=>{
+container.innerHTML =
+filtered.map(client => {
 
-                const linked =
-                    appointments.filter(
-                        a =>
-                            Number(a.clientId) ===
-                            Number(client.id)
-                    );
+const linked =
+appointments.filter(
+a =>
+Number(a.clientId) ===
+Number(client.id)
+);
 
-                const total =
-                    linked.reduce(
-                        (sum,a)=>
-                            sum+
-                            Number(a.income || 0),
-                        0
-                    );
+const received =
+linked.reduce(
+(sum,a) =>
+sum + getReceived(a),
+0
+);
 
-                const received =
-                    linked.reduce(
-                        (sum,a)=>
-                            sum+
-                            getReceived(a),
-                        0
-                    );
+const expenses =
+linked.reduce(
+(sum,a) =>
+sum + Number(a.expense || 0),
+0
+);
 
-                const expenses =
-                    linked.reduce(
-                        (sum,a)=>
-                            sum+
-                            Number(a.expense || 0),
-                        0
-                    );
+return `
 
-                const net =
-                    received-expenses;
+<div class="item">
 
-                const remaining =
-                    Math.max(
-                        0,
-                        total-received
-                    );
+<div class="item-title">
+${escapeHTML(client.name)}
+</div>
 
-                return `
+${
+client.phone
+?
+`<div class="item-sub">
+📞 ${escapeHTML(client.phone)}
+</div>`
+:""
+}
 
-                <div class="item">
+${
+client.email
+?
+`<div class="item-sub">
+✉️ ${escapeHTML(client.email)}
+</div>`
+:""
+}
 
-                    <div class="item-title">
-                        ${escapeHTML(client.name)}
-                    </div>
+<div class="badge">
+${linked.length} appuntamenti
+</div>
 
-                    ${
-                        client.phone
-                        ?
-                        `<div class="item-sub">
-                            📞 ${escapeHTML(client.phone)}
-                         </div>`
-                        :
-                        ""
-                    }
+<div class="item-money">
 
-                    ${
-                        client.email
-                        ?
-                        `<div class="item-sub">
-                            ✉️ ${escapeHTML(client.email)}
-                         </div>`
-                        :
-                        ""
-                    }
+<div class="money-box">
+<small>Incassato</small>
+<strong class="green">
+${euro(received)}
+</strong>
+</div>
 
-                    ${
-                        client.notes
-                        ?
-                        `<div class="item-sub">
-                            📝 ${escapeHTML(client.notes)}
-                         </div>`
-                        :
-                        ""
-                    }
+<div class="money-box">
+<small>Spese</small>
+<strong class="red">
+${euro(expenses)}
+</strong>
+</div>
 
-                    <div class="badge">
-                        ${linked.length} appuntamenti
-                    </div>
+<div class="money-box">
+<small>Netto</small>
+<strong class="blue">
+${euro(received-expenses)}
+</strong>
+</div>
 
-                    ${
-                        remaining > 0
-                        ?
-                        `<div class="badge orange-badge">
-                            ⏳ ${euro(remaining)} da incassare
-                         </div>`
-                        :
-                        ""
-                    }
+</div>
 
-                    <div class="item-money">
+<div class="actions">
 
-                        <div class="money-box">
+<button
+class="danger"
+onclick="deleteClient(${client.id})">
 
-                            <small>Incassato</small>
+Elimina
 
-                            <strong class="green">
-                                ${euro(received)}
-                            </strong>
+</button>
 
-                        </div>
+</div>
 
-                        <div class="money-box">
+</div>
 
-                            <small>Spese</small>
+`;
 
-                            <strong class="red">
-                                ${euro(expenses)}
-                            </strong>
-
-                        </div>
-
-                        <div class="money-box">
-
-                            <small>Netto</small>
-
-                            <strong class="blue">
-                                ${euro(net)}
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-                    <div class="actions">
-
-                        <button
-                            class="danger"
-                            onclick="deleteClient(${client.id})">
-
-                            Elimina
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-                `;
-
-            }
-        ).join("");
+}).join("");
 
 }
 
 
 function deleteClient(id){
 
-    const linked =
-        appointments.some(
-            a =>
-                Number(a.clientId) ===
-                Number(id)
-        );
+const linked =
+appointments.some(
+a =>
+Number(a.clientId) ===
+Number(id)
+);
 
-    if(linked){
+if(linked){
 
-        alert(
-            "Questo cliente ha appuntamenti collegati. Elimina prima gli appuntamenti dallo storico."
-        );
+alert(
+"Questo cliente ha appuntamenti collegati. Elimina prima gli appuntamenti."
+);
 
-        return;
+return;
 
-    }
+}
 
-    if(
-        !confirm(
-            "Eliminare questo cliente?"
-        )
-    ){
+if(!confirm("Eliminare questo cliente?")){
+return;
+}
 
-        return;
+clients =
+clients.filter(
+c =>
+Number(c.id) !== Number(id)
+);
 
-    }
+saveData();
 
-    clients =
-        clients.filter(
-            c =>
-                Number(c.id) !==
-                Number(id)
-        );
-
-    saveData();
-
-    renderClients();
-
-    populateClientSelect();
+renderClients();
+populateClientSelect();
 
 }
 
@@ -1887,969 +1600,396 @@ function deleteClient(id){
 
 function populateClientSelect(){
 
-    const select =
-        document.getElementById(
-            "appointmentClient"
-        );
+const select =
+document.getElementById(
+"appointmentClient"
+);
 
-    if(!clients.length){
+if(!clients.length){
 
-        select.innerHTML =
-            '<option value="">Prima crea un cliente</option>';
+select.innerHTML =
+'<option value="">Prima crea un cliente</option>';
 
-        return;
+return;
 
-    }
+}
 
-    select.innerHTML =
-        '<option value="">Seleziona cliente</option>' +
+select.innerHTML =
+'<option value="">Seleziona cliente</option>' +
 
-        clients.map(
-            c =>
-                `<option value="${c.id}">
-                    ${escapeHTML(c.name)}
-                 </option>`
-        ).join("");
+clients.map(
+c =>
+`<option value="${c.id}">
+${escapeHTML(c.name)}
+</option>`
+).join("");
 
 }
 
 
 /* =========================
-   SALVA APPUNTAMENTO
+   APPUNTAMENTI
 ========================= */
 
 function saveAppointment(){
 
-    const clientId =
-        document.getElementById(
-            "appointmentClient"
-        ).value;
+const clientId =
+document.getElementById(
+"appointmentClient"
+).value;
 
-    const date =
-        document.getElementById(
-            "appointmentDate"
-        ).value;
+const date =
+document.getElementById(
+"appointmentDate"
+).value;
 
-    const time =
-        document.getElementById(
-            "appointmentTime"
-        ).value;
+if(!clientId){
 
-    const notes =
-        document.getElementById(
-            "appointmentNotes"
-        ).value
-        .trim();
+alert("Seleziona un cliente.");
 
-    if(!clientId){
-
-        alert(
-            "Seleziona un cliente."
-        );
-
-        return;
-
-    }
-
-    if(!date){
-
-        alert(
-            "Inserisci la data."
-        );
-
-        return;
-
-    }
-
-    appointments.push({
-
-        id:
-            Date.now(),
-
-        clientId:
-            Number(clientId),
-
-        date:
-            date,
-
-        time:
-            time,
-
-        notes:
-            notes,
-
-        income:0,
-
-        expense:0,
-
-        net:0,
-
-        paymentMode:
-            null,
-
-        installmentCount:0,
-
-        payments:[],
-
-        completed:false
-
-    });
-
-    saveData();
-
-    resetAppointmentForm();
-
-    refreshEverything();
-
-    alert(
-        "Appuntamento salvato."
-    );
+return;
 
 }
 
+if(!date){
 
-/* =========================
-   RESET APPUNTAMENTO
-========================= */
+alert("Inserisci la data.");
+
+return;
+
+}
+
+appointments.push({
+
+id:Date.now(),
+
+clientId:Number(clientId),
+
+date:date,
+
+time:
+document.getElementById(
+"appointmentTime"
+).value,
+
+notes:
+document.getElementById(
+"appointmentNotes"
+).value.trim(),
+
+completed:false,
+
+income:0,
+
+expense:0,
+
+paymentMode:"",
+
+deposit:0,
+
+installmentCount:0,
+
+installments:[],
+
+payments:[]
+
+});
+
+saveData();
+
+resetAppointmentForm();
+
+refreshEverything();
+
+alert("Appuntamento salvato.");
+
+}
+
 
 function resetAppointmentForm(){
 
-    document.getElementById(
-        "appointmentClient"
-    ).value="";
+document.getElementById(
+"appointmentClient"
+).value="";
 
-    document.getElementById(
-        "appointmentDate"
-    ).value =
-        todayString();
+document.getElementById(
+"appointmentDate"
+).value=todayString();
 
-    document.getElementById(
-        "appointmentTime"
-    ).value="";
+document.getElementById(
+"appointmentTime"
+).value="";
 
-    document.getElementById(
-        "appointmentNotes"
-    ).value="";
+document.getElementById(
+"appointmentNotes"
+).value="";
 
 }
 
 
 /* =========================
-   COMPLETAMENTO
+   STORICO
 ========================= */
 
-function openCompletionModal(id){
+function renderAppointments(){
 
-    const appointment =
-        appointments.find(
-            a =>
-                Number(a.id) ===
-                Number(id)
-        );
+const container =
+document.getElementById(
+"appointmentsList"
+);
 
-    if(!appointment){
+const search =
+(
+document.getElementById(
+"appointmentSearch"
+)?.value || ""
+).toLowerCase();
 
-        alert(
-            "Appuntamento non trovato."
-        );
+const map = {};
 
-        return;
+appointments.forEach(a => {
 
-    }
+const clientId =
+Number(a.clientId);
 
-    completionAppointmentId =
-        appointment.id;
+const name =
+getClientName(clientId);
 
-    document.getElementById(
-        "completionClientName"
-    ).textContent =
-        getClientName(
-            appointment.clientId
-        ) +
-        " · " +
-        formatDate(
-            appointment.date
-        );
+if(!name.toLowerCase().includes(search)){
+return;
+}
 
-    document.getElementById(
-        "completionIncome"
-    ).value =
-        "";
+if(!map[clientId]){
+map[clientId] = {
 
-    document.getElementById(
-        "completionExpense"
-    ).value =
-        "";
+clientId:clientId,
 
-    document.getElementById(
-        "completionPaymentMode"
-    ).value =
-        "single";
+name:name,
 
-    document.getElementById(
-        "completionInstallmentCount"
-    ).value =
-        "2";
+appointments:[]
 
-    document.getElementById(
-        "completionDeposit"
-    ).value =
-        "";
+};
 
-    document.getElementById(
-        "completionInstallments"
-    ).classList.add(
-        "hidden"
-    );
+}
 
-    document.getElementById(
-        "manualInstallments"
-    ).innerHTML =
-        "";
+map[clientId]
+.appointments
+.push(a);
 
-    updateCompletionNet();
+});
 
-    document.getElementById(
-        "completionModal"
-    ).classList.remove(
-        "hidden"
-    );
+const groups =
+Object.values(map);
+
+if(!groups.length){
+
+container.innerHTML =
+'<div class="empty">Nessun appuntamento trovato.</div>';
+
+return;
+
+}
+
+container.innerHTML =
+groups.map(group => `
+
+<div
+class="item client-history"
+onclick="toggleClientHistory(${group.clientId})">
+
+<div style="
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px">
+
+<div class="item-title">
+👤 ${escapeHTML(group.name)}
+</div>
+
+<div class="chevron">
+›
+</div>
+
+</div>
+
+<div class="item-sub">
+${group.appointments.length}
+appuntament${group.appointments.length === 1 ? "o" : "i"}
+registrat${group.appointments.length === 1 ? "o" : "i"}
+</div>
+
+</div>
+
+<div
+id="history-${group.clientId}"
+class="hidden">
+
+${group.appointments
+.map(a => historyAppointmentHTML(a))
+.join("")}
+
+</div>
+
+`).join("");
 
 }
 
 
-function closeCompletionModal(){
+function toggleClientHistory(clientId){
 
-    completionAppointmentId =
-        null;
+const element =
+document.getElementById(
+"history-"+clientId
+);
 
-    document.getElementById(
-        "completionModal"
-    ).classList.add(
-        "hidden"
-    );
+if(element){
+
+element.classList.toggle("hidden");
+
+}
 
 }
 
 
-function toggleCompletionPayment(){
+function historyAppointmentHTML(a){
 
-    const mode =
-        document.getElementById(
-            "completionPaymentMode"
-        ).value;
+return `
 
-    document.getElementById(
-        "completionInstallments"
-    ).classList.toggle(
-        "hidden",
-        mode !== "installments"
-    );
+<div class="item">
 
-    if(mode==="installments"){
+<div class="item-title">
 
-        buildInstallmentInputs();
+📅 ${formatDate(a.date)}
 
-    }
+${
+a.time
+?
+` · ${escapeHTML(a.time)}`
+:
+""
+}
 
-    updateCompletionNet();
+</div>
+
+${
+a.notes
+?
+`<div class="item-sub">
+📝 ${escapeHTML(a.notes)}
+</div>`
+:
+""
+}
+
+${
+a.completed
+?
+`<span class="badge green-badge">
+✅ Completato
+</span>`
+:
+`<span class="badge orange-badge">
+⏳ Non completato
+</span>`
+}
+
+<div class="actions">
+
+<button
+class="danger"
+onclick="deleteAppointment(${a.id});event.stopPropagation()">
+
+🗑️ Elimina
+
+</button>
+
+</div>
+
+</div>
+
+`;
 
 }
 
 
 /* =========================
-   RATE MANUALI
+   ELIMINA
 ========================= */
 
-function buildInstallmentInputs(){
+function deleteAppointment(id){
 
-    const count =
-        Number(
-            document.getElementById(
-                "completionInstallmentCount"
-            ).value
-        ) || 2;
+if(!confirm(
+"Eliminare definitivamente questo appuntamento?"
+)){
 
-    const container =
-        document.getElementById(
-            "manualInstallments"
-        );
+return;
 
-    let html = "";
+}
 
-    for(
-        let i=1;
-        i<=count;
-        i++
-    ){
+appointments =
+appointments.filter(
+a =>
+Number(a.id) !== Number(id)
+);
 
-        html += `
+saveData();
 
-        <div class="installment-input">
-
-            <label>
-                Rata ${i}/${count} (€)
-            </label>
-
-            <input
-                type="number"
-                class="manual-rate"
-                data-number="${i}"
-                min="0"
-                step="0.01"
-                placeholder="0,00"
-                oninput="updateCompletionNet()">
-
-        </div>
-
-        `;
-
-    }
-
-    container.innerHTML =
-        html;
+refreshEverything();
 
 }
 
 
 /* =========================
-   NETTO POPUP
-========================= */
-
-function updateCompletionNet(){
-
-    const income =
-        Number(
-            document.getElementById(
-                "completionIncome"
-            ).value
-        ) || 0;
-
-    const expense =
-        Number(
-            document.getElementById(
-                "completionExpense"
-            ).value
-        ) || 0;
-
-    document.getElementById(
-        "completionNet"
-    ).textContent =
-        euro(
-            income-expense
-        );
-
-}
-
-
-/* =========================
-   CONFERMA COMPLETAMENTO
-========================= */
-
-function completeAppointment(){
-
-    const appointment =
-        appointments.find(
-            a =>
-                Number(a.id) ===
-                Number(completionAppointmentId)
-        );
-
-    if(!appointment){
-
-        alert(
-            "Appuntamento non trovato."
-        );
-
-        return;
-
-    }
-
-    const income =
-        Number(
-            document.getElementById(
-                "completionIncome"
-            ).value
-        ) || 0;
-
-    const expense =
-        Number(
-            document.getElementById(
-                "completionExpense"
-            ).value
-        ) || 0;
-
-    if(income <= 0){
-
-        alert(
-            "Inserisci il guadagno totale."
-        );
-
-        return;
-
-    }
-
-    const mode =
-        document.getElementById(
-            "completionPaymentMode"
-        ).value;
-
-    let payments = [];
-
-    if(mode==="single"){
-
-        payments = [{
-
-            id:
-                Date.now()+Math.random(),
-
-            number:1,
-
-            type:
-                "single",
-
-            amount:
-                income,
-
-            date:
-                todayString()
-
-        }];
-
-    }
-
-    else{
-
-        const deposit =
-            Number(
-                document.getElementById(
-                    "completionDeposit"
-                ).value
-            ) || 0;
-
-        const rateInputs =
-            Array.from(
-                document.querySelectorAll(
-                    ".manual-rate"
-                )
-            );
-
-        let rates = [];
-
-        rateInputs.forEach(
-            input => {
-
-                const amount =
-                    Number(
-                        input.value
-                    ) || 0;
-
-                if(amount > 0){
-
-                    rates.push({
-
-                        number:
-                            Number(
-                                input.dataset.number
-                            ),
-
-                        amount:
-                            amount
-
-                    });
-
-                }
-
-            }
-        );
-
-        const plannedTotal =
-            deposit +
-            rates.reduce(
-                (sum,r)=>
-                    sum+r.amount,
-                0
-            );
-
-        if(deposit < 0){
-
-            alert(
-                "L'acconto non può essere negativo."
-            );
-
-            return;
-
-        }
-
-        if(
-            rates.length === 0 &&
-            deposit <= 0
-        ){
-
-            alert(
-                "Inserisci almeno un acconto oppure una rata."
-            );
-
-            return;
-
-        }
-
-        if(
-            plannedTotal > income + 0.01
-        ){
-
-            alert(
-                "Acconto + rate non possono superare il guadagno totale."
-            );
-
-            return;
-
-        }
-
-        if(deposit > 0){
-
-            payments.push({
-
-                id:
-                    Date.now()+Math.random(),
-
-                number:0,
-
-                type:
-                    "deposit",
-
-                amount:
-                    deposit,
-
-                date:
-                    todayString()
-
-            });
-
-        }
-
-        rates.forEach(
-            rate => {
-
-                payments.push({
-
-                    id:
-                        Date.now()+
-                        Math.random(),
-
-                    number:
-                        rate.number,
-
-                    type:
-                        "installment",
-
-                    amount:
-                        rate.amount,
-
-                    date:
-                        todayString()
-
-                });
-
-            }
-        );
-
-        appointment.installmentCount =
-            Number(
-                document.getElementById(
-                    "completionInstallmentCount"
-                ).value
-            ) || 2;
-
-    }
-
-    appointment.income =
-        income;
-
-    appointment.expense =
-        expense;
-
-    appointment.net =
-        income-expense;
-
-    appointment.paymentMode =
-        mode;
-
-    appointment.payments =
-        payments;
-
-    appointment.completed =
-        true;
-
-    appointment.completedAt =
-        todayString();
-
-    saveData();
-
-    closeCompletionModal();
-
-    refreshEverything();
-
-    alert(
-        "Appuntamento completato e registrato."
-    );
-
-}
-
-
-/* =========================
-   CLIENTE
-========================= */
-
-function getClientName(id){
-
-    const client =
-        clients.find(
-            c =>
-                Number(c.id) ===
-                Number(id)
-        );
-
-    return client
-        ? client.name
-        : "Cliente eliminato";
-
-}
-
-
-/* =========================
-   INCASSATO
+   INCASSI
 ========================= */
 
 function getReceived(a){
 
-    if(
-        Array.isArray(
-            a.payments
-        )
-    ){
+let total = 0;
 
-        return a.payments.reduce(
-            (sum,p)=>
-                sum+
-                Number(
-                    p.amount || 0
-                ),
-            0
-        );
+if(Number(a.deposit || 0) > 0){
+total += Number(a.deposit);
+}
 
-    }
+if(Array.isArray(a.installments)){
 
-    return 0;
+a.installments.forEach(
+r => {
+
+if(r.paid){
+total += Number(r.amount || 0);
 
 }
 
+});
 
-/* =========================
-   RESIDUO
-========================= */
+}
+
+if(
+a.paymentMode === "single" &&
+a.completed &&
+Number(a.income || 0) > 0 &&
+Number(a.deposit || 0) === 0 &&
+(!a.installments || a.installments.length===0)
+){
+
+total = Number(a.income || 0);
+
+}
+
+return total;
+
+}
+
 
 function getRemaining(a){
 
-    return Math.max(
-        0,
-        Number(a.income || 0) -
-        getReceived(a)
-    );
-
-}
-
-
-/* =========================
-   STATO
-========================= */
-
-function isCompleted(a){
-
-    return Boolean(
-        a.completed
-    );
-
-}
-
-
-/* =========================
-   DASHBOARD APPUNTAMENTI
-========================= */
-
-function appointmentDashboardHTML(a){
-
-    return `
-
-    <div class="item future">
-
-        <div class="item-title">
-
-            ${escapeHTML(
-                getClientName(
-                    a.clientId
-                )
-            )}
-
-        </div>
-
-        <div class="item-sub">
-
-            📅 ${formatDate(a.date)}
-
-            ${
-                a.time
-                ?
-                ` · 🕐 ${escapeHTML(a.time)}`
-                :
-                ""
-            }
-
-        </div>
-
-        ${
-            a.notes
-            ?
-            `<div class="item-sub">
-                📝 ${escapeHTML(a.notes)}
-             </div>`
-            :
-            ""
-        }
-
-        <div class="badge blue-badge">
-            📅 Da completare
-        </div>
-
-        <button
-            class="success"
-            style="width:100%;margin-top:12px"
-            onclick="openCompletionModal(${a.id})">
-
-            ✅ Completa appuntamento
-
-        </button>
-
-    </div>
-
-    `;
-
-}
-
-
-/* =========================
-   DASHBOARD DETTAGLIO
-========================= */
-
-function appointmentPeriodHTML(a){
-
-    return `
-
-    <div class="item">
-
-        <div class="item-title">
-
-            ${escapeHTML(
-                getClientName(
-                    a.clientId
-                )
-            )}
-
-        </div>
-
-        <div class="item-sub">
-
-            📅 ${formatDate(a.date)}
-
-            ${
-                a.time
-                ?
-                ` · 🕐 ${escapeHTML(a.time)}`
-                :
-                ""
-            }
-
-        </div>
-
-        ${
-            a.notes
-            ?
-            `<div class="item-sub">
-                📝 ${escapeHTML(a.notes)}
-             </div>`
-            :
-            ""
-        }
-
-        ${
-            a.completed
-            ?
-            `
-            <div class="badge green-badge">
-                ✅ Completato
-            </div>
-
-            <div class="item-money">
-
-                <div class="money-box">
-
-                    <small>Incassato</small>
-
-                    <strong class="green">
-                        ${euro(getReceived(a))}
-                    </strong>
-
-                </div>
-
-                <div class="money-box">
-
-                    <small>Spese</small>
-
-                    <strong class="red">
-                        ${euro(a.expense)}
-                    </strong>
-
-                </div>
-
-                <div class="money-box">
-
-                    <small>Netto</small>
-
-                    <strong class="blue">
-                        ${euro(
-                            getReceived(a) -
-                            Number(a.expense || 0)
-                        )}
-                    </strong>
-
-                </div>
-
-            </div>
-            `
-            :
-            `
-            <div class="badge blue-badge">
-                📅 Da completare
-            </div>
-            `
-        }
-
-    </div>
-
-    `;
-
-}
-
-
-/* =========================
-   PERIODI
-========================= */
-
-function getPeriodDates(){
-
-    const filter =
-        document.getElementById(
-            "periodFilter"
-        ).value;
-
-    const now =
-        new Date();
-
-    let from =
-        new Date(now);
-
-    let to =
-        new Date(now);
-
-    if(filter==="yesterday"){
-
-        from.setDate(
-            now.getDate()-1
-        );
-
-        to.setDate(
-            now.getDate()-1
-        );
-
-    }
-
-    else if(filter==="week"){
-
-        const day =
-            now.getDay() || 7;
-
-        from.setDate(
-            now.getDate()-day+1
-        );
-
-    }
-
-    else if(filter==="month"){
-
-        from =
-            new Date(
-                now.getFullYear(),
-                now.getMonth(),
-                1
-            );
-
-    }
-
-    else if(filter==="lastMonth"){
-
-        from =
-            new Date(
-                now.getFullYear(),
-                now.getMonth()-1,
-                1
-            );
-
-        to =
-            new Date(
-                now.getFullYear(),
-                now.getMonth(),
-                0
-            );
-
-    }
-
-    else if(filter==="custom"){
-
-        const f =
-            document.getElementById(
-                "dateFrom"
-            ).value;
-
-        const t =
-            document.getElementById(
-                "dateTo"
-            ).value;
-
-        if(!f || !t){
-
-            return null;
-
-        }
-
-        return {
-
-            from:f,
-
-            to:t
-
-        };
-
-    }
-
-    return {
-
-        from:
-            dateToString(from),
-
-        to:
-            dateToString(to)
-
-    };
+return Math.max(
+0,
+Number(a.income || 0) -
+getReceived(a)
+);
 
 }
 
@@ -2858,177 +1998,265 @@ function getPeriodDates(){
    DASHBOARD
 ========================= */
 
+function getPeriodDates(){
+
+const filter =
+document.getElementById(
+"periodFilter"
+).value;
+
+const now = new Date();
+
+let from = new Date(now);
+let to = new Date(now);
+
+if(filter==="yesterday"){
+
+from.setDate(
+now.getDate()-1
+);
+
+to.setDate(
+now.getDate()-1
+);
+
+}
+
+else if(filter==="week"){
+
+const day =
+now.getDay() || 7;
+
+from.setDate(
+now.getDate()-day+1
+);
+
+}
+
+else if(filter==="month"){
+
+from =
+new Date(
+now.getFullYear(),
+now.getMonth(),
+1
+);
+
+}
+
+else if(filter==="lastMonth"){
+
+from =
+new Date(
+now.getFullYear(),
+now.getMonth()-1,
+1
+);
+
+to =
+new Date(
+now.getFullYear(),
+now.getMonth(),
+0
+);
+
+}
+
+else if(filter==="custom"){
+
+const f =
+document.getElementById(
+"dateFrom"
+).value;
+
+const t =
+document.getElementById(
+"dateTo"
+).value;
+
+if(!f || !t){
+return null;
+}
+
+return {
+from:f,
+to:t
+};
+
+}
+
+return {
+
+from:dateToString(from),
+to:dateToString(to)
+
+};
+
+}
+
+
 function updateDashboard(){
 
-    const filter =
-        document.getElementById(
-            "periodFilter"
-        ).value;
+const filter =
+document.getElementById(
+"periodFilter"
+).value;
 
-    document.getElementById(
-        "customDates"
-    ).classList.toggle(
-        "hidden",
-        filter!=="custom"
-    );
+document.getElementById(
+"customDates"
+).classList.toggle(
+"hidden",
+filter!=="custom"
+);
 
-    const range =
-        getPeriodDates();
+const range =
+getPeriodDates();
 
-    if(!range){
-
-        return;
-
-    }
-
-    const filtered =
-        appointments.filter(
-            a =>
-                a.date >= range.from &&
-                a.date <= range.to
-        );
-
-    const completedFiltered =
-        filtered.filter(
-            a =>
-                a.completed
-        );
-
-    const income =
-        completedFiltered.reduce(
-            (sum,a)=>
-                sum+
-                getReceived(a),
-            0
-        );
-
-    const expenses =
-        completedFiltered.reduce(
-            (sum,a)=>
-                sum+
-                Number(
-                    a.expense || 0
-                ),
-            0
-        );
-
-    const net =
-        income-expenses;
-
-    document.getElementById(
-        "dashIncome"
-    ).textContent =
-        euro(income);
-
-    document.getElementById(
-        "dashExpenses"
-    ).textContent =
-        euro(expenses);
-
-    document.getElementById(
-        "dashNet"
-    ).textContent =
-        euro(net);
+if(!range){
+return;
+}
 
 
-    /* ANNO */
+/*
+ * IMPORTANTE:
+ * gli appuntamenti completati
+ * non vengono più mostrati
+ * tra quelli da fare.
+ */
 
-    const year =
-        new Date()
-            .getFullYear()
-            .toString();
-
-    const yearly =
-        appointments.filter(
-            a =>
-                (a.date || "")
-                    .startsWith(year)
-        );
-
-    const yearlyCompleted =
-        yearly.filter(
-            a =>
-                a.completed
-        );
-
-    const yearIncome =
-        yearlyCompleted.reduce(
-            (sum,a)=>
-                sum+
-                getReceived(a),
-            0
-        );
-
-    const yearExpenses =
-        yearlyCompleted.reduce(
-            (sum,a)=>
-                sum+
-                Number(
-                    a.expense || 0
-                ),
-            0
-        );
-
-    document.getElementById(
-        "yearIncome"
-    ).textContent =
-        euro(yearIncome);
-
-    document.getElementById(
-        "yearExpenses"
-    ).textContent =
-        euro(yearExpenses);
-
-    document.getElementById(
-        "yearNet"
-    ).textContent =
-        euro(
-            yearIncome-yearExpenses
-        );
-
-    document.getElementById(
-        "yearAppointments"
-    ).textContent =
-        yearly.length;
+const filtered =
+appointments.filter(
+a =>
+a.date >= range.from &&
+a.date <= range.to
+);
 
 
-    /* PROSSIMI */
+const completedFiltered =
+filtered.filter(
+a => a.completed
+);
 
-    renderFutureAppointments();
+
+const income =
+completedFiltered.reduce(
+(sum,a) =>
+sum + getReceived(a),
+0
+);
+
+const expenses =
+completedFiltered.reduce(
+(sum,a) =>
+sum + Number(a.expense || 0),
+0
+);
+
+document.getElementById(
+"dashIncome"
+).textContent =
+euro(income);
+
+document.getElementById(
+"dashExpenses"
+).textContent =
+euro(expenses);
+
+document.getElementById(
+"dashNet"
+).textContent =
+euro(income-expenses);
 
 
-    /* DETTAGLIO PERIODO */
+/* ANNO */
 
-    const container =
-        document.getElementById(
-            "dashboardAppointments"
-        );
+const year =
+String(
+new Date().getFullYear()
+);
 
-    if(!filtered.length){
+const yearly =
+appointments.filter(
+a =>
+(a.date || "").startsWith(year)
+&& a.completed
+);
 
-        container.innerHTML =
-            '<div class="empty">Nessun appuntamento nel periodo selezionato.</div>';
+const yearIncome =
+yearly.reduce(
+(sum,a) =>
+sum + getReceived(a),
+0
+);
 
-        return;
+const yearExpenses =
+yearly.reduce(
+(sum,a) =>
+sum + Number(a.expense || 0),
+0
+);
 
-    }
+document.getElementById(
+"yearIncome"
+).textContent =
+euro(yearIncome);
 
-    const sorted =
-        [...filtered].sort(
-            (a,b)=>
-                `${a.date}${a.time || ""}`
-                    .localeCompare(
-                        `${b.date}${b.time || ""}`
-                    )
-        );
+document.getElementById(
+"yearExpenses"
+).textContent =
+euro(yearExpenses);
 
-    container.innerHTML =
-        sorted
-            .map(
-                a =>
-                    appointmentPeriodHTML(a)
-            )
-            .join("");
+document.getElementById(
+"yearNet"
+).textContent =
+euro(
+yearIncome-yearExpenses
+);
+
+document.getElementById(
+"yearAppointments"
+).textContent =
+yearly.length;
+
+
+/* PROSSIMI */
+
+renderFutureAppointments();
+
+
+/* DETTAGLIO */
+
+const container =
+document.getElementById(
+"dashboardAppointments"
+);
+
+const pending =
+filtered.filter(
+a => !a.completed
+);
+
+if(!pending.length){
+
+container.innerHTML =
+'<div class="empty">Nessun appuntamento da completare nel periodo.</div>';
+
+return;
+
+}
+
+pending.sort(
+(a,b) =>
+`${a.date}${a.time || ""}`
+.localeCompare(
+`${b.date}${b.time || ""}`
+)
+);
+
+container.innerHTML =
+pending.map(
+a => dashboardAppointmentHTML(a)
+).join("");
 
 }
 
@@ -3039,407 +2267,695 @@ function updateDashboard(){
 
 function renderFutureAppointments(){
 
-    const container =
-        document.getElementById(
-            "futureAppointments"
-        );
+const container =
+document.getElementById(
+"futureAppointments"
+);
 
-    const today =
-        todayString();
+const today =
+todayString();
 
-    const list =
-        appointments
-            .filter(
-                a =>
-                    !a.completed &&
-                    a.date >= today
-            )
-            .sort(
-                (a,b)=>
-                    `${a.date}${a.time || ""}`
-                        .localeCompare(
-                            `${b.date}${b.time || ""}`
-                        )
-            );
+let list =
+appointments.filter(
+a =>
+!a.completed &&
+a.date >= today
+);
 
-    if(!list.length){
+list.sort(
+(a,b) =>
+`${a.date}${a.time || ""}`
+.localeCompare(
+`${b.date}${b.time || ""}`
+)
+);
 
-        container.innerHTML =
-            '<div class="empty">Nessun appuntamento futuro.</div>';
+if(!list.length){
 
-        return;
+container.innerHTML =
+'<div class="empty">Nessun appuntamento futuro.</div>';
 
-    }
+return;
 
-    container.innerHTML =
-        list
-            .map(
-                a =>
-                    appointmentDashboardHTML(a)
-            )
-            .join("");
+}
+
+container.innerHTML =
+list.map(
+a =>
+dashboardAppointmentHTML(a)
+).join("");
 
 }
 
 
 /* =========================
-   STORICO
+   APPUNTAMENTO DASHBOARD
 ========================= */
 
-function renderHistory(){
+function dashboardAppointmentHTML(a){
 
-    const container =
-        document.getElementById(
-            "historyList"
-        );
+return `
 
-    const search =
-        (
-            document.getElementById(
-                "historySearch"
-            )?.value || ""
-        ).toLowerCase();
+<div class="item">
 
-    const grouped = {};
+<div class="item-title">
 
-    appointments.forEach(
-        a => {
+${escapeHTML(
+getClientName(a.clientId)
+)}
 
-            const clientId =
-                Number(a.clientId);
+</div>
 
-            if(!grouped[clientId]){
+<div class="item-sub">
 
-                grouped[clientId] = [];
+📅 ${formatDate(a.date)}
 
-            }
-
-            grouped[clientId].push(a);
-
-        }
-    );
-
-    const groups =
-        Object.keys(grouped)
-            .map(
-                id => ({
-                    clientId:Number(id),
-                    appointments:
-                        grouped[id]
-                })
-            )
-            .filter(
-                group =>
-                    getClientName(
-                        group.clientId
-                    )
-                    .toLowerCase()
-                    .includes(search)
-            )
-            .sort(
-                (a,b)=>
-                    getClientName(
-                        a.clientId
-                    ).localeCompare(
-                        getClientName(
-                            b.clientId
-                        )
-                    )
-            );
-
-    if(!groups.length){
-
-        container.innerHTML =
-            '<div class="empty">Nessuno storico appuntamenti trovato.</div>';
-
-        return;
-
-    }
-
-    container.innerHTML =
-        groups
-            .map(
-                group =>
-                    historyClientHTML(
-                        group
-                    )
-            )
-            .join("");
-
+${
+a.time
+?
+` · 🕐 ${escapeHTML(a.time)}`
+:
+""
 }
 
+</div>
 
-function historyClientHTML(group){
-
-    const id =
-        group.clientId;
-
-    const isOpen =
-        Boolean(
-            openHistoryClients[id]
-        );
-
-    const sorted =
-        [...group.appointments].sort(
-            (a,b)=>
-                `${b.date}${b.time || ""}`
-                    .localeCompare(
-                        `${a.date}${a.time || ""}`
-                    )
-        );
-
-    return `
-
-    <div class="history-client">
-
-        <div class="history-client-head"
-             onclick="toggleHistoryClient(${id})">
-
-            <div>
-
-                <div class="history-client-name">
-
-                    👤 ${escapeHTML(
-                        getClientName(id)
-                    )}
-
-                </div>
-
-                <div class="history-count">
-
-                    ${group.appointments.length}
-                    ${
-                        group.appointments.length === 1
-                        ?
-                        "appuntamento registrato"
-                        :
-                        "appuntamenti registrati"
-                    }
-
-                </div>
-
-            </div>
-
-            <div class="history-arrow">
-
-                ${isOpen ? "⌃" : "⌄"}
-
-            </div>
-
-        </div>
-
-        ${
-            isOpen
-            ?
-            `
-            <div class="history-details">
-
-                ${sorted
-                    .map(
-                        a =>
-                            historyAppointmentHTML(a)
-                    )
-                    .join("")}
-
-            </div>
-            `
-            :
-            ""
-        }
-
-    </div>
-
-    `;
-
+${
+a.notes
+?
+`<div class="item-sub">
+📝 ${escapeHTML(a.notes)}
+</div>`
+:
+""
 }
 
+<span class="badge orange-badge">
+⏳ Da completare
+</span>
 
-function toggleHistoryClient(id){
 
-    openHistoryClients[id] =
-        !openHistoryClients[id];
+<div class="actions">
 
-    renderHistory();
+<button
+class="secondary"
+onclick="editDashboardAppointment(${a.id})">
+
+✏️ Modifica
+
+</button>
+
+<button
+class="success"
+onclick="openCompletionModal(${a.id})">
+
+✅ Completa
+
+</button>
+
+</div>
+
+</div>
+
+`;
 
 }
 
 
 /* =========================
-   STORICO APPUNTAMENTO
+   MODIFICA APPUNTAMENTO
 ========================= */
 
-function historyAppointmentHTML(a){
+function editDashboardAppointment(id){
 
-    const received =
-        getReceived(a);
+const a =
+appointments.find(
+x => Number(x.id) === Number(id)
+);
 
-    const remaining =
-        getRemaining(a);
+if(!a){
+return;
+}
 
-    return `
+showPage(
+"appointments",
+document.querySelectorAll(".nav button")[2]
+);
 
-    <div class="history-appointment">
+document.getElementById(
+"appointmentClient"
+).value =
+String(a.clientId);
 
-        <div class="history-header">
+document.getElementById(
+"appointmentDate"
+).value =
+a.date || "";
 
-            <div class="history-date">
+document.getElementById(
+"appointmentTime"
+).value =
+a.time || "";
 
-                📅 ${formatDate(a.date)}
+document.getElementById(
+"appointmentNotes"
+).value =
+a.notes || "";
 
-                ${
-                    a.time
-                    ?
-                    ` · 🕐 ${escapeHTML(a.time)}`
-                    :
-                    ""
-                }
-
-            </div>
-
-            ${
-                a.completed
-                ?
-                `<span class="badge green-badge">
-                    Completato
-                 </span>`
-                :
-                `<span class="badge blue-badge">
-                    Da completare
-                 </span>`
-            }
-
-        </div>
-
-        ${
-            a.notes
-            ?
-            `<div class="item-sub">
-                📝 ${escapeHTML(a.notes)}
-             </div>`
-            :
-            ""
-        }
-
-        ${
-            a.completed
-            ?
-            `
-            <div class="history-finance">
-
-                <div class="history-finance-box">
-
-                    <small>Incassato</small>
-
-                    <strong class="green">
-                        ${euro(received)}
-                    </strong>
-
-                </div>
-
-                <div class="history-finance-box">
-
-                    <small>Spese</small>
-
-                    <strong class="red">
-                        ${euro(a.expense)}
-                    </strong>
-
-                </div>
-
-                <div class="history-finance-box">
-
-                    <small>Residuo</small>
-
-                    <strong class="orange">
-                        ${euro(remaining)}
-                    </strong>
-
-                </div>
-
-            </div>
-
-            <div class="item-sub"
-                 style="margin-top:9px">
-
-                💳
-                ${
-                    a.paymentMode === "installments"
-                    ?
-                    `Pagamento dilazionato · ${a.installmentCount} rate`
-                    :
-                    "Pagamento unico"
-                }
-
-            </div>
-            `
-            :
-            ""
-        }
-
-        <button
-            class="danger"
-            style="width:100%;margin-top:12px"
-            onclick="deleteHistoryAppointment(${a.id})">
-
-            🗑️ Elimina appuntamento
-
-        </button>
-
-    </div>
-
-    `;
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
 
 }
 
 
 /* =========================
-   ELIMINA STORICO
+   POPUP COMPLETAMENTO
 ========================= */
 
-function deleteHistoryAppointment(id){
+function openCompletionModal(id){
 
-    const appointment =
-        appointments.find(
-            a =>
-                Number(a.id) ===
-                Number(id)
-        );
+const a =
+appointments.find(
+x => Number(x.id) === Number(id)
+);
 
-    if(!appointment){
+if(!a){
+return;
+}
 
-        return;
+completionAppointmentId = id;
 
-    }
+document.getElementById(
+"completionClient"
+).textContent =
+getClientName(a.clientId);
 
-    const name =
-        getClientName(
-            appointment.clientId
-        );
+document.getElementById(
+"completionIncome"
+).value =
+a.income || "";
 
-    if(
-        !confirm(
-            `Eliminare l'appuntamento di ${name} del ${formatDate(appointment.date)}?`
-        )
-    ){
+document.getElementById(
+"completionExpense"
+).value =
+a.expense || "";
 
-        return;
+document.getElementById(
+"completionPaymentMode"
+).value =
+a.paymentMode || "single";
 
-    }
+document.getElementById(
+"completionDeposit"
+).value =
+a.deposit || "";
 
-    appointments =
-        appointments.filter(
-            a =>
-                Number(a.id) !==
-                Number(id)
-        );
+document.getElementById(
+"completionInstallmentCount"
+).value =
+a.installmentCount || 2;
 
-    saveData();
+toggleCompletionInstallments();
 
-    refreshEverything();
+document.getElementById(
+"completionModal"
+).classList.remove("hidden");
 
-    alert(
-        "Appuntamento eliminato."
-    );
+updateCompletion();
+
+}
+
+
+function closeCompletionModal(){
+
+completionAppointmentId = null;
+
+document.getElementById(
+"completionModal"
+).classList.add("hidden");
+
+}
+
+
+function toggleCompletionInstallments(){
+
+const mode =
+document.getElementById(
+"completionPaymentMode"
+).value;
+
+document.getElementById(
+"completionInstallments"
+).classList.toggle(
+"hidden",
+mode !== "installments"
+);
+
+if(mode === "installments"){
+buildInstallmentInputs();
+}
+
+updateCompletion();
+
+}
+
+
+/* =========================
+   RATE MANUALI
+========================= */
+
+function buildInstallmentInputs(){
+
+const count =
+Number(
+document.getElementById(
+"completionInstallmentCount"
+).value
+) || 2;
+
+const container =
+document.getElementById(
+"installmentInputs"
+);
+
+const appointment =
+appointments.find(
+a =>
+Number(a.id) ===
+Number(completionAppointmentId)
+);
+
+const oldRates =
+appointment &&
+Array.isArray(appointment.installments)
+?
+appointment.installments
+:
+[];
+
+let html = "";
+
+for(let i=1;i<=count;i++){
+
+const old =
+oldRates.find(
+r =>
+Number(r.number) === i
+);
+
+html += `
+
+<div class="rate-row">
+
+<div class="rate-label">
+Rata ${i}
+</div>
+
+<input
+type="number"
+min="0"
+step="0.01"
+placeholder="€ 0,00"
+id="rate-${i}"
+value="${
+old
+?
+Number(old.amount || 0)
+:
+""
+}"
+oninput="updateCompletion()">
+
+</div>
+
+`;
+
+}
+
+container.innerHTML = html;
+
+updateCompletion();
+
+}
+
+
+/* =========================
+   CALCOLO COMPLETAMENTO
+========================= */
+
+function updateCompletion(){
+
+const income =
+Number(
+document.getElementById(
+"completionIncome"
+).value
+) || 0;
+
+const expense =
+Number(
+document.getElementById(
+"completionExpense"
+).value
+) || 0;
+
+const mode =
+document.getElementById(
+"completionPaymentMode"
+).value;
+
+let deposit = 0;
+let installmentsTotal = 0;
+
+if(mode === "installments"){
+
+deposit =
+Number(
+document.getElementById(
+"completionDeposit"
+).value
+) || 0;
+
+const count =
+Number(
+document.getElementById(
+"completionInstallmentCount"
+).value
+) || 2;
+
+for(let i=1;i<=count;i++){
+
+const input =
+document.getElementById(
+"rate-"+i
+);
+
+if(input){
+
+installmentsTotal +=
+Number(input.value || 0);
+
+}
+
+}
+
+}
+
+else{
+
+installmentsTotal = income;
+
+}
+
+const received =
+mode === "single"
+?
+income
+:
+deposit + installmentsTotal;
+
+const net =
+received - expense;
+
+document.getElementById(
+"completionTotal"
+).textContent =
+euro(income);
+
+document.getElementById(
+"completionDepositView"
+).textContent =
+euro(
+mode === "installments"
+?
+deposit
+:
+income
+);
+
+document.getElementById(
+"completionInstallmentsView"
+).textContent =
+mode === "installments"
+?
+euro(installmentsTotal)
+:
+euro(0);
+
+document.getElementById(
+"completionNet"
+).textContent =
+euro(net);
+
+}
+
+
+/* =========================
+   COMPLETA APPUNTAMENTO
+========================= */
+
+function completeAppointment(){
+
+if(completionAppointmentId === null){
+return;
+}
+
+const appointment =
+appointments.find(
+a =>
+Number(a.id) ===
+Number(completionAppointmentId)
+);
+
+if(!appointment){
+
+alert("Appuntamento non trovato.");
+
+return;
+
+}
+
+const income =
+Number(
+document.getElementById(
+"completionIncome"
+).value
+) || 0;
+
+const expense =
+Number(
+document.getElementById(
+"completionExpense"
+).value
+) || 0;
+
+const mode =
+document.getElementById(
+"completionPaymentMode"
+).value;
+
+if(income <= 0){
+
+alert("Inserisci il guadagno.");
+
+return;
+
+}
+
+if(expense < 0){
+
+alert("Le spese non possono essere negative.");
+
+return;
+
+}
+
+
+/* PAGAMENTO UNICO */
+
+if(mode === "single"){
+
+appointment.income = income;
+
+appointment.expense = expense;
+
+appointment.paymentMode = "single";
+
+appointment.deposit = 0;
+
+appointment.installmentCount = 1;
+
+appointment.installments = [];
+
+appointment.payments = [
+
+{
+
+id:Date.now()+Math.random(),
+
+number:1,
+
+amount:income,
+
+date:todayString(),
+
+paid:true
+
+}
+
+];
+
+}
+
+
+/* PAGAMENTO DILAZIONATO */
+
+else{
+
+const deposit =
+Number(
+document.getElementById(
+"completionDeposit"
+).value
+) || 0;
+
+const count =
+Number(
+document.getElementById(
+"completionInstallmentCount"
+).value
+) || 2;
+
+if(deposit < 0){
+
+alert("L'acconto non può essere negativo.");
+
+return;
+
+}
+
+if(deposit > income){
+
+alert(
+"L'acconto non può essere superiore al guadagno totale."
+);
+
+return;
+
+}
+
+const rates = [];
+
+let ratesTotal = 0;
+
+for(let i=1;i<=count;i++){
+
+const input =
+document.getElementById(
+"rate-"+i
+);
+
+const amount =
+Number(input?.value || 0);
+
+if(amount <= 0){
+
+alert(
+"Inserisci l'importo della rata "+i+"."
+);
+
+return;
+
+}
+
+rates.push({
+
+number:i,
+
+amount:amount,
+
+paid:false,
+
+date:""
+
+});
+
+ratesTotal += amount;
+
+}
+
+const expected =
+income - deposit;
+
+if(Math.abs(
+ratesTotal - expected
+) > 0.009){
+
+alert(
+"Il totale delle rate deve essere uguale al residuo dopo l'acconto: "+
+euro(expected)+"."
+);
+
+return;
+
+}
+
+appointment.income = income;
+
+appointment.expense = expense;
+
+appointment.paymentMode =
+"installments";
+
+appointment.deposit = deposit;
+
+appointment.installmentCount =
+count;
+
+appointment.installments =
+rates;
+
+appointment.payments = [];
+
+if(deposit > 0){
+
+appointment.payments.push({
+
+id:Date.now()+Math.random(),
+
+number:0,
+
+type:"deposit",
+
+amount:deposit,
+
+date:todayString(),
+
+paid:true
+
+});
+
+}
+
+}
+
+
+appointment.completed = true;
+
+appointment.net =
+income-expense;
+
+saveData();
+
+closeCompletionModal();
+
+refreshEverything();
+
+alert(
+"Appuntamento completato e registrato."
+);
 
 }
 
@@ -3450,676 +2966,536 @@ function deleteHistoryAppointment(id){
 
 function getPaymentClients(){
 
-    const map = {};
+const map = {};
 
-    appointments.forEach(
-        a => {
+appointments.forEach(a => {
 
-            if(
-                !a.completed ||
-                a.paymentMode !==
-                    "installments"
-            ){
+if(
+a.paymentMode !== "installments"
+){
+return;
+}
 
-                return;
+const remaining =
+getRemaining(a);
 
-            }
+if(remaining <= 0){
+return;
+}
 
-            const remaining =
-                getRemaining(a);
+const clientId =
+Number(a.clientId);
 
-            if(remaining <= 0){
+if(!map[clientId]){
 
-                return;
+map[clientId] = {
 
-            }
+clientId:clientId,
 
-            const clientId =
-                Number(a.clientId);
+appointments:[],
 
-            if(!map[clientId]){
+total:0,
 
-                map[clientId] = {
+received:0,
 
-                    clientId:
-                        clientId,
+remaining:0
 
-                    appointments:[],
+};
 
-                    total:0,
+}
 
-                    received:0,
+map[clientId]
+.appointments
+.push(a);
 
-                    remaining:0
+map[clientId].total +=
+Number(a.income || 0);
 
-                };
+map[clientId].received +=
+getReceived(a);
 
-            }
+map[clientId].remaining +=
+remaining;
 
-            map[clientId]
-                .appointments
-                .push(a);
+});
 
-            map[clientId].total +=
-                Number(
-                    a.income || 0
-                );
-
-            map[clientId].received +=
-                getReceived(a);
-
-            map[clientId].remaining +=
-                remaining;
-
-        }
-    );
-
-    return Object.values(map);
+return Object.values(map);
 
 }
 
 
 function renderPayments(){
 
-    const container =
-        document.getElementById(
-            "paymentsList"
-        );
+const container =
+document.getElementById(
+"paymentsList"
+);
 
-    const search =
-        (
-            document.getElementById(
-                "paymentSearch"
-            )?.value || ""
-        ).toLowerCase();
+const search =
+(
+document.getElementById(
+"paymentSearch"
+)?.value || ""
+).toLowerCase();
 
-    let groups =
-        getPaymentClients();
+let groups =
+getPaymentClients();
 
-    groups =
-        groups.filter(
-            group =>
-                getClientName(
-                    group.clientId
-                )
-                .toLowerCase()
-                .includes(search)
-        );
+groups =
+groups.filter(
+g =>
+getClientName(g.clientId)
+.toLowerCase()
+.includes(search)
+);
 
-    const allGroups =
-        getPaymentClients();
 
-    const totalReceived =
-        allGroups.reduce(
-            (sum,g)=>
-                sum+
-                g.received,
-            0
-        );
+const totalReceived =
+groups.reduce(
+(sum,g) =>
+sum+g.received,
+0
+);
 
-    const totalRemaining =
-        allGroups.reduce(
-            (sum,g)=>
-                sum+
-                g.remaining,
-            0
-        );
+const totalRemaining =
+groups.reduce(
+(sum,g) =>
+sum+g.remaining,
+0
+);
 
-    document.getElementById(
-        "paymentsReceived"
-    ).textContent =
-        euro(totalReceived);
+document.getElementById(
+"paymentsReceived"
+).textContent =
+euro(totalReceived);
 
-    document.getElementById(
-        "paymentsRemaining"
-    ).textContent =
-        euro(totalRemaining);
+document.getElementById(
+"paymentsRemaining"
+).textContent =
+euro(totalRemaining);
 
-    document.getElementById(
-        "paymentsClients"
-    ).textContent =
-        allGroups.length;
+document.getElementById(
+"paymentsClients"
+).textContent =
+groups.length;
 
-    if(!groups.length){
 
-        container.innerHTML =
-            '<div class="empty">Nessun pagamento dilazionato in corso.</div>';
+if(!groups.length){
 
-        return;
+container.innerHTML =
+'<div class="empty">Nessun pagamento dilazionato in corso.</div>';
 
-    }
+return;
 
-    container.innerHTML =
-        groups
-            .map(
-                group =>
-                    paymentClientHTML(
-                        group
-                    )
-            )
-            .join("");
+}
+
+
+/*
+ * IMPORTANTE:
+ * inizialmente viene mostrato
+ * SOLO il nome del cliente.
+ */
+
+container.innerHTML =
+groups.map(group => `
+
+<div
+class="item client-history"
+onclick="togglePaymentClient(${group.clientId})">
+
+<div style="
+display:flex;
+align-items:center;
+justify-content:space-between">
+
+<div class="item-title">
+
+👤 ${escapeHTML(
+getClientName(group.clientId)
+)}
+
+</div>
+
+<div class="chevron">
+›
+</div>
+
+</div>
+
+</div>
+
+
+<div
+id="payment-client-${group.clientId}"
+class="hidden">
+
+${paymentClientDetailsHTML(group)}
+
+</div>
+
+`).join("");
+
+}
+
+
+function togglePaymentClient(clientId){
+
+const element =
+document.getElementById(
+"payment-client-"+clientId
+);
+
+if(element){
+
+element.classList.toggle("hidden");
+
+}
+
+}
+
+
+function paymentClientDetailsHTML(group){
+
+const percentage =
+group.total > 0
+?
+Math.min(
+100,
+(group.received/group.total)*100
+)
+:
+0;
+
+return `
+
+<div class="item">
+
+<div class="payment-summary">
+
+<div class="payment-summary-row">
+
+<span>Totale</span>
+
+<strong>
+${euro(group.total)}
+</strong>
+
+</div>
+
+<div class="payment-summary-row">
+
+<span>Incassato</span>
+
+<strong class="green">
+${euro(group.received)}
+</strong>
+
+</div>
+
+<div class="payment-summary-row">
+
+<span>Residuo</span>
+
+<strong class="orange">
+${euro(group.remaining)}
+</strong>
+
+</div>
+
+<div class="payment-progress">
+
+<div
+class="payment-progress-bar"
+style="width:${percentage}%">
+</div>
+
+</div>
+
+<small style="color:#777">
+${percentage.toFixed(0)}% pagato
+</small>
+
+</div>
+
+
+${group.appointments
+.map(
+a =>
+appointmentPaymentsHTML(a)
+)
+.join("")}
+
+</div>
+
+`;
 
 }
 
 
 /* =========================
-   PAGAMENTI CLIENTE
-========================= */
-
-function paymentClientHTML(group){
-
-    const name =
-        getClientName(
-            group.clientId
-        );
-
-    const percentage =
-        group.total > 0
-        ?
-        Math.min(
-            100,
-            (
-                group.received /
-                group.total
-            )*100
-        )
-        :
-        0;
-
-    return `
-
-    <div class="item">
-
-        <div class="item-title">
-
-            👤 ${escapeHTML(name)}
-
-        </div>
-
-        <div class="payment-summary">
-
-            <div class="payment-summary-row">
-
-                <span>Totale</span>
-
-                <strong>
-                    ${euro(group.total)}
-                </strong>
-
-            </div>
-
-            <div class="payment-summary-row">
-
-                <span>Già pagato</span>
-
-                <strong class="green">
-                    ${euro(group.received)}
-                </strong>
-
-            </div>
-
-            <div class="payment-summary-row">
-
-                <span>Residuo</span>
-
-                <strong class="orange">
-                    ${euro(group.remaining)}
-                </strong>
-
-            </div>
-
-            <div class="payment-progress">
-
-                <div
-                    class="payment-progress-bar"
-                    style="width:${percentage}%">
-                </div>
-
-            </div>
-
-            <small style="color:#777">
-
-                ${percentage.toFixed(0)}% pagato
-
-            </small>
-
-        </div>
-
-        ${
-            group.appointments
-                .map(
-                    a =>
-                        appointmentPaymentsHTML(a)
-                )
-                .join("")
-        }
-
-    </div>
-
-    `;
-
-}
-
-
-/* =========================
-   RATE
+   DETTAGLIO RATE
 ========================= */
 
 function appointmentPaymentsHTML(a){
 
-    const total =
-        Number(a.income || 0);
+const count =
+Number(
+a.installmentCount || 1
+);
 
-    const payments =
-        Array.isArray(a.payments)
-        ?
-        a.payments
-        :
-        [];
+const rates =
+Array.isArray(a.installments)
+?
+a.installments
+:
+[];
 
-    const paid =
-        getReceived(a);
+const paid =
+getReceived(a);
 
-    const remaining =
-        getRemaining(a);
+const remaining =
+getRemaining(a);
 
-    const count =
-        Number(
-            a.installmentCount || 0
-        );
+let html = "";
 
-    const deposit =
-        payments.find(
-            p =>
-                p.type === "deposit"
-        );
+if(Number(a.deposit || 0) > 0){
 
-    const installmentPayments =
-        payments.filter(
-            p =>
-                p.type === "installment"
-        );
+html += `
 
-    let rows = "";
+<div class="installment paid">
 
-    if(deposit){
+<div class="installment-head">
 
-        rows += `
+<div class="installment-title">
+Acconto
+</div>
 
-        <div class="installment paid">
+<span class="badge green-badge">
+✅ Pagato
+</span>
 
-            <div class="installment-head">
+</div>
 
-                <div class="installment-title">
-                    Acconto
-                </div>
+<div class="installment-info">
 
-                <span class="badge green-badge">
-                    ✅ Pagato
-                </span>
+Importo:
+<strong>
+${euro(a.deposit)}
+</strong>
 
-            </div>
+</div>
 
-            <div class="installment-info">
+</div>
 
-                Importo:
-                <strong>
-                    ${euro(deposit.amount)}
-                </strong>
+`;
 
-                <br>
+}
 
-                Pagato il:
-                ${formatDate(deposit.date)}
 
-            </div>
+for(let i=1;i<=count;i++){
 
-        </div>
+const rate =
+rates.find(
+r =>
+Number(r.number) === i
+);
 
-        `;
+if(!rate){
+continue;
+}
 
-    }
+const amount =
+Number(rate.amount || 0);
 
+const isPaid =
+Boolean(rate.paid);
 
-    for(
-        let i=1;
-        i<=count;
-        i++
-    ){
+html += `
 
-        const existing =
-            installmentPayments.find(
-                p =>
-                    Number(p.number) ===
-                    i
-            );
+<div class="installment ${
+isPaid ? "paid" : ""
+}">
 
-        if(existing){
+<div class="installment-head">
 
-            rows += `
+<div class="installment-title">
 
-            <div class="installment paid">
+Rata ${i}/${count}
 
-                <div class="installment-head">
+</div>
 
-                    <div class="installment-title">
+${
+isPaid
+?
+`<span class="badge green-badge">
+✅ Pagata
+</span>`
+:
+`<span class="badge orange-badge">
+⏳ Residua
+</span>`
+}
 
-                        Rata ${i}/${count}
+</div>
 
-                    </div>
+<div class="installment-info">
 
-                    <span class="badge green-badge">
+Importo:
+<strong>
+${euro(amount)}
+</strong>
 
-                        ✅ Pagata
+${
+isPaid
+?
+`<br>
+Pagata il:
+${formatDate(rate.date)}`
+:
+""
+}
 
-                    </span>
+</div>
 
-                </div>
+${
+!isPaid
+?
+`<button
+class="success payment-button"
+onclick="registerPayment(
+${a.id},
+${i}
+)">
 
-                <div class="installment-info">
+💶 Registra pagamento
 
-                    Importo:
-                    <strong>
-                        ${euro(existing.amount)}
-                    </strong>
+</button>`
+:
+""
+}
 
-                    <br>
+</div>
 
-                    Pagata il:
-                    ${formatDate(existing.date)}
+`;
 
-                </div>
+}
 
-            </div>
 
-            `;
+return `
 
-        }
+<div style="margin-top:14px">
 
-        else{
+<div class="item-sub">
 
-            rows += `
+📅 ${formatDate(a.date)}
 
-            <div class="installment">
+</div>
 
-                <div class="installment-head">
+<div class="item-sub">
 
-                    <div class="installment-title">
+Incassato:
+<span class="green">
+${euro(paid)}
+</span>
 
-                        Rata ${i}/${count}
+· Residuo:
+<span class="orange">
+${euro(remaining)}
+</span>
 
-                    </div>
+</div>
 
-                    <span class="badge orange-badge">
+${html}
 
-                        ⏳ Residua
+</div>
 
-                    </span>
-
-                </div>
-
-                <div class="installment-info">
-
-                    Importo previsto:
-                    <strong>
-                        ${euro(
-                            getPlannedInstallmentAmount(
-                                a,
-                                i
-                            )
-                        )}
-                    </strong>
-
-                </div>
-
-                <button
-                    class="success payment-button"
-                    onclick="registerPayment(${a.id},${i})">
-
-                    💶 Registra pagamento
-
-                </button>
-
-            </div>
-
-            `;
-
-        }
-
-    }
-
-
-    return `
-
-    <div style="margin-top:14px">
-
-        ${
-            a.notes
-            ?
-            `<div class="item-sub"
-                  style="margin-bottom:7px">
-
-                📝 ${escapeHTML(a.notes)}
-
-             </div>`
-            :
-            ""
-        }
-
-        <strong>
-            ${formatDate(a.date)}
-        </strong>
-
-        <div class="item-sub">
-
-            Incassato:
-            <span class="green">
-                ${euro(paid)}
-            </span>
-
-            · Residuo:
-            <span class="orange">
-                ${euro(remaining)}
-            </span>
-
-        </div>
-
-        ${rows}
-
-    </div>
-
-    `;
+`;
 
 }
 
 
 /* =========================
-   IMPORTI RATE PREVISTI
-========================= */
-
-function getPlannedInstallmentAmount(
-    appointment,
-    number
-){
-
-    const planned =
-        Array.isArray(
-            appointment.plannedInstallments
-        )
-        ?
-        appointment.plannedInstallments
-        :
-        [];
-
-    const found =
-        planned.find(
-            p =>
-                Number(p.number) ===
-                Number(number)
-        );
-
-    return found
-        ?
-        Number(found.amount || 0)
-        :
-        0;
-
-}
-
-
-/* =========================
-   REGISTRA PAGAMENTO
+   REGISTRA RATA
 ========================= */
 
 function registerPayment(
-    appointmentId,
-    installmentNumber
+appointmentId,
+number
 ){
 
-    const appointment =
-        appointments.find(
-            a =>
-                Number(a.id) ===
-                Number(appointmentId)
-        );
+const appointment =
+appointments.find(
+a =>
+Number(a.id) ===
+Number(appointmentId)
+);
 
-    if(!appointment){
+if(!appointment){
+return;
+}
 
-        alert(
-            "Appuntamento non trovato."
-        );
+const rate =
+appointment.installments.find(
+r =>
+Number(r.number) ===
+Number(number)
+);
 
-        return;
+if(!rate){
 
-    }
+alert("Rata non trovata.");
 
-    if(
-        !Array.isArray(
-            appointment.payments
-        )
-    ){
+return;
 
-        appointment.payments=[];
+}
 
-    }
+if(rate.paid){
 
-    const already =
-        appointment.payments.some(
-            p =>
-                p.type === "installment" &&
-                Number(p.number) ===
-                Number(installmentNumber)
-        );
+alert("Questa rata è già stata pagata.");
 
-    if(already){
+return;
 
-        alert(
-            "Questa rata risulta già pagata."
-        );
+}
 
-        return;
+if(!confirm(
+`Confermi il pagamento della rata ${number} di ${euro(rate.amount)}?`
+)){
 
-    }
+return;
 
-    const planned =
-        getPlannedInstallmentAmount(
-            appointment,
-            installmentNumber
-        );
+}
 
-    let amount =
-        planned;
+rate.paid = true;
 
-    /*
-     * Se l'importo non era stato
-     * impostato in fase di completamento,
-     * chiediamo manualmente quanto è stato
-     * incassato.
-     */
+rate.date = todayString();
 
-    if(amount <= 0){
+if(!Array.isArray(
+appointment.payments
+)){
 
-        const answer =
-            prompt(
-                `Importo della rata ${installmentNumber}:`,
-                ""
-            );
+appointment.payments=[];
 
-        if(answer === null){
+}
 
-            return;
+appointment.payments.push({
 
-        }
+id:Date.now()+Math.random(),
 
-        amount =
-            Number(
-                answer.replace(",",".")
-            ) || 0;
+number:number,
 
-    }
+amount:Number(rate.amount),
 
-    if(amount <= 0){
+date:todayString(),
 
-        alert(
-            "Inserisci un importo valido."
-        );
+paid:true
 
-        return;
+});
 
-    }
+saveData();
 
-    const remaining =
-        getRemaining(
-            appointment
-        );
+refreshEverything();
 
-    if(amount > remaining + 0.01){
-
-        alert(
-            `Il pagamento non può superare il residuo di ${euro(remaining)}.`
-        );
-
-        return;
-
-    }
-
-    const ok =
-        confirm(
-            `Confermi il pagamento della rata ${installmentNumber} di ${euro(amount)}?`
-        );
-
-    if(!ok){
-
-        return;
-
-    }
-
-    appointment.payments.push({
-
-        id:
-            Date.now()+Math.random(),
-
-        number:
-            Number(installmentNumber),
-
-        type:
-            "installment",
-
-        amount:
-            amount,
-
-        date:
-            todayString()
-
-    });
-
-    saveData();
-
-    refreshEverything();
-
-    alert(
-        "Pagamento registrato."
-    );
+alert("Pagamento registrato.");
 
 }
 
@@ -4130,161 +3506,130 @@ function registerPayment(
 
 function exportBackup(){
 
-    const backup = {
+const backup = {
 
-        version:"8.0",
+version:"8.0",
 
-        createdAt:
-            new Date().toISOString(),
+createdAt:
+new Date().toISOString(),
 
-        clients:
-            clients,
+clients:clients,
 
-        appointments:
-            appointments
+appointments:appointments
 
-    };
+};
 
-    const json =
-        JSON.stringify(
-            backup,
-            null,
-            2
-        );
+const blob =
+new Blob(
+[
+JSON.stringify(
+backup,
+null,
+2
+)
+],
+{
+type:"application/json"
+}
+);
 
-    const blob =
-        new Blob(
-            [json],
-            {
-                type:"application/json"
-            }
-        );
+const url =
+URL.createObjectURL(blob);
 
-    const url =
-        URL.createObjectURL(
-            blob
-        );
+const link =
+document.createElement("a");
 
-    const link =
-        document.createElement(
-            "a"
-        );
+link.href=url;
 
-    link.href =
-        url;
+link.download =
+`igea-impianti-backup-${todayString()}.json`;
 
-    link.download =
-        `igea-impianti-backup-${todayString()}.json`;
+document.body.appendChild(link);
 
-    document.body.appendChild(
-        link
-    );
+link.click();
 
-    link.click();
+link.remove();
 
-    link.remove();
+URL.revokeObjectURL(url);
 
-    URL.revokeObjectURL(
-        url
-    );
-
-    alert(
-        "Backup creato correttamente."
-    );
+alert("Backup creato correttamente.");
 
 }
 
 
-/* =========================
-   IMPORT
-========================= */
-
 function importBackup(event){
 
-    const file =
-        event.target.files[0];
+const file =
+event.target.files[0];
 
-    if(!file){
+if(!file){
+return;
+}
 
-        return;
+const reader =
+new FileReader();
 
-    }
+reader.onload =
+function(){
 
-    const reader =
-        new FileReader();
+try{
 
-    reader.onload =
-        function(){
+const backup =
+JSON.parse(
+reader.result
+);
 
-            try{
+if(
+!backup ||
+!Array.isArray(backup.clients) ||
+!Array.isArray(backup.appointments)
+){
 
-                const backup =
-                    JSON.parse(
-                        reader.result
-                    );
+throw new Error();
 
-                if(
-                    !backup ||
-                    !Array.isArray(
-                        backup.clients
-                    ) ||
-                    !Array.isArray(
-                        backup.appointments
-                    )
-                ){
+}
 
-                    throw new Error(
-                        "Backup non valido"
-                    );
+if(!confirm(
+"L'importazione sostituirà tutti i dati attuali. Continuare?"
+)){
 
-                }
+event.target.value="";
 
-                const ok =
-                    confirm(
-                        "L'importazione sostituirà tutti i dati attuali. Continuare?"
-                    );
+return;
 
-                if(!ok){
+}
 
-                    event.target.value="";
+clients =
+backup.clients;
 
-                    return;
+appointments =
+backup.appointments;
 
-                }
+migrateData();
 
-                clients =
-                    backup.clients;
+saveData();
 
-                appointments =
-                    backup.appointments;
+refreshEverything();
 
-                migrateData();
+alert(
+"Backup importato correttamente."
+);
 
-                saveData();
+}
 
-                refreshEverything();
+catch(error){
 
-                alert(
-                    "Backup importato correttamente."
-                );
+alert(
+"Errore: il file non è un backup valido di Igea Impianti."
+);
 
-            }
+}
 
-            catch(error){
+event.target.value="";
 
-                alert(
-                    "Errore: il file non è un backup valido di Igea Impianti."
-                );
+};
 
-            }
-
-            event.target.value="";
-
-        };
-
-    reader.readAsText(
-        file
-    );
+reader.readAsText(file);
 
 }
 
@@ -4295,35 +3640,31 @@ function importBackup(event){
 
 function deleteAllData(){
 
-    const confirmation =
-        prompt(
-            "Per confermare scrivi: ELIMINA"
-        );
+const confirmation =
+prompt(
+"Per confermare scrivi: ELIMINA"
+);
 
-    if(
-        confirmation !==
-        "ELIMINA"
-    ){
+if(
+confirmation !== "ELIMINA"
+){
 
-        alert(
-            "Operazione annullata."
-        );
+alert("Operazione annullata.");
 
-        return;
+return;
 
-    }
+}
 
-    clients=[];
+clients=[];
+appointments=[];
 
-    appointments=[];
+saveData();
 
-    saveData();
+refreshEverything();
 
-    refreshEverything();
-
-    alert(
-        "Tutti i dati sono stati eliminati."
-    );
+alert(
+"Tutti i dati sono stati eliminati."
+);
 
 }
 
@@ -4334,75 +3675,17 @@ function deleteAllData(){
 
 function refreshEverything(){
 
-    populateClientSelect();
+populateClientSelect();
 
-    renderClients();
+renderClients();
 
-    renderHistory();
+renderAppointments();
 
-    renderPayments();
+renderPayments();
 
-    updateDashboard();
-
-}
-
-
-/* =========================
-   SICUREZZA HTML
-========================= */
-
-function escapeHTML(value){
-
-    return String(
-        value || ""
-    )
-    .replaceAll(
-        "&",
-        "&amp;"
-    )
-    .replaceAll(
-        "<",
-        "&lt;"
-    )
-    .replaceAll(
-        ">",
-        "&gt;"
-    )
-    .replaceAll(
-        '"',
-        "&quot;"
-    )
-    .replaceAll(
-        "'",
-        "&#039;"
-    );
+updateDashboard();
 
 }
-
-
-/* =========================
-   CHIUSURA MODAL
-========================= */
-
-document
-    .getElementById(
-        "completionModal"
-    )
-    .addEventListener(
-        "click",
-        function(event){
-
-            if(
-                event.target ===
-                this
-            ){
-
-                closeCompletionModal();
-
-            }
-
-        }
-    );
 
 
 /* =========================
@@ -4411,12 +3694,10 @@ document
 
 migrateData();
 
-saveData();
-
 document.getElementById(
-    "appointmentDate"
+"appointmentDate"
 ).value =
-    todayString();
+todayString();
 
 refreshEverything();
 
