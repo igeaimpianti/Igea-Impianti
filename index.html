@@ -10,11 +10,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Igea Impianti">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0b0d12">
+<meta name="theme-color" content="#f5f5f7">
 
 <title>Igea Impianti</title>
 
 <style>
+
 *{
     box-sizing:border-box;
     -webkit-tap-highlight-color:transparent;
@@ -23,8 +24,8 @@
 body{
     margin:0;
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;
-    background:#0b0d12;
-    color:#fff;
+    background:#f5f5f7;
+    color:#111111;
 }
 
 button,
@@ -45,27 +46,20 @@ button{
     padding-bottom:100px;
 }
 
+/* ================= HEADER ================= */
+
 header{
-    padding:calc(25px + env(safe-area-inset-top)) 18px 16px;
+    padding:calc(18px + env(safe-area-inset-top)) 18px 16px;
     position:sticky;
     top:0;
     z-index:30;
-    background:rgba(11,13,18,.94);
+    background:rgba(245,245,247,.94);
     backdrop-filter:blur(18px);
     -webkit-backdrop-filter:blur(18px);
+    border-bottom:1px solid #dedee3;
 }
 
-header h1{
-    margin:0;
-    font-size:28px;
-    letter-spacing:-.5px;
-}
-
-header p{
-    margin:5px 0 0;
-    color:#8e96a5;
-}
-    .brand{
+.brand{
     display:flex;
     align-items:center;
     justify-content:flex-start;
@@ -94,29 +88,37 @@ header p{
 
 .brand-text h1{
     margin:0;
-    font-size:28px;
+    font-size:27px;
     line-height:1.1;
+    letter-spacing:-.5px;
+    color:#111111;
 }
 
 .brand-text p{
     margin:4px 0 0;
+    color:#6f7178;
+    font-size:14px;
 }
 
+/* ================= MAIN ================= */
+
 main{
-    padding:10px 16px;
+    padding:14px 16px;
 }
 
 .card{
-    background:#151821;
-    border:1px solid #252b38;
+    background:#ffffff;
+    border:1px solid #dcdde2;
     border-radius:19px;
     padding:17px;
     margin-bottom:14px;
+    box-shadow:0 2px 8px rgba(0,0,0,.035);
 }
 
 .card h2{
     margin:0 0 15px;
     font-size:18px;
+    color:#111111;
 }
 
 .stats{
@@ -126,7 +128,8 @@ main{
 }
 
 .stat{
-    background:#1c202a;
+    background:#f4f4f6;
+    border:1px solid #e0e1e5;
     border-radius:15px;
     padding:14px 9px;
     min-width:0;
@@ -134,7 +137,7 @@ main{
 
 .stat small{
     display:block;
-    color:#8f97a5;
+    color:#71737a;
     font-size:11px;
     margin-bottom:7px;
 }
@@ -142,20 +145,34 @@ main{
 .stat strong{
     font-size:16px;
     white-space:nowrap;
+    color:#111111;
 }
 
-.green{color:#39d98a}
-.red{color:#ff6577}
-.blue{color:#61a8ff}
-.yellow{color:#f5c85b}
+.green{
+    color:#159957 !important;
+}
+
+.red{
+    color:#e04455 !important;
+}
+
+.blue{
+    color:#287bdc !important;
+}
+
+.yellow{
+    color:#b78300 !important;
+}
+
+/* ================= FORM ================= */
 
 input,
 select,
 textarea{
     width:100%;
-    background:#0e1118;
-    color:#fff;
-    border:1px solid #2b3240;
+    background:#fafafa;
+    color:#111111;
+    border:1px solid #d0d1d6;
     border-radius:12px;
     padding:13px;
     font-size:16px;
@@ -166,7 +183,8 @@ textarea{
 input:focus,
 select:focus,
 textarea:focus{
-    border-color:#596579;
+    border-color:#999ca5;
+    background:#ffffff;
 }
 
 textarea{
@@ -176,10 +194,12 @@ textarea{
 
 label{
     display:block;
-    color:#969eac;
+    color:#666970;
     font-size:13px;
     margin:8px 0 6px;
 }
+
+/* ================= BUTTONS ================= */
 
 button{
     border:0;
@@ -191,29 +211,33 @@ button{
 
 .primary{
     width:100%;
-    background:#fff;
-    color:#000;
+    background:#111111;
+    color:#ffffff;
     margin-top:5px;
 }
 
 .secondary{
-    background:#252b38;
-    color:#fff;
+    background:#eeeeF1;
+    color:#111111;
+    border:1px solid #d6d7dc;
 }
 
 .danger{
-    background:#351923;
-    color:#ff7181;
+    background:#fff0f2;
+    color:#d93448;
+    border:1px solid #f3cbd1;
 }
 
 .warning{
-    background:#302918;
-    color:#f5c85b;
+    background:#fff8df;
+    color:#9b7300;
+    border:1px solid #eadb9d;
 }
 
 .success{
-    background:#183328;
-    color:#39d98a;
+    background:#e9f8f0;
+    color:#13844b;
+    border:1px solid #c8ead7;
 }
 
 .actions{
@@ -226,32 +250,35 @@ button{
     flex:1;
 }
 
+/* ================= NAV ================= */
+
 .nav{
     position:fixed;
     bottom:0;
     left:0;
     right:0;
     height:82px;
-    background:rgba(18,21,28,.97);
+    background:rgba(255,255,255,.97);
     backdrop-filter:blur(20px);
     -webkit-backdrop-filter:blur(20px);
-    border-top:1px solid #252b36;
+    border-top:1px solid #dcdde2;
     display:flex;
     justify-content:space-around;
     z-index:50;
     padding-bottom:env(safe-area-inset-bottom);
+    box-shadow:0 -3px 15px rgba(0,0,0,.04);
 }
 
 .nav button{
     background:transparent;
-    color:#858d9d;
+    color:#85878e;
     font-size:11px;
     padding:8px 9px;
     min-width:65px;
 }
 
 .nav button.active{
-    color:#fff;
+    color:#111111;
 }
 
 .nav-icon{
@@ -260,13 +287,15 @@ button{
     margin-bottom:3px;
 }
 
+/* ================= GENERALE ================= */
+
 .hidden{
     display:none!important;
 }
 
 .item{
-    background:#10131a;
-    border:1px solid #252b37;
+    background:#ffffff;
+    border:1px solid #dedfe4;
     border-radius:16px;
     padding:15px;
     margin-bottom:10px;
@@ -275,10 +304,11 @@ button{
 .item-title{
     font-size:17px;
     font-weight:700;
+    color:#111111;
 }
 
 .item-sub{
-    color:#969eac;
+    color:#70727a;
     font-size:13px;
     margin-top:5px;
     line-height:1.4;
@@ -288,7 +318,7 @@ button{
     display:flex;
     margin-top:12px;
     padding-top:12px;
-    border-top:1px solid #252b37;
+    border-top:1px solid #e2e3e7;
 }
 
 .money-box{
@@ -298,7 +328,7 @@ button{
 
 .money-box small{
     display:block;
-    color:#858d9d;
+    color:#777981;
     font-size:10px;
     margin-bottom:4px;
 }
@@ -321,7 +351,7 @@ button{
 
 .empty{
     text-align:center;
-    color:#737b8b;
+    color:#85878e;
     padding:25px 8px;
 }
 
@@ -335,8 +365,9 @@ button{
     display:inline-block;
     padding:5px 9px;
     border-radius:8px;
-    background:#202632;
-    color:#aeb6c4;
+    background:#f0f0f3;
+    color:#666970;
+    border:1px solid #dedfe3;
     font-size:11px;
     margin-top:8px;
 }
@@ -345,17 +376,12 @@ button{
     margin-bottom:12px;
 }
 
-.backup-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:9px;
-}
-
 .file-label{
     display:block;
     text-align:center;
-    background:#252b38;
-    color:#fff;
+    background:#eeeeF1;
+    color:#111111;
+    border:1px solid #d6d7dc;
     border-radius:12px;
     padding:13px 10px;
     font-size:15px;
@@ -367,18 +393,18 @@ button{
 }
 
 .notice{
-    background:#1d2029;
-    border:1px solid #303644;
+    background:#f5f5f7;
+    border:1px solid #dedfe4;
     border-radius:13px;
     padding:12px;
-    color:#9ca4b3;
+    color:#666970;
     font-size:13px;
     line-height:1.45;
 }
 
 hr{
     border:0;
-    border-top:1px solid #282e3a;
+    border-top:1px solid #dedfe4;
     margin:16px 0;
 }
 
@@ -399,8 +425,8 @@ hr{
 }
 
 .edit-mode{
-    background:#171f2d;
-    border:1px solid #33435b;
+    background:#f8fbff;
+    border-color:#a9c8ec;
 }
 
 .year-grid{
@@ -410,8 +436,8 @@ hr{
 }
 
 .month-card{
-    background:#10131a;
-    border:1px solid #252b37;
+    background:#fafafa;
+    border:1px solid #dedfe4;
     border-radius:14px;
     padding:13px;
 }
@@ -420,24 +446,27 @@ hr{
     display:block;
     margin-bottom:8px;
     font-size:14px;
+    color:#111111;
 }
 
 .month-line{
     display:flex;
     justify-content:space-between;
-    color:#9ca4b3;
+    color:#777981;
     font-size:12px;
     margin-top:4px;
 }
 
 .month-line span:last-child{
-    color:#fff;
+    color:#111111;
 }
+
+/* ================= MENU ALTRO ================= */
 
 .menu-overlay{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,.45);
+    background:rgba(0,0,0,.25);
     z-index:80;
 }
 
@@ -448,18 +477,18 @@ hr{
     bottom:88px;
     max-width:650px;
     margin:auto;
-    background:#171a22;
-    border:1px solid #303644;
+    background:#ffffff;
+    border:1px solid #d8d9de;
     border-radius:20px;
     padding:10px;
-    box-shadow:0 15px 45px rgba(0,0,0,.5);
+    box-shadow:0 15px 45px rgba(0,0,0,.18);
     z-index:90;
 }
 
 .more-menu button{
     width:100%;
     background:transparent;
-    color:#fff;
+    color:#111111;
     text-align:left;
     padding:15px;
     margin:2px 0;
@@ -467,13 +496,15 @@ hr{
 }
 
 .more-menu button:active{
-    background:#252b38;
+    background:#f1f1f3;
 }
+
+/* ================= MODALE ================= */
 
 .modal-overlay{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,.65);
+    background:rgba(0,0,0,.45);
     z-index:100;
     display:flex;
     align-items:flex-end;
@@ -485,40 +516,47 @@ hr{
     max-width:680px;
     max-height:90vh;
     overflow:auto;
-    background:#151821;
+    background:#ffffff;
     border-radius:22px 22px 0 0;
     padding:20px;
     padding-bottom:calc(20px + env(safe-area-inset-bottom));
-    border:1px solid #303644;
+    border:1px solid #d7d8dd;
 }
 
 .modal h2{
     margin:0 0 15px;
+    color:#111111;
 }
 
 .modal-close{
     float:right;
-    background:#252b38;
-    color:#fff;
+    background:#eeeeF1;
+    color:#111111;
     padding:8px 12px;
+    border:1px solid #d7d8dd;
 }
+
+/* ================= TOAST ================= */
 
 .toast{
     position:fixed;
     left:50%;
     bottom:95px;
     transform:translateX(-50%);
-    background:#fff;
-    color:#000;
+    background:#111111;
+    color:#ffffff;
     padding:12px 17px;
     border-radius:12px;
     font-size:14px;
     font-weight:650;
     z-index:200;
-    box-shadow:0 8px 30px rgba(0,0,0,.35);
+    box-shadow:0 8px 30px rgba(0,0,0,.25);
 }
 
+/* ================= MOBILE ================= */
+
 @media(max-width:380px){
+
     .stats{
         gap:6px;
     }
@@ -536,7 +574,13 @@ hr{
         padding-left:5px;
         padding-right:5px;
     }
+
+    .brand-text h1{
+        font-size:24px;
+    }
+
 }
+
 </style>
 </head>
 
@@ -545,13 +589,27 @@ hr{
 <div class="app">
 
 <header>
+
     <div class="brand">
-        <img src="icon.png" alt="Igea Impianti" class="brand-logo">
+
+        <img
+            src="icon.png"
+            alt="Igea Impianti"
+            class="brand-logo"
+        >
+
         <div class="brand-text">
+
             <h1>Igea Impianti</h1>
-            <p id="pageSubtitle">Dashboard</p>
+
+            <p id="pageSubtitle">
+                Dashboard
+            </p>
+
         </div>
+
     </div>
+
 </header>
 
 <main>
@@ -561,68 +619,130 @@ hr{
 <section id="dashboard">
 
 <div class="card">
+
     <h2>📊 Riepilogo</h2>
 
     <label>Periodo</label>
 
-    <select id="periodFilter" onchange="updateDashboard()">
-        <option value="today">Oggi</option>
-        <option value="yesterday">Ieri</option>
-        <option value="week">Questa settimana</option>
-        <option value="month" selected>Questo mese</option>
-        <option value="lastMonth">Mese precedente</option>
-        <option value="year">Quest'anno</option>
-        <option value="custom">Personalizzato</option>
+    <select id="periodFilter"
+            onchange="updateDashboard()">
+
+        <option value="today">
+            Oggi
+        </option>
+
+        <option value="yesterday">
+            Ieri
+        </option>
+
+        <option value="week">
+            Questa settimana
+        </option>
+
+        <option value="month" selected>
+            Questo mese
+        </option>
+
+        <option value="lastMonth">
+            Mese precedente
+        </option>
+
+        <option value="year">
+            Quest'anno
+        </option>
+
+        <option value="custom">
+            Personalizzato
+        </option>
+
     </select>
 
-    <div id="customDates" class="filter-date hidden">
+    <div id="customDates"
+         class="filter-date hidden">
 
         <div>
+
             <label>Dal</label>
-            <input type="date" id="dateFrom" onchange="updateDashboard()">
+
+            <input type="date"
+                   id="dateFrom"
+                   onchange="updateDashboard()">
+
         </div>
 
         <div>
+
             <label>Al</label>
-            <input type="date" id="dateTo" onchange="updateDashboard()">
+
+            <input type="date"
+                   id="dateTo"
+                   onchange="updateDashboard()">
+
         </div>
 
     </div>
+
 </div>
+
 
 <div class="stats">
 
     <div class="stat">
+
         <small>💰 Guadagni</small>
-        <strong id="dashIncome" class="green">€0,00</strong>
+
+        <strong id="dashIncome"
+                class="green">
+            €0,00
+        </strong>
+
     </div>
 
     <div class="stat">
+
         <small>💸 Spese</small>
-        <strong id="dashExpenses" class="red">€0,00</strong>
+
+        <strong id="dashExpenses"
+                class="red">
+            €0,00
+        </strong>
+
     </div>
 
     <div class="stat">
+
         <small>🟢 Netto</small>
-        <strong id="dashNet" class="blue">€0,00</strong>
+
+        <strong id="dashNet"
+                class="blue">
+            €0,00
+        </strong>
+
     </div>
 
 </div>
 
-<div class="card" style="margin-top:14px">
+
+<div class="card"
+     style="margin-top:14px">
 
     <div class="section-title">
+
         <h2>📅 Appuntamenti</h2>
 
         <button class="secondary small-button"
                 onclick="openPageFromButton('appointments')">
+
             Vedi tutti
+
         </button>
+
     </div>
 
     <div id="dashboardAppointments"></div>
 
 </div>
+
 
 <div class="card">
 
@@ -631,29 +751,50 @@ hr{
     <div class="stats">
 
         <div class="stat">
+
             <small>💰 Anno</small>
-            <strong id="yearIncome" class="green">€0,00</strong>
+
+            <strong id="yearIncome"
+                    class="green">
+                €0,00
+            </strong>
+
         </div>
 
         <div class="stat">
+
             <small>💸 Spese</small>
-            <strong id="yearExpenses" class="red">€0,00</strong>
+
+            <strong id="yearExpenses"
+                    class="red">
+                €0,00
+            </strong>
+
         </div>
 
         <div class="stat">
+
             <small>🟢 Netto</small>
-            <strong id="yearNet" class="blue">€0,00</strong>
+
+            <strong id="yearNet"
+                    class="blue">
+                €0,00
+            </strong>
+
         </div>
 
     </div>
 
 </div>
 
+
 <div class="card">
 
     <h2>📆 Andamento mensile</h2>
 
-    <div id="yearMonths" class="year-grid"></div>
+    <div id="yearMonths"
+         class="year-grid">
+    </div>
 
 </div>
 
@@ -662,7 +803,8 @@ hr{
 
 <!-- ================= CLIENTI ================= -->
 
-<section id="clients" class="hidden">
+<section id="clients"
+         class="hidden">
 
 <div class="card">
 
@@ -684,10 +826,13 @@ hr{
 
     <button class="primary"
             onclick="saveClient()">
+
         Salva cliente
+
     </button>
 
 </div>
+
 
 <div class="card">
 
@@ -707,9 +852,11 @@ hr{
 
 <!-- ================= APPUNTAMENTI ================= -->
 
-<section id="appointments" class="hidden">
+<section id="appointments"
+         class="hidden">
 
-<div id="appointmentFormCard" class="card">
+<div id="appointmentFormCard"
+     class="card">
 
     <div class="section-title">
 
@@ -720,35 +867,46 @@ hr{
         <button id="cancelEditButton"
                 class="secondary small-button hidden"
                 onclick="cancelEditAppointment()">
+
             Annulla
+
         </button>
 
     </div>
 
-    <input type="hidden" id="editingAppointmentId">
+
+    <input type="hidden"
+           id="editingAppointmentId">
+
 
     <label>Cliente</label>
 
-    <select id="appointmentClient"></select>
+    <select id="appointmentClient">
+    </select>
+
 
     <label>Data</label>
 
     <input type="date"
            id="appointmentDate">
 
+
     <label>Ora</label>
 
     <input type="time"
            id="appointmentTime">
+
 
     <label>Tipo di lavoro</label>
 
     <input id="appointmentWork"
            placeholder="Es. Installazione impianto">
 
+
     <div class="row">
 
         <div>
+
             <label>Guadagno (€)</label>
 
             <input type="number"
@@ -757,9 +915,11 @@ hr{
                    step="0.01"
                    placeholder="0,00"
                    oninput="calculateNet()">
+
         </div>
 
         <div>
+
             <label>Spese (€)</label>
 
             <input type="number"
@@ -768,34 +928,43 @@ hr{
                    step="0.01"
                    placeholder="0,00"
                    oninput="calculateNet()">
+
         </div>
 
     </div>
 
-    <div class="card"
-         style="background:#10131a;margin-top:3px">
 
-        <small style="color:#8c94a3">
+    <div class="card"
+         style="background:#f6f6f8;margin-top:3px">
+
+        <small style="color:#777981">
             🟢 NETTO
         </small>
 
         <div id="appointmentNet"
              class="total-big green">
+
             €0,00
+
         </div>
 
     </div>
 
+
     <textarea id="appointmentNotes"
               placeholder="Note appuntamento"></textarea>
+
 
     <button id="appointmentSaveButton"
             class="primary"
             onclick="saveAppointment()">
+
         Salva appuntamento
+
     </button>
 
 </div>
+
 
 <div class="card">
 
@@ -815,7 +984,8 @@ hr{
 
 <!-- ================= GUADAGNI ================= -->
 
-<section id="income" class="hidden">
+<section id="income"
+         class="hidden">
 
 <div class="card">
 
@@ -826,45 +996,58 @@ hr{
         €0,00
     </div>
 
-    <small style="color:#8d94a3">
+    <small style="color:#777981">
         Totale guadagni registrati
     </small>
 
 </div>
+
 
 <div class="card">
 
     <div class="stats">
 
         <div class="stat">
+
             <small>Quest'anno</small>
+
             <strong id="incomeYearTotal"
                     class="green">
                 €0,00
             </strong>
+
         </div>
 
         <div class="stat">
+
             <small>Questo mese</small>
+
             <strong id="incomeMonthTotal"
                     class="green">
                 €0,00
             </strong>
+
         </div>
 
         <div class="stat">
+
             <small>Appuntamenti</small>
+
             <strong id="incomeAppointmentCount">
                 0
             </strong>
+
         </div>
 
     </div>
 
 </div>
 
+
 <div class="card">
+
     <div id="incomeList"></div>
+
 </div>
 
 </section>
@@ -872,7 +1055,8 @@ hr{
 
 <!-- ================= SPESE ================= -->
 
-<section id="expenses" class="hidden">
+<section id="expenses"
+         class="hidden">
 
 <div class="card">
 
@@ -883,45 +1067,58 @@ hr{
         €0,00
     </div>
 
-    <small style="color:#8d94a3">
+    <small style="color:#777981">
         Totale spese registrate
     </small>
 
 </div>
+
 
 <div class="card">
 
     <div class="stats">
 
         <div class="stat">
+
             <small>Quest'anno</small>
+
             <strong id="expenseYearTotal"
                     class="red">
                 €0,00
             </strong>
+
         </div>
 
         <div class="stat">
+
             <small>Questo mese</small>
+
             <strong id="expenseMonthTotal"
                     class="red">
                 €0,00
             </strong>
+
         </div>
 
         <div class="stat">
+
             <small>Registrazioni</small>
+
             <strong id="expenseCount">
                 0
             </strong>
+
         </div>
 
     </div>
 
 </div>
 
+
 <div class="card">
+
     <div id="expenseList"></div>
+
 </div>
 
 </section>
@@ -929,7 +1126,8 @@ hr{
 
 <!-- ================= IMPOSTAZIONI ================= -->
 
-<section id="settings" class="hidden">
+<section id="settings"
+         class="hidden">
 
 <div class="card">
 
@@ -943,20 +1141,29 @@ hr{
 
     </div>
 
+
     <hr>
+
 
     <h2>💾 Backup</h2>
 
     <button class="primary"
             onclick="exportBackup()">
+
         📤 Esporta backup
+
     </button>
 
-    <p style="color:#858d9d;font-size:12px">
+
+    <p style="color:#777981;font-size:12px">
+
         Verrà creato un file JSON contenente tutti i dati dell'app.
+
     </p>
 
+
     <hr>
+
 
     <h2>📥 Importazione</h2>
 
@@ -971,19 +1178,26 @@ hr{
 
     </label>
 
-    <p style="color:#858d9d;font-size:12px">
+
+    <p style="color:#777981;font-size:12px">
+
         L'importazione sostituirà i dati attuali con quelli presenti
         nel backup.
+
     </p>
 
+
     <hr>
+
 
     <h2>🗑️ Zona pericolosa</h2>
 
     <button class="danger"
             style="width:100%"
             onclick="deleteAllData()">
+
         Elimina tutti i dati
+
     </button>
 
 </div>
@@ -1036,7 +1250,9 @@ hr{
 
         <button class="modal-close"
                 onclick="closeClientModal()">
+
             ✕
+
         </button>
 
         <h2 id="clientModalTitle">
@@ -1058,31 +1274,46 @@ hr{
         data-page="dashboard"
         onclick="showPage('dashboard',this)">
 
-    <span class="nav-icon">📊</span>
+    <span class="nav-icon">
+        📊
+    </span>
+
     Home
 
 </button>
 
+
 <button data-page="appointments"
         onclick="showPage('appointments',this)">
 
-    <span class="nav-icon">📅</span>
+    <span class="nav-icon">
+        📅
+    </span>
+
     Appuntamenti
 
 </button>
 
+
 <button data-page="clients"
         onclick="showPage('clients',this)">
 
-    <span class="nav-icon">👥</span>
+    <span class="nav-icon">
+        👥
+    </span>
+
     Clienti
 
 </button>
 
+
 <button data-page="more"
         onclick="openMoreMenu()">
 
-    <span class="nav-icon">☰</span>
+    <span class="nav-icon">
+        ☰
+    </span>
+
     Altro
 
 </button>
@@ -1093,7 +1324,9 @@ hr{
 
 
 <script>
+
 "use strict";
+
 
 /* =========================================================
    DATI
@@ -1101,12 +1334,17 @@ hr{
 
 let clients =
     JSON.parse(
-        localStorage.getItem("gestionePro_clients") || "[]"
+        localStorage.getItem(
+            "gestionePro_clients"
+        ) || "[]"
     );
+
 
 let appointments =
     JSON.parse(
-        localStorage.getItem("gestionePro_appointments") || "[]"
+        localStorage.getItem(
+            "gestionePro_appointments"
+        ) || "[]"
     );
 
 
@@ -1125,6 +1363,7 @@ function saveData(){
         "gestionePro_appointments",
         JSON.stringify(appointments)
     );
+
 }
 
 
@@ -1144,14 +1383,20 @@ function showToast(message){
     const toast =
         document.createElement("div");
 
-    toast.className = "toast";
-    toast.textContent = message;
+    toast.className =
+        "toast";
 
-    document.body.appendChild(toast);
+    toast.textContent =
+        message;
+
+    document.body.appendChild(
+        toast
+    );
 
     setTimeout(()=>{
         toast.remove();
     },2200);
+
 }
 
 
@@ -1161,13 +1406,16 @@ function showToast(message){
 
 function euro(value){
 
-    return Number(value || 0).toLocaleString(
+    return Number(
+        value || 0
+    ).toLocaleString(
         "it-IT",
         {
             style:"currency",
             currency:"EUR"
         }
     );
+
 }
 
 
@@ -1180,6 +1428,7 @@ function todayString(){
     return dateToString(
         new Date()
     );
+
 }
 
 
@@ -1199,6 +1448,7 @@ function dateToString(date){
         ).padStart(2,"0");
 
     return `${y}-${m}-${d}`;
+
 }
 
 
@@ -1218,6 +1468,7 @@ function formatDate(date){
             year:"numeric"
         }
     );
+
 }
 
 
@@ -1225,6 +1476,7 @@ function getCurrentYear(){
 
     return new Date()
         .getFullYear();
+
 }
 
 
@@ -1232,6 +1484,7 @@ function getCurrentMonth(){
 
     return new Date()
         .getMonth();
+
 }
 
 
@@ -1241,12 +1494,30 @@ function getCurrentMonth(){
 
 function escapeHTML(value){
 
-    return String(value || "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+    return String(
+        value || ""
+    )
+    .replaceAll(
+        "&",
+        "&amp;"
+    )
+    .replaceAll(
+        "<",
+        "&lt;"
+    )
+    .replaceAll(
+        ">",
+        "&gt;"
+    )
+    .replaceAll(
+        '"',
+        "&quot;"
+    )
+    .replaceAll(
+        "'",
+        "&#039;"
+    );
+
 }
 
 
@@ -1258,25 +1529,45 @@ function showPage(page,button){
 
     document.querySelectorAll(
         "main > section"
-    ).forEach(section=>{
-        section.classList.add("hidden");
-    });
+    ).forEach(
+        section=>{
+            section.classList.add(
+                "hidden"
+            );
+        }
+    );
+
 
     const target =
-        document.getElementById(page);
+        document.getElementById(
+            page
+        );
+
 
     if(target){
-        target.classList.remove("hidden");
+        target.classList.remove(
+            "hidden"
+        );
     }
+
 
     document.querySelectorAll(
         ".nav button"
-    ).forEach(btn=>{
-        btn.classList.remove("active");
-    });
+    ).forEach(
+        btn=>{
+            btn.classList.remove(
+                "active"
+            );
+        }
+    );
+
 
     if(button){
-        button.classList.add("active");
+
+        button.classList.add(
+            "active"
+        );
+
     }
     else{
 
@@ -1286,10 +1577,15 @@ function showPage(page,button){
             );
 
         if(navButton){
-            navButton.classList.add("active");
+
+            navButton.classList.add(
+                "active"
+            );
+
         }
 
     }
+
 
     const titles = {
 
@@ -1302,30 +1598,37 @@ function showPage(page,button){
 
     };
 
+
     document.getElementById(
         "pageSubtitle"
     ).textContent =
-        titles[page] || "Dashboard";
+        titles[page] ||
+        "Dashboard";
 
 
     if(page==="dashboard"){
         updateDashboard();
     }
 
+
     if(page==="clients"){
         renderClients();
     }
 
+
     if(page==="appointments"){
 
         populateClientSelect();
+
         renderAppointments();
 
     }
 
+
     if(page==="income"){
         renderIncome();
     }
+
 
     if(page==="expenses"){
         renderExpenses();
@@ -1344,20 +1647,23 @@ function openPageFromButton(page){
 function openPageFromMenu(page){
 
     closeMoreMenu();
+
     showPage(page);
 
 }
 
 
 /* =========================================================
-   MENU ALTRO
+   MENU
 ========================================================= */
 
 function openMoreMenu(){
 
     document.getElementById(
         "menuOverlay"
-    ).classList.remove("hidden");
+    ).classList.remove(
+        "hidden"
+    );
 
 }
 
@@ -1366,7 +1672,9 @@ function closeMoreMenu(){
 
     document.getElementById(
         "menuOverlay"
-    ).classList.add("hidden");
+    ).classList.add(
+        "hidden"
+    );
 
 }
 
@@ -1384,6 +1692,7 @@ function calculateNet(){
             ).value
         ) || 0;
 
+
     const expense =
         Number(
             document.getElementById(
@@ -1391,13 +1700,13 @@ function calculateNet(){
             ).value
         ) || 0;
 
-    const net =
-        income-expense;
 
     document.getElementById(
         "appointmentNet"
     ).textContent =
-        euro(net);
+        euro(
+            income-expense
+        );
 
 }
 
@@ -1413,6 +1722,7 @@ function saveClient(){
             "clientName"
         ).value.trim();
 
+
     if(!name){
 
         alert(
@@ -1420,7 +1730,9 @@ function saveClient(){
         );
 
         return;
+
     }
+
 
     clients.push({
 
@@ -1445,26 +1757,34 @@ function saveClient(){
 
     });
 
+
     saveData();
+
 
     document.getElementById(
         "clientName"
     ).value="";
 
+
     document.getElementById(
         "clientPhone"
     ).value="";
+
 
     document.getElementById(
         "clientEmail"
     ).value="";
 
+
     document.getElementById(
         "clientNotes"
     ).value="";
 
+
     renderClients();
+
     populateClientSelect();
+
 
     showToast(
         "Cliente salvato"
@@ -1480,6 +1800,7 @@ function renderClients(){
             "clientsList"
         );
 
+
     const search =
         (
             document.getElementById(
@@ -1487,14 +1808,15 @@ function renderClients(){
             )?.value || ""
         ).toLowerCase();
 
+
     const filtered =
-        clients.filter(c =>
-
+        clients.filter(
+            c =>
             c.name
-                .toLowerCase()
-                .includes(search)
-
+             .toLowerCase()
+             .includes(search)
         );
+
 
     if(!filtered.length){
 
@@ -1502,7 +1824,9 @@ function renderClients(){
             '<div class="empty">Nessun cliente trovato.</div>';
 
         return;
+
     }
+
 
     container.innerHTML =
         filtered.map(
@@ -1511,42 +1835,58 @@ function renderClients(){
                 const linked =
                     appointments.filter(
                         a =>
-                        Number(a.clientId) ===
-                        Number(client.id)
+                        Number(
+                            a.clientId
+                        ) ===
+                        Number(
+                            client.id
+                        )
                     );
+
 
                 const total =
                     linked.reduce(
                         (sum,a)=>
-                        sum +
-                        Number(a.income || 0),
+                        sum+
+                        Number(
+                            a.income || 0
+                        ),
                         0
                     );
+
 
                 const expenses =
                     linked.reduce(
                         (sum,a)=>
-                        sum +
-                        Number(a.expense || 0),
+                        sum+
+                        Number(
+                            a.expense || 0
+                        ),
                         0
                     );
 
+
                 const net =
                     total-expenses;
+
 
                 return `
 
                 <div class="item">
 
                     <div class="item-title">
-                        ${escapeHTML(client.name)}
+                        ${escapeHTML(
+                            client.name
+                        )}
                     </div>
 
                     ${
                         client.phone
                         ?
                         `<div class="item-sub">
-                            📞 ${escapeHTML(client.phone)}
+                            📞 ${escapeHTML(
+                                client.phone
+                            )}
                          </div>`
                         :
                         ""
@@ -1556,37 +1896,55 @@ function renderClients(){
                         client.email
                         ?
                         `<div class="item-sub">
-                            ✉️ ${escapeHTML(client.email)}
+                            ✉️ ${escapeHTML(
+                                client.email
+                            )}
                          </div>`
                         :
                         ""
                     }
 
                     <div class="badge">
-                        ${linked.length} appuntamenti
+                        ${linked.length}
+                        appuntamenti
                     </div>
 
                     <div class="item-money">
 
                         <div class="money-box">
-                            <small>Guadagni</small>
+
+                            <small>
+                                Guadagni
+                            </small>
+
                             <strong class="green">
                                 ${euro(total)}
                             </strong>
+
                         </div>
 
                         <div class="money-box">
-                            <small>Spese</small>
+
+                            <small>
+                                Spese
+                            </small>
+
                             <strong class="red">
                                 ${euro(expenses)}
                             </strong>
+
                         </div>
 
                         <div class="money-box">
-                            <small>Netto</small>
+
+                            <small>
+                                Netto
+                            </small>
+
                             <strong class="blue">
                                 ${euro(net)}
                             </strong>
+
                         </div>
 
                     </div>
@@ -1595,12 +1953,16 @@ function renderClients(){
 
                         <button class="secondary"
                                 onclick="openClientModal(${client.id})">
+
                             Dettagli
+
                         </button>
 
                         <button class="danger"
                                 onclick="deleteClient(${client.id})">
+
                             Elimina
+
                         </button>
 
                     </div>
@@ -1624,46 +1986,59 @@ function openClientModal(id){
             Number(id)
         );
 
+
     if(!client){
         return;
     }
 
+
     const linked =
         appointments
-            .filter(
-                a =>
-                Number(a.clientId) ===
-                Number(id)
+        .filter(
+            a =>
+            Number(a.clientId) ===
+            Number(id)
+        )
+        .sort(
+            (a,b)=>
+            `${b.date}${b.time || ""}`
+            .localeCompare(
+                `${a.date}${a.time || ""}`
             )
-            .sort(
-                (a,b)=>
-                `${b.date}${b.time || ""}`
-                .localeCompare(
-                    `${a.date}${a.time || ""}`
-                )
-            );
+        );
+
 
     const total =
         linked.reduce(
             (sum,a)=>
-            sum+Number(a.income || 0),
+            sum+
+            Number(
+                a.income || 0
+            ),
             0
         );
+
 
     const expenses =
         linked.reduce(
             (sum,a)=>
-            sum+Number(a.expense || 0),
+            sum+
+            Number(
+                a.expense || 0
+            ),
             0
         );
 
+
     const net =
         total-expenses;
+
 
     document.getElementById(
         "clientModalTitle"
     ).textContent =
         "👤 "+client.name;
+
 
     document.getElementById(
         "clientModalContent"
@@ -1673,7 +2048,9 @@ function openClientModal(id){
             client.phone
             ?
             `<div class="item-sub">
-                📞 ${escapeHTML(client.phone)}
+                📞 ${escapeHTML(
+                    client.phone
+                )}
              </div>`
             :
             ""
@@ -1683,7 +2060,9 @@ function openClientModal(id){
             client.email
             ?
             `<div class="item-sub">
-                ✉️ ${escapeHTML(client.email)}
+                ✉️ ${escapeHTML(
+                    client.email
+                )}
              </div>`
             :
             ""
@@ -1692,47 +2071,74 @@ function openClientModal(id){
         ${
             client.notes
             ?
-            `<div class="notice" style="margin-top:12px">
-                📝 ${escapeHTML(client.notes)}
+            `<div class="notice"
+                  style="margin-top:12px">
+
+                📝 ${escapeHTML(
+                    client.notes
+                )}
+
              </div>`
             :
             ""
         }
 
-        <div class="stats" style="margin-top:15px">
+        <div class="stats"
+             style="margin-top:15px">
 
             <div class="stat">
-                <small>Guadagni</small>
+
+                <small>
+                    Guadagni
+                </small>
+
                 <strong class="green">
                     ${euro(total)}
                 </strong>
+
             </div>
 
             <div class="stat">
-                <small>Spese</small>
+
+                <small>
+                    Spese
+                </small>
+
                 <strong class="red">
                     ${euro(expenses)}
                 </strong>
+
             </div>
 
             <div class="stat">
-                <small>Netto</small>
+
+                <small>
+                    Netto
+                </small>
+
                 <strong class="blue">
                     ${euro(net)}
                 </strong>
+
             </div>
 
         </div>
 
         <hr>
 
-        <h3>📅 Appuntamenti</h3>
+        <h3>
+            📅 Appuntamenti
+        </h3>
 
         ${
             linked.length
             ?
             linked.map(
-                a => appointmentHTML(a,true)
+                a =>
+                appointmentHTML(
+                    a,
+                    true
+                )
             ).join("")
             :
             '<div class="empty">Nessun appuntamento.</div>'
@@ -1740,9 +2146,12 @@ function openClientModal(id){
 
     `;
 
+
     document.getElementById(
         "clientModal"
-    ).classList.remove("hidden");
+    ).classList.remove(
+        "hidden"
+    );
 
 }
 
@@ -1751,7 +2160,9 @@ function closeClientModal(){
 
     document.getElementById(
         "clientModal"
-    ).classList.add("hidden");
+    ).classList.add(
+        "hidden"
+    );
 
 }
 
@@ -1761,9 +2172,12 @@ function deleteClient(id){
     const linked =
         appointments.some(
             a =>
-            Number(a.clientId) ===
+            Number(
+                a.clientId
+            ) ===
             Number(id)
         );
+
 
     if(linked){
 
@@ -1772,13 +2186,18 @@ function deleteClient(id){
         );
 
         return;
+
     }
+
 
     if(!confirm(
         "Eliminare questo cliente?"
     )){
+
         return;
+
     }
+
 
     clients =
         clients.filter(
@@ -1787,10 +2206,14 @@ function deleteClient(id){
             Number(id)
         );
 
+
     saveData();
 
+
     renderClients();
+
     populateClientSelect();
+
 
     showToast(
         "Cliente eliminato"
@@ -1810,35 +2233,41 @@ function populateClientSelect(){
             "appointmentClient"
         );
 
+
     if(!clients.length){
 
         select.innerHTML =
             '<option value="">Prima crea un cliente</option>';
 
         return;
+
     }
+
 
     const current =
         select.value;
 
+
+    const sorted =
+        [...clients].sort(
+            (a,b)=>
+            a.name.localeCompare(
+                b.name,
+                "it"
+            )
+        );
+
+
     select.innerHTML =
         '<option value="">Seleziona cliente</option>' +
 
-        clients
-            .sort(
-                (a,b)=>
-                a.name.localeCompare(
-                    b.name,
-                    "it"
-                )
-            )
-            .map(
-                c=>
-                `<option value="${c.id}">
-                    ${escapeHTML(c.name)}
-                 </option>`
-            )
-            .join("");
+        sorted.map(
+            c =>
+            `<option value="${c.id}">
+                ${escapeHTML(c.name)}
+             </option>`
+        ).join("");
+
 
     if(current){
 
@@ -1850,8 +2279,10 @@ function populateClientSelect(){
                 current
             );
 
+
         if(exists){
-            select.value=current;
+            select.value =
+                current;
         }
 
     }
@@ -1870,10 +2301,12 @@ function saveAppointment(){
             "appointmentClient"
         ).value;
 
+
     const date =
         document.getElementById(
             "appointmentDate"
         ).value;
+
 
     if(!clientId){
 
@@ -1882,7 +2315,9 @@ function saveAppointment(){
         );
 
         return;
+
     }
+
 
     if(!date){
 
@@ -1891,7 +2326,9 @@ function saveAppointment(){
         );
 
         return;
+
     }
+
 
     const income =
         Number(
@@ -1900,6 +2337,7 @@ function saveAppointment(){
             ).value
         ) || 0;
 
+
     const expense =
         Number(
             document.getElementById(
@@ -1907,16 +2345,20 @@ function saveAppointment(){
             ).value
         ) || 0;
 
+
     const editingId =
         document.getElementById(
             "editingAppointmentId"
         ).value;
 
+
     const data = {
 
-        clientId:Number(clientId),
+        clientId:
+            Number(clientId),
 
-        date:date,
+        date:
+            date,
 
         time:
             document.getElementById(
@@ -1928,11 +2370,14 @@ function saveAppointment(){
                 "appointmentWork"
             ).value.trim(),
 
-        income:income,
+        income:
+            income,
 
-        expense:expense,
+        expense:
+            expense,
 
-        net:income-expense,
+        net:
+            income-expense,
 
         notes:
             document.getElementById(
@@ -1951,6 +2396,7 @@ function saveAppointment(){
                 Number(editingId)
             );
 
+
         if(index !== -1){
 
             appointments[index] = {
@@ -1964,21 +2410,28 @@ function saveAppointment(){
 
             };
 
+
             saveData();
 
             cancelEditAppointment();
 
             renderAppointments();
+
             updateDashboard();
+
             renderClients();
+
             renderIncome();
+
             renderExpenses();
+
 
             showToast(
                 "Appuntamento modificato"
             );
 
             return;
+
         }
 
     }
@@ -1986,21 +2439,29 @@ function saveAppointment(){
 
     appointments.push({
 
-        id:Date.now(),
+        id:
+            Date.now(),
 
         ...data
 
     });
 
+
     saveData();
+
 
     resetAppointmentForm();
 
     renderAppointments();
+
     updateDashboard();
+
     renderClients();
+
     renderIncome();
+
     renderExpenses();
+
 
     showToast(
         "Appuntamento salvato"
@@ -2015,34 +2476,42 @@ function resetAppointmentForm(){
         "editingAppointmentId"
     ).value="";
 
+
     document.getElementById(
         "appointmentDate"
     ).value =
         todayString();
 
+
     document.getElementById(
         "appointmentTime"
     ).value="";
+
 
     document.getElementById(
         "appointmentWork"
     ).value="";
 
+
     document.getElementById(
         "appointmentIncome"
     ).value="";
+
 
     document.getElementById(
         "appointmentExpense"
     ).value="";
 
+
     document.getElementById(
         "appointmentNotes"
     ).value="";
 
+
     document.getElementById(
         "appointmentClient"
     ).value="";
+
 
     document.getElementById(
         "appointmentNet"
@@ -2061,71 +2530,91 @@ function startEditAppointment(id){
             Number(id)
         );
 
+
     if(!appointment){
         return;
     }
 
+
     populateClientSelect();
+
 
     document.getElementById(
         "editingAppointmentId"
     ).value =
         appointment.id;
 
+
     document.getElementById(
         "appointmentClient"
     ).value =
         appointment.clientId;
+
 
     document.getElementById(
         "appointmentDate"
     ).value =
         appointment.date;
 
+
     document.getElementById(
         "appointmentTime"
     ).value =
         appointment.time || "";
+
 
     document.getElementById(
         "appointmentWork"
     ).value =
         appointment.work || "";
 
+
     document.getElementById(
         "appointmentIncome"
     ).value =
         appointment.income || "";
+
 
     document.getElementById(
         "appointmentExpense"
     ).value =
         appointment.expense || "";
 
+
     document.getElementById(
         "appointmentNotes"
     ).value =
         appointment.notes || "";
+
 
     document.getElementById(
         "appointmentFormTitle"
     ).textContent =
         "✏️ Modifica appuntamento";
 
+
     document.getElementById(
         "appointmentSaveButton"
     ).textContent =
         "Salva modifiche";
 
+
     document.getElementById(
         "cancelEditButton"
-    ).classList.remove("hidden");
+    ).classList.remove(
+        "hidden"
+    );
+
 
     document.getElementById(
         "appointmentFormCard"
-    ).classList.add("edit-mode");
+    ).classList.add(
+        "edit-mode"
+    );
+
 
     calculateNet();
+
 
     window.scrollTo({
         top:0,
@@ -2139,23 +2628,31 @@ function cancelEditAppointment(){
 
     resetAppointmentForm();
 
+
     document.getElementById(
         "appointmentFormTitle"
     ).textContent =
         "📅 Nuovo appuntamento";
+
 
     document.getElementById(
         "appointmentSaveButton"
     ).textContent =
         "Salva appuntamento";
 
+
     document.getElementById(
         "cancelEditButton"
-    ).classList.add("hidden");
+    ).classList.add(
+        "hidden"
+    );
+
 
     document.getElementById(
         "appointmentFormCard"
-    ).classList.remove("edit-mode");
+    ).classList.remove(
+        "edit-mode"
+    );
 
 }
 
@@ -2168,6 +2665,7 @@ function getClientName(id){
             Number(c.id) ===
             Number(id)
         );
+
 
     return client
         ? client.name
@@ -2183,6 +2681,7 @@ function renderAppointments(){
             "appointmentsList"
         );
 
+
     const search =
         (
             document.getElementById(
@@ -2190,29 +2689,54 @@ function renderAppointments(){
             )?.value || ""
         ).toLowerCase();
 
+
     let list =
-        appointments.filter(a=>{
+        appointments.filter(
+            a=>{
 
-            const client =
-                getClientName(
-                    a.clientId
-                ).toLowerCase();
+                const client =
+                    getClientName(
+                        a.clientId
+                    ).toLowerCase();
 
-            const work =
-                (a.work || "")
-                .toLowerCase();
 
-            const notes =
-                (a.notes || "")
-                .toLowerCase();
+                const work =
+                    (
+                        a.work ||
+                        ""
+                    ).toLowerCase();
 
-            return (
-                client.includes(search) ||
-                work.includes(search) ||
-                notes.includes(search)
-            );
 
-        });
+                const notes =
+                    (
+                        a.notes ||
+                        ""
+                    ).toLowerCase();
+
+
+                return (
+
+                    client.includes(
+                        search
+                    )
+
+                    ||
+
+                    work.includes(
+                        search
+                    )
+
+                    ||
+
+                    notes.includes(
+                        search
+                    )
+
+                );
+
+            }
+        );
+
 
     if(!list.length){
 
@@ -2220,7 +2744,9 @@ function renderAppointments(){
             '<div class="empty">Nessun appuntamento trovato.</div>';
 
         return;
+
     }
+
 
     list.sort(
         (a,b)=>
@@ -2230,18 +2756,20 @@ function renderAppointments(){
         )
     );
 
+
     container.innerHTML =
-        list
-            .map(
-                a =>
-                appointmentHTML(a)
-            )
-            .join("");
+        list.map(
+            a =>
+            appointmentHTML(a)
+        ).join("");
 
 }
 
 
-function appointmentHTML(a,insideModal=false){
+function appointmentHTML(
+    a,
+    insideModal=false
+){
 
     return `
 
@@ -2250,10 +2778,13 @@ function appointmentHTML(a,insideModal=false){
         <div class="item-title">
 
             ${escapeHTML(
-                getClientName(a.clientId)
+                getClientName(
+                    a.clientId
+                )
             )}
 
         </div>
+
 
         <div class="item-sub">
 
@@ -2262,28 +2793,38 @@ function appointmentHTML(a,insideModal=false){
             ${
                 a.time
                 ?
-                ` · 🕐 ${escapeHTML(a.time)}`
+                ` · 🕐 ${escapeHTML(
+                    a.time
+                )}`
                 :
                 ""
             }
 
         </div>
 
+
         ${
             a.work
             ?
             `<div class="item-sub">
-                🔧 ${escapeHTML(a.work)}
+
+                🔧 ${escapeHTML(
+                    a.work
+                )}
+
              </div>`
             :
             ""
         }
 
+
         <div class="item-money">
 
             <div class="money-box">
 
-                <small>Guadagno</small>
+                <small>
+                    Guadagno
+                </small>
 
                 <strong class="green">
                     ${euro(a.income)}
@@ -2291,9 +2832,12 @@ function appointmentHTML(a,insideModal=false){
 
             </div>
 
+
             <div class="money-box">
 
-                <small>Spese</small>
+                <small>
+                    Spese
+                </small>
 
                 <strong class="red">
                     ${euro(a.expense)}
@@ -2301,30 +2845,45 @@ function appointmentHTML(a,insideModal=false){
 
             </div>
 
+
             <div class="money-box">
 
-                <small>Netto</small>
+                <small>
+                    Netto
+                </small>
 
                 <strong class="blue">
+
                     ${euro(
-                        Number(a.income || 0) -
-                        Number(a.expense || 0)
+                        Number(
+                            a.income || 0
+                        ) -
+                        Number(
+                            a.expense || 0
+                        )
                     )}
+
                 </strong>
 
             </div>
 
         </div>
 
+
         ${
             a.notes
             ?
             `<div class="item-sub">
-                📝 ${escapeHTML(a.notes)}
+
+                📝 ${escapeHTML(
+                    a.notes
+                )}
+
              </div>`
             :
             ""
         }
+
 
         ${
             !insideModal
@@ -2333,12 +2892,16 @@ function appointmentHTML(a,insideModal=false){
 
                 <button class="secondary"
                         onclick="startEditAppointment(${a.id})">
+
                     ✏️ Modifica
+
                 </button>
 
                 <button class="danger"
                         onclick="deleteAppointment(${a.id})">
+
                     Elimina
+
                 </button>
 
              </div>`
@@ -2358,8 +2921,11 @@ function deleteAppointment(id){
     if(!confirm(
         "Eliminare questo appuntamento?"
     )){
+
         return;
+
     }
+
 
     appointments =
         appointments.filter(
@@ -2368,13 +2934,20 @@ function deleteAppointment(id){
             Number(id)
         );
 
+
     saveData();
 
+
     renderAppointments();
+
     updateDashboard();
+
     renderClients();
+
     renderIncome();
+
     renderExpenses();
+
 
     showToast(
         "Appuntamento eliminato"
@@ -2394,11 +2967,14 @@ function getPeriodDates(){
             "periodFilter"
         ).value;
 
+
     const now =
         new Date();
 
+
     let from =
         new Date(now);
+
 
     let to =
         new Date(now);
@@ -2490,18 +3066,24 @@ function getPeriodDates(){
                 "dateFrom"
             ).value;
 
+
         const t =
             document.getElementById(
                 "dateTo"
             ).value;
 
+
         if(!f || !t){
             return null;
         }
 
+
         return {
+
             from:f,
+
             to:t
+
         };
 
     }
@@ -2531,6 +3113,7 @@ function updateDashboard(){
             "periodFilter"
         ).value;
 
+
     document.getElementById(
         "customDates"
     ).classList.toggle(
@@ -2538,12 +3121,15 @@ function updateDashboard(){
         filter!=="custom"
     );
 
+
     const range =
         getPeriodDates();
+
 
     if(!range){
         return;
     }
+
 
     const filtered =
         appointments.filter(
@@ -2552,19 +3138,28 @@ function updateDashboard(){
             a.date <= range.to
         );
 
+
     const income =
         filtered.reduce(
             (sum,a)=>
-            sum+Number(a.income || 0),
+            sum+
+            Number(
+                a.income || 0
+            ),
             0
         );
+
 
     const expenses =
         filtered.reduce(
             (sum,a)=>
-            sum+Number(a.expense || 0),
+            sum+
+            Number(
+                a.expense || 0
+            ),
             0
         );
+
 
     const net =
         income-expenses;
@@ -2575,10 +3170,12 @@ function updateDashboard(){
     ).textContent =
         euro(income);
 
+
     document.getElementById(
         "dashExpenses"
     ).textContent =
         euro(expenses);
+
 
     document.getElementById(
         "dashNet"
@@ -2608,13 +3205,12 @@ function updateDashboard(){
             )
         );
 
+
         container.innerHTML =
-            filtered
-                .map(
-                    a =>
-                    appointmentHTML(a)
-                )
-                .join("");
+            filtered.map(
+                a =>
+                appointmentHTML(a)
+            ).join("");
 
     }
 
@@ -2625,7 +3221,7 @@ function updateDashboard(){
 
 
 /* =========================================================
-   RIEPILOGO ANNUALE
+   ANNUALE
 ========================================================= */
 
 function getYearAppointments(year){
@@ -2633,7 +3229,10 @@ function getYearAppointments(year){
     return appointments.filter(
         a =>
         Number(
-            (a.date || "").slice(0,4)
+            (
+                a.date ||
+                ""
+            ).slice(0,4)
         ) ===
         Number(year)
     );
@@ -2646,35 +3245,50 @@ function updateYearSummary(){
     const year =
         getCurrentYear();
 
+
     const list =
-        getYearAppointments(year);
+        getYearAppointments(
+            year
+        );
+
 
     const income =
         list.reduce(
             (sum,a)=>
-            sum+Number(a.income || 0),
+            sum+
+            Number(
+                a.income || 0
+            ),
             0
         );
+
 
     const expenses =
         list.reduce(
             (sum,a)=>
-            sum+Number(a.expense || 0),
+            sum+
+            Number(
+                a.expense || 0
+            ),
             0
         );
 
+
     const net =
         income-expenses;
+
 
     document.getElementById(
         "yearIncome"
     ).textContent =
         euro(income);
 
+
     document.getElementById(
         "yearExpenses"
     ).textContent =
         euro(expenses);
+
 
     document.getElementById(
         "yearNet"
@@ -2686,6 +3300,7 @@ function updateYearSummary(){
         document.getElementById(
             "yearMonths"
         );
+
 
     const monthNames = [
 
@@ -2713,10 +3328,14 @@ function updateYearSummary(){
                     list.filter(
                         a =>
                         Number(
-                            a.date.slice(5,7)
+                            a.date.slice(
+                                5,
+                                7
+                            )
                         ) ===
                         index+1
                     );
+
 
                 const mIncome =
                     month.reduce(
@@ -2728,6 +3347,7 @@ function updateYearSummary(){
                         0
                     );
 
+
                 const mExpense =
                     month.reduce(
                         (sum,a)=>
@@ -2738,8 +3358,10 @@ function updateYearSummary(){
                         0
                     );
 
+
                 const mNet =
                     mIncome-mExpense;
+
 
                 return `
 
@@ -2750,24 +3372,39 @@ function updateYearSummary(){
                     </strong>
 
                     <div class="month-line">
-                        <span>Guadagni</span>
+
+                        <span>
+                            Guadagni
+                        </span>
+
                         <span class="green">
                             ${euro(mIncome)}
                         </span>
+
                     </div>
 
                     <div class="month-line">
-                        <span>Spese</span>
+
+                        <span>
+                            Spese
+                        </span>
+
                         <span class="red">
                             ${euro(mExpense)}
                         </span>
+
                     </div>
 
                     <div class="month-line">
-                        <span>Netto</span>
+
+                        <span>
+                            Netto
+                        </span>
+
                         <span class="blue">
                             ${euro(mNet)}
                         </span>
+
                     </div>
 
                 </div>
@@ -2789,9 +3426,13 @@ function renderIncome(){
     const total =
         appointments.reduce(
             (sum,a)=>
-            sum+Number(a.income || 0),
+            sum+
+            Number(
+                a.income || 0
+            ),
             0
         );
+
 
     document.getElementById(
         "incomeTotal"
@@ -2802,8 +3443,10 @@ function renderIncome(){
     const year =
         getCurrentYear();
 
+
     const month =
         getCurrentMonth();
+
 
     const yearTotal =
         appointments.reduce(
@@ -2811,8 +3454,12 @@ function renderIncome(){
 
                 if(
                     Number(
-                        a.date.slice(0,4)
-                    ) === year
+                        a.date.slice(
+                            0,
+                            4
+                        )
+                    ) ===
+                    year
                 ){
 
                     return sum+
@@ -2835,12 +3482,16 @@ function renderIncome(){
 
                 const d =
                     new Date(
-                        a.date+"T00:00:00"
+                        a.date+
+                        "T00:00:00"
                     );
 
+
                 if(
-                    d.getFullYear() === year &&
-                    d.getMonth() === month
+                    d.getFullYear() ===
+                    year &&
+                    d.getMonth() ===
+                    month
                 ){
 
                     return sum+
@@ -2862,10 +3513,12 @@ function renderIncome(){
     ).textContent =
         euro(yearTotal);
 
+
     document.getElementById(
         "incomeMonthTotal"
     ).textContent =
         euro(monthTotal);
+
 
     document.getElementById(
         "incomeAppointmentCount"
@@ -2878,20 +3531,14 @@ function renderIncome(){
             "incomeList"
         );
 
-    if(!appointments.length){
-
-        container.innerHTML =
-            '<div class="empty">Nessun guadagno registrato.</div>';
-
-        return;
-    }
-
 
     const list =
         [...appointments]
         .filter(
             a =>
-            Number(a.income || 0) > 0
+            Number(
+                a.income || 0
+            ) > 0
         )
         .sort(
             (a,b)=>
@@ -2908,6 +3555,7 @@ function renderIncome(){
             '<div class="empty">Nessun guadagno registrato.</div>';
 
         return;
+
     }
 
 
@@ -2918,22 +3566,30 @@ function renderIncome(){
             <div class="item">
 
                 <div class="item-title">
+
                     ${escapeHTML(
                         getClientName(
                             a.clientId
                         )
                     )}
+
                 </div>
 
                 <div class="item-sub">
+
                     ${formatDate(a.date)}
+
                     ${
                         a.work
                         ?
-                        " · "+escapeHTML(a.work)
+                        " · "+
+                        escapeHTML(
+                            a.work
+                        )
                         :
                         ""
                     }
+
                 </div>
 
                 <div style="margin-top:10px"
@@ -2960,9 +3616,13 @@ function renderExpenses(){
     const total =
         appointments.reduce(
             (sum,a)=>
-            sum+Number(a.expense || 0),
+            sum+
+            Number(
+                a.expense || 0
+            ),
             0
         );
+
 
     document.getElementById(
         "expenseTotal"
@@ -2972,6 +3632,7 @@ function renderExpenses(){
 
     const year =
         getCurrentYear();
+
 
     const month =
         getCurrentMonth();
@@ -2983,8 +3644,12 @@ function renderExpenses(){
 
                 if(
                     Number(
-                        a.date.slice(0,4)
-                    ) === year
+                        a.date.slice(
+                            0,
+                            4
+                        )
+                    ) ===
+                    year
                 ){
 
                     return sum+
@@ -3007,12 +3672,16 @@ function renderExpenses(){
 
                 const d =
                     new Date(
-                        a.date+"T00:00:00"
+                        a.date+
+                        "T00:00:00"
                     );
 
+
                 if(
-                    d.getFullYear() === year &&
-                    d.getMonth() === month
+                    d.getFullYear() ===
+                    year &&
+                    d.getMonth() ===
+                    month
                 ){
 
                     return sum+
@@ -3034,6 +3703,7 @@ function renderExpenses(){
     ).textContent =
         euro(yearTotal);
 
+
     document.getElementById(
         "expenseMonthTotal"
     ).textContent =
@@ -3044,7 +3714,9 @@ function renderExpenses(){
         appointments
         .filter(
             a =>
-            Number(a.expense || 0)>0
+            Number(
+                a.expense || 0
+            ) > 0
         )
         .sort(
             (a,b)=>
@@ -3073,12 +3745,13 @@ function renderExpenses(){
             '<div class="empty">Nessuna spesa registrata.</div>';
 
         return;
+
     }
 
 
     container.innerHTML =
         list.map(
-            a=>`
+            a => `
 
             <div class="item">
 
@@ -3099,7 +3772,10 @@ function renderExpenses(){
                     ${
                         a.work
                         ?
-                        " · "+escapeHTML(a.work)
+                        " · "+
+                        escapeHTML(
+                            a.work
+                        )
                         :
                         ""
                     }
@@ -3155,30 +3831,47 @@ function exportBackup(){
         new Blob(
             [json],
             {
-                type:"application/json"
+                type:
+                    "application/json"
             }
         );
 
 
     const url =
-        URL.createObjectURL(blob);
+        URL.createObjectURL(
+            blob
+        );
 
 
     const link =
-        document.createElement("a");
+        document.createElement(
+            "a"
+        );
 
-    link.href=url;
+
+    link.href =
+        url;
+
 
     link.download =
         `igea-impianti-backup-${todayString()}.json`;
 
-    document.body.appendChild(link);
+
+    document.body.appendChild(
+        link
+    );
+
 
     link.click();
 
+
     link.remove();
 
-    URL.revokeObjectURL(url);
+
+    URL.revokeObjectURL(
+        url
+    );
+
 
     showToast(
         "Backup creato correttamente"
@@ -3188,13 +3881,14 @@ function exportBackup(){
 
 
 /* =========================================================
-   IMPORT BACKUP
+   IMPORT
 ========================================================= */
 
 function importBackup(event){
 
     const file =
         event.target.files[0];
+
 
     if(!file){
         return;
@@ -3242,6 +3936,7 @@ function importBackup(event){
                 if(!ok){
 
                     event.target.value="";
+
                     return;
 
                 }
@@ -3250,12 +3945,16 @@ function importBackup(event){
                 clients =
                     backup.clients;
 
+
                 appointments =
                     backup.appointments;
 
+
                 saveData();
 
+
                 refreshEverything();
+
 
                 showToast(
                     "Backup importato correttamente"
@@ -3270,6 +3969,7 @@ function importBackup(event){
                 );
 
             }
+
 
             event.target.value="";
 
@@ -3310,11 +4010,15 @@ function deleteAllData(){
     clients=[];
     appointments=[];
 
+
     saveData();
+
 
     cancelEditAppointment();
 
+
     refreshEverything();
+
 
     showToast(
         "Tutti i dati sono stati eliminati"
@@ -3324,7 +4028,7 @@ function deleteAllData(){
 
 
 /* =========================================================
-   AGGIORNA TUTTO
+   REFRESH
 ========================================================= */
 
 function refreshEverything(){
