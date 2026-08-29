@@ -28,7 +28,7 @@ body{
     padding-bottom:95px;
 }
 header{
-    padding:25px 18px 16px;
+    padding:calc(25px + env(safe-area-inset-top)) 18px 16px;
     position:sticky;
     top:0;
     z-index:20;
@@ -271,7 +271,7 @@ hr{
 <body>
 <div class="app">
 <header>
-    <h1>Gestione Pro</h1>
+    <h1>Igea Impianti</h1>
     <p id="pageSubtitle">Dashboard</p>
 </header>
 <main>
