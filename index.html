@@ -13,7 +13,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-<title>Igea Impianti V5</title>
+<title>Igea Impianti V6</title>
 
 <style>
 
@@ -140,6 +140,10 @@ main{
     color:#1769aa;
 }
 
+.orange{
+    color:#b26a00;
+}
+
 /* =========================
    FORM
 ========================= */
@@ -215,6 +219,12 @@ button{
     border:1px solid #f0df9b;
 }
 
+.success{
+    background:#eaf8f0;
+    color:#16834b;
+    border:1px solid #bfe8d0;
+}
+
 .actions{
     display:flex;
     gap:8px;
@@ -242,6 +252,7 @@ button{
     justify-content:space-around;
     z-index:50;
     padding-bottom:env(safe-area-inset-bottom);
+    overflow-x:auto;
 }
 
 .nav button{
@@ -250,6 +261,7 @@ button{
     font-size:10px;
     padding:8px 5px;
     min-width:58px;
+    flex-shrink:0;
 }
 
 .nav button.active{
@@ -349,6 +361,26 @@ button{
     margin-top:8px;
 }
 
+.badge-open{
+    background:#fff8e5;
+    color:#9a7100;
+}
+
+.badge-completed{
+    background:#eaf8f0;
+    color:#16834b;
+}
+
+.badge-paid{
+    background:#eaf8f0;
+    color:#16834b;
+}
+
+.badge-pending{
+    background:#fff8e5;
+    color:#9a7100;
+}
+
 .search{
     margin-bottom:12px;
 }
@@ -422,6 +454,131 @@ hr{
     font-size:18px;
 }
 
+.payment-summary{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+    margin-top:12px;
+}
+
+.payment-stat{
+    background:#f5f5f5;
+    border:1px solid #e2e2e2;
+    border-radius:12px;
+    padding:10px;
+    text-align:center;
+}
+
+.payment-stat small{
+    display:block;
+    color:#777777;
+    font-size:10px;
+    margin-bottom:4px;
+}
+
+.payment-stat strong{
+    font-size:14px;
+}
+
+.rate{
+    background:#ffffff;
+    border:1px solid #dedede;
+    border-radius:14px;
+    padding:12px;
+    margin-top:9px;
+}
+
+.rate-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+}
+
+.rate-number{
+    font-weight:700;
+}
+
+.rate-amount{
+    font-weight:700;
+}
+
+.rate-date{
+    color:#777777;
+    font-size:12px;
+    margin-top:5px;
+}
+
+.rate button{
+    width:100%;
+    margin-top:9px;
+}
+
+.payment-progress{
+    height:8px;
+    background:#e8e8e8;
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:10px;
+}
+
+.payment-progress-bar{
+    height:100%;
+    background:#16834b;
+    border-radius:10px;
+    transition:.25s;
+}
+
+.warning-box{
+    background:#fff8e5;
+    border:1px solid #f0df9b;
+    color:#806300;
+    border-radius:13px;
+    padding:12px;
+    font-size:13px;
+    line-height:1.4;
+    margin-top:10px;
+}
+
+.success-box{
+    background:#eaf8f0;
+    border:1px solid #bfe8d0;
+    color:#176b41;
+    border-radius:13px;
+    padding:12px;
+    font-size:13px;
+    line-height:1.4;
+    margin-top:10px;
+}
+
+.section-title{
+    font-size:14px;
+    font-weight:700;
+    margin:15px 0 8px;
+}
+
+.small-muted{
+    color:#777777;
+    font-size:12px;
+}
+
+.close-button{
+    width:100%;
+    background:#111111;
+    color:#ffffff;
+    margin-top:10px;
+}
+
+.rate-inputs{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.rate-inputs > div{
+    min-width:0;
+}
+
 /* =========================
    RESPONSIVE
 ========================= */
@@ -429,7 +586,7 @@ hr{
 @media(max-width:400px){
 
     .nav button{
-        min-width:48px;
+        min-width:50px;
         font-size:9px;
     }
 
@@ -445,6 +602,11 @@ hr{
     .brand-text h1{
         font-size:22px;
     }
+
+    .payment-summary{
+        grid-template-columns:1fr;
+    }
+
 }
 
 </style>
@@ -458,7 +620,6 @@ hr{
 
     <div class="brand">
 
-        <!-- LOGO -->
         <img src="icon.png" alt="Igea Impianti">
 
         <div class="brand-text">
@@ -477,9 +638,9 @@ hr{
 
 <main>
 
-<!-- =========================
+<!-- =====================================================
      DASHBOARD
-========================= -->
+===================================================== -->
 
 <section id="dashboard">
 
@@ -532,7 +693,7 @@ hr{
 
         <div class="stat">
 
-            <small>💰 Guadagni</small>
+            <small>💰 Incassato</small>
 
             <strong id="dashIncome"
                     class="green">
@@ -565,7 +726,6 @@ hr{
 
     </div>
 
-    <!-- ANNO -->
 
     <div class="card"
          style="margin-top:14px">
@@ -576,7 +736,7 @@ hr{
 
             <div class="year-stat">
 
-                <small>💰 Guadagni</small>
+                <small>💰 Incassato</small>
 
                 <strong id="yearIncome"
                         class="green">
@@ -621,9 +781,34 @@ hr{
 
     </div>
 
+
+    <!-- APPUNTAMENTI APERTI -->
+
     <div class="card">
 
-        <h2>📅 Dettaglio periodo</h2>
+        <h2>📅 Appuntamenti da completare</h2>
+
+        <div id="dashboardOpenAppointments"></div>
+
+    </div>
+
+
+    <!-- PAGAMENTI DA INCASSARE -->
+
+    <div class="card">
+
+        <h2>💳 Pagamenti da incassare</h2>
+
+        <div id="dashboardPayments"></div>
+
+    </div>
+
+
+    <!-- DETTAGLIO PERIODO -->
+
+    <div class="card">
+
+        <h2>📋 Incassi del periodo</h2>
 
         <div id="dashboardAppointments"></div>
 
@@ -632,9 +817,9 @@ hr{
 </section>
 
 
-<!-- =========================
+<!-- =====================================================
      CLIENTI
-========================= -->
+===================================================== -->
 
 <section id="clients"
          class="hidden">
@@ -683,9 +868,9 @@ hr{
 </section>
 
 
-<!-- =========================
+<!-- =====================================================
      APPUNTAMENTI
-========================= -->
+===================================================== -->
 
 <section id="appointments"
          class="hidden">
@@ -715,53 +900,7 @@ hr{
         <input id="appointmentWork"
                placeholder="Es. Installazione impianto">
 
-        <div class="row">
-
-            <div>
-
-                <label>Guadagno (€)</label>
-
-                <input type="number"
-                       id="appointmentIncome"
-                       min="0"
-                       step="0.01"
-                       placeholder="0,00"
-                       oninput="calculateNet()">
-
-            </div>
-
-            <div>
-
-                <label>Spese (€)</label>
-
-                <input type="number"
-                       id="appointmentExpense"
-                       min="0"
-                       step="0.01"
-                       placeholder="0,00"
-                       oninput="calculateNet()">
-
-            </div>
-
-        </div>
-
-
-        <div class="card"
-             style="background:#f7f7f7;margin-top:3px">
-
-            <small style="color:#777777">
-                🟢 NETTO
-            </small>
-
-            <div id="appointmentNet"
-                 class="total-big green">
-
-                €0,00
-
-            </div>
-
-        </div>
-
+        <label>Note appuntamento</label>
 
         <textarea id="appointmentNotes"
                   placeholder="Note appuntamento"></textarea>
@@ -804,9 +943,9 @@ hr{
 </section>
 
 
-<!-- =========================
+<!-- =====================================================
      GUADAGNI
-========================= -->
+===================================================== -->
 
 <section id="income"
          class="hidden">
@@ -823,7 +962,7 @@ hr{
         </div>
 
         <small style="color:#777777">
-            Totale guadagni registrati
+            Totale incassato
         </small>
 
     </div>
@@ -838,9 +977,9 @@ hr{
 </section>
 
 
-<!-- =========================
+<!-- =====================================================
      SPESE
-========================= -->
+===================================================== -->
 
 <section id="expenses"
          class="hidden">
@@ -872,9 +1011,41 @@ hr{
 </section>
 
 
-<!-- =========================
+<!-- =====================================================
+     PAGAMENTI
+===================================================== -->
+
+<section id="payments"
+         class="hidden">
+
+    <div class="card">
+
+        <h2>💳 Pagamenti</h2>
+
+        <div id="paymentsSummary"></div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>💳 Clienti con pagamenti da completare</h2>
+
+        <input class="search"
+               id="paymentSearch"
+               placeholder="🔎 Cerca cliente..."
+               oninput="renderPayments()">
+
+        <div id="paymentsList"></div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
      IMPOSTAZIONI
-========================= -->
+===================================================== -->
 
 <section id="settings"
          class="hidden">
@@ -889,7 +1060,7 @@ hr{
             sul dispositivo.
 
             Usa il backup per conservare una copia
-            dei tuoi clienti, appuntamenti e dati economici.
+            dei tuoi clienti, appuntamenti e pagamenti.
 
         </div>
 
@@ -958,9 +1129,9 @@ hr{
 </main>
 
 
-<!-- =========================
+<!-- =====================================================
      NAVIGAZIONE
-========================= -->
+===================================================== -->
 
 <nav class="nav">
 
@@ -1005,6 +1176,14 @@ hr{
     </button>
 
 
+    <button onclick="showPage('payments',this)">
+
+        <span class="nav-icon">💳</span>
+        Pagamenti
+
+    </button>
+
+
     <button onclick="showPage('settings',this)">
 
         <span class="nav-icon">⚙️</span>
@@ -1022,18 +1201,9 @@ hr{
 "use strict";
 
 
-/* =========================
+/* =====================================================
    DATI
-========================= */
-
-/*
-   IMPORTANTISSIMO:
-   Queste sono le STESSE chiavi
-   della V4.
-
-   In questo modo la V5 legge
-   i dati già presenti.
-*/
+===================================================== */
 
 let clients =
     JSON.parse(
@@ -1053,9 +1223,103 @@ let appointments =
 let editingAppointmentId = null;
 
 
-/* =========================
+/* =====================================================
+   MIGRAZIONE V5 → V6
+===================================================== */
+
+function migrateData(){
+
+    let changed = false;
+
+    appointments =
+        appointments.map(a => {
+
+            const copy = {...a};
+
+            /*
+                V5 non aveva uno stato.
+
+                Se esistono sia guadagno che spesa,
+                consideriamo il vecchio appuntamento
+                come già completato.
+            */
+
+            if(!copy.status){
+
+                if(
+                    Number(copy.income || 0) > 0 &&
+                    Number(copy.expense || 0) > 0
+                ){
+
+                    copy.status = "completed";
+
+                    copy.paymentType = "single";
+
+                    copy.totalIncome =
+                        Number(copy.income || 0);
+
+                    copy.totalExpense =
+                        Number(copy.expense || 0);
+
+                    copy.paidAmount =
+                        Number(copy.income || 0);
+
+                    copy.remainingAmount = 0;
+
+                    copy.installments = [];
+
+                }
+
+                else{
+
+                    copy.status = "open";
+
+                    copy.paymentType = null;
+
+                    copy.totalIncome = 0;
+
+                    copy.totalExpense =
+                        Number(copy.expense || 0);
+
+                    copy.paidAmount = 0;
+
+                    copy.remainingAmount = 0;
+
+                    copy.installments = [];
+
+                }
+
+                changed = true;
+
+            }
+
+
+            if(!Array.isArray(copy.installments)){
+
+                copy.installments = [];
+
+                changed = true;
+
+            }
+
+
+            return copy;
+
+        });
+
+
+    if(changed){
+
+        saveData();
+
+    }
+
+}
+
+
+/* =====================================================
    SALVATAGGIO
-========================= */
+===================================================== */
 
 function saveData(){
 
@@ -1072,9 +1336,9 @@ function saveData(){
 }
 
 
-/* =========================
+/* =====================================================
    EURO
-========================= */
+===================================================== */
 
 function euro(value){
 
@@ -1090,9 +1354,9 @@ function euro(value){
 }
 
 
-/* =========================
+/* =====================================================
    DATE
-========================= */
+===================================================== */
 
 function todayString(){
 
@@ -1141,9 +1405,25 @@ function formatDate(date){
 }
 
 
-/* =========================
+function formatDateTime(date,time){
+
+    if(!date) return "";
+
+    return (
+        formatDate(date) +
+        (
+            time
+            ? " · 🕐 "+time
+            : ""
+        )
+    );
+
+}
+
+
+/* =====================================================
    NAVIGAZIONE
-========================= */
+===================================================== */
 
 function showPage(page,button){
 
@@ -1194,6 +1474,7 @@ function showPage(page,button){
         appointments:"Appuntamenti",
         income:"Guadagni",
         expenses:"Spese",
+        payments:"Pagamenti",
         settings:"Impostazioni"
 
     };
@@ -1243,52 +1524,19 @@ function showPage(page,button){
 
     }
 
-}
 
+    if(page==="payments"){
 
-/* =========================
-   NETTO
-========================= */
+        renderPayments();
 
-function calculateNet(){
-
-    const income =
-        Number(
-            document
-                .getElementById(
-                    "appointmentIncome"
-                )
-                .value
-        ) || 0;
-
-
-    const expense =
-        Number(
-            document
-                .getElementById(
-                    "appointmentExpense"
-                )
-                .value
-        ) || 0;
-
-
-    const net =
-        income-expense;
-
-
-    document
-        .getElementById(
-            "appointmentNet"
-        )
-        .textContent =
-            euro(net);
+    }
 
 }
 
 
-/* =========================
+/* =====================================================
    CLIENTI
-========================= */
+===================================================== */
 
 function saveClient(){
 
@@ -1348,32 +1596,10 @@ function saveClient(){
     saveData();
 
 
-    document
-        .getElementById(
-            "clientName"
-        )
-        .value="";
-
-
-    document
-        .getElementById(
-            "clientPhone"
-        )
-        .value="";
-
-
-    document
-        .getElementById(
-            "clientEmail"
-        )
-        .value="";
-
-
-    document
-        .getElementById(
-            "clientNotes"
-        )
-        .value="";
+    document.getElementById("clientName").value="";
+    document.getElementById("clientPhone").value="";
+    document.getElementById("clientEmail").value="";
+    document.getElementById("clientNotes").value="";
 
 
     renderClients();
@@ -1388,9 +1614,9 @@ function saveClient(){
 }
 
 
-/* =========================
+/* =====================================================
    RENDER CLIENTI
-========================= */
+===================================================== */
 
 function renderClients(){
 
@@ -1443,30 +1669,48 @@ function renderClients(){
                     );
 
 
-                const total =
-                    linked.reduce(
+                const completed =
+                    linked.filter(
+                        a =>
+                            a.status === "completed"
+                    );
+
+
+                const totalWork =
+                    completed.reduce(
                         (sum,a)=>
                             sum+
                             Number(
-                                a.income || 0
+                                a.totalIncome || a.income || 0
                             ),
                         0
                     );
 
 
                 const expenses =
-                    linked.reduce(
+                    completed.reduce(
                         (sum,a)=>
                             sum+
                             Number(
-                                a.expense || 0
+                                a.totalExpense || a.expense || 0
+                            ),
+                        0
+                    );
+
+
+                const paid =
+                    completed.reduce(
+                        (sum,a)=>
+                            sum+
+                            Number(
+                                a.paidAmount || 0
                             ),
                         0
                     );
 
 
                 const net =
-                    total-expenses;
+                    paid-expenses;
 
 
                 return `
@@ -1534,11 +1778,11 @@ function renderClients(){
                         <div class="money-box">
 
                             <small>
-                                Guadagni
+                                Lavori
                             </small>
 
-                            <strong class="green">
-                                ${euro(total)}
+                            <strong>
+                                ${euro(totalWork)}
                             </strong>
 
                         </div>
@@ -1547,11 +1791,11 @@ function renderClients(){
                         <div class="money-box">
 
                             <small>
-                                Spese
+                                Incassato
                             </small>
 
-                            <strong class="red">
-                                ${euro(expenses)}
+                            <strong class="green">
+                                ${euro(paid)}
                             </strong>
 
                         </div>
@@ -1594,9 +1838,9 @@ function renderClients(){
 }
 
 
-/* =========================
+/* =====================================================
    ELIMINA CLIENTE
-========================= */
+===================================================== */
 
 function deleteClient(id){
 
@@ -1647,9 +1891,9 @@ function deleteClient(id){
 }
 
 
-/* =========================
+/* =====================================================
    SELECT CLIENTE
-========================= */
+===================================================== */
 
 function populateClientSelect(){
 
@@ -1684,9 +1928,9 @@ function populateClientSelect(){
 }
 
 
-/* =========================
+/* =====================================================
    SALVA APPUNTAMENTO
-========================= */
+===================================================== */
 
 function saveAppointment(){
 
@@ -1728,26 +1972,6 @@ function saveAppointment(){
     }
 
 
-    const income =
-        Number(
-            document
-                .getElementById(
-                    "appointmentIncome"
-                )
-                .value
-        ) || 0;
-
-
-    const expense =
-        Number(
-            document
-                .getElementById(
-                    "appointmentExpense"
-                )
-                .value
-        ) || 0;
-
-
     const data = {
 
         clientId:Number(clientId),
@@ -1768,12 +1992,6 @@ function saveAppointment(){
                 )
                 .value
                 .trim(),
-
-        income:income,
-
-        expense:expense,
-
-        net:income-expense,
 
         notes:
             document
@@ -1845,15 +2063,7 @@ function saveAppointment(){
 
         resetAppointmentForm();
 
-        renderAppointments();
-
-        updateDashboard();
-
-        renderClients();
-
-        renderIncome();
-
-        renderExpenses();
+        refreshEverything();
 
 
         alert(
@@ -1865,13 +2075,27 @@ function saveAppointment(){
     }
 
 
-    /* NUOVO APPUNTAMENTO */
+    /* NUOVO */
 
     appointments.push({
 
         id:Date.now(),
 
-        ...data
+        ...data,
+
+        status:"open",
+
+        paymentType:null,
+
+        totalIncome:0,
+
+        totalExpense:0,
+
+        paidAmount:0,
+
+        remainingAmount:0,
+
+        installments:[]
 
     });
 
@@ -1880,15 +2104,7 @@ function saveAppointment(){
 
     resetAppointmentForm();
 
-    renderAppointments();
-
-    updateDashboard();
-
-    renderClients();
-
-    renderIncome();
-
-    renderExpenses();
+    refreshEverything();
 
 
     alert(
@@ -1898,9 +2114,9 @@ function saveAppointment(){
 }
 
 
-/* =========================
+/* =====================================================
    MODIFICA APPUNTAMENTO
-========================= */
+===================================================== */
 
 function editAppointment(id){
 
@@ -1922,6 +2138,13 @@ function editAppointment(id){
 
     }
 
+
+    /*
+       Un appuntamento completato può essere modificato
+       solo nei dati descrittivi/data.
+       I dati economici vengono gestiti dalla chiusura
+       e dai pagamenti.
+    */
 
     editingAppointmentId =
         appointment.id;
@@ -1966,29 +2189,10 @@ function editAppointment(id){
 
     document
         .getElementById(
-            "appointmentIncome"
-        )
-        .value =
-            appointment.income || "";
-
-
-    document
-        .getElementById(
-            "appointmentExpense"
-        )
-        .value =
-            appointment.expense || "";
-
-
-    document
-        .getElementById(
             "appointmentNotes"
         )
         .value =
             appointment.notes || "";
-
-
-    calculateNet();
 
 
     document
@@ -2016,6 +2220,12 @@ function editAppointment(id){
         );
 
 
+    showPage(
+        "appointments",
+        document.querySelectorAll(".nav button")[2]
+    );
+
+
     window.scrollTo({
         top:0,
         behavior:"smooth"
@@ -2024,9 +2234,9 @@ function editAppointment(id){
 }
 
 
-/* =========================
+/* =====================================================
    ANNULLA MODIFICA
-========================= */
+===================================================== */
 
 function cancelEditAppointment(){
 
@@ -2063,11 +2273,18 @@ function cancelEditAppointment(){
 }
 
 
-/* =========================
+/* =====================================================
    RESET FORM
-========================= */
+===================================================== */
 
 function resetAppointmentForm(){
+
+    document
+        .getElementById(
+            "appointmentClient"
+        )
+        .value="";
+
 
     document
         .getElementById(
@@ -2093,38 +2310,16 @@ function resetAppointmentForm(){
 
     document
         .getElementById(
-            "appointmentIncome"
-        )
-        .value="";
-
-
-    document
-        .getElementById(
-            "appointmentExpense"
-        )
-        .value="";
-
-
-    document
-        .getElementById(
             "appointmentNotes"
         )
         .value="";
 
-
-    document
-        .getElementById(
-            "appointmentNet"
-        )
-        .textContent =
-            euro(0);
-
 }
 
 
-/* =========================
+/* =====================================================
    NOME CLIENTE
-========================= */
+===================================================== */
 
 function getClientName(id){
 
@@ -2143,9 +2338,23 @@ function getClientName(id){
 }
 
 
-/* =========================
+/* =====================================================
+   APPUNTAMENTI APERTI
+===================================================== */
+
+function getOpenAppointments(){
+
+    return appointments.filter(
+        a =>
+            a.status !== "completed"
+    );
+
+}
+
+
+/* =====================================================
    RENDER APPUNTAMENTI
-========================= */
+===================================================== */
 
 function renderAppointments(){
 
@@ -2200,9 +2409,9 @@ function renderAppointments(){
 
     list.sort(
         (a,b)=>
-            `${b.date}${b.time || ""}`
+            `${a.date}${a.time || ""}`
                 .localeCompare(
-                    `${a.date}${a.time || ""}`
+                    `${b.date}${b.time || ""}`
                 )
     );
 
@@ -2218,11 +2427,199 @@ function renderAppointments(){
 }
 
 
-/* =========================
+/* =====================================================
    HTML APPUNTAMENTO
-========================= */
+===================================================== */
 
 function appointmentHTML(a){
+
+    const completed =
+        a.status === "completed";
+
+
+    const totalIncome =
+        Number(
+            a.totalIncome ||
+            a.income ||
+            0
+        );
+
+
+    const totalExpense =
+        Number(
+            a.totalExpense ||
+            a.expense ||
+            0
+        );
+
+
+    const paid =
+        Number(
+            a.paidAmount || 0
+        );
+
+
+    const remaining =
+        Math.max(
+            0,
+            totalIncome-paid
+        );
+
+
+    if(completed){
+
+        return `
+
+        <div class="item">
+
+            <div class="item-title">
+
+                ${escapeHTML(
+                    getClientName(
+                        a.clientId
+                    )
+                )}
+
+            </div>
+
+
+            <div class="item-sub">
+
+                📅 ${formatDateTime(
+                    a.date,
+                    a.time
+                )}
+
+            </div>
+
+
+            ${
+                a.work
+                ?
+                `<div class="item-sub">
+                    🔧 ${escapeHTML(a.work)}
+                 </div>`
+                :
+                ""
+            }
+
+
+            <span class="badge badge-completed">
+                ✅ Appuntamento completato
+            </span>
+
+
+            <div class="item-money">
+
+                <div class="money-box">
+
+                    <small>
+                        Lavoro
+                    </small>
+
+                    <strong>
+                        ${euro(totalIncome)}
+                    </strong>
+
+                </div>
+
+
+                <div class="money-box">
+
+                    <small>
+                        Incassato
+                    </small>
+
+                    <strong class="green">
+                        ${euro(paid)}
+                    </strong>
+
+                </div>
+
+
+                <div class="money-box">
+
+                    <small>
+                        Residuo
+                    </small>
+
+                    <strong class="orange">
+                        ${euro(remaining)}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="item-sub">
+
+                💸 Spese:
+                <strong>
+                    ${euro(totalExpense)}
+                </strong>
+
+                ·
+
+                🟢 Netto:
+                <strong class="blue">
+                    ${euro(paid-totalExpense)}
+                </strong>
+
+            </div>
+
+
+            ${
+                a.paymentType === "installments"
+                ?
+                `<div class="badge badge-pending">
+                    💳 Pagamento rateale
+                 </div>`
+                :
+                `<div class="badge badge-paid">
+                    💵 Pagamento unico
+                 </div>`
+            }
+
+
+            ${
+                a.notes
+                ?
+                `<div class="item-sub">
+                    📝 ${escapeHTML(a.notes)}
+                 </div>`
+                :
+                ""
+            }
+
+
+            <div class="actions">
+
+                <button
+                    class="secondary"
+                    onclick="editAppointment(${a.id})">
+
+                    ✏️ Modifica
+
+                </button>
+
+
+                <button
+                    class="danger"
+                    onclick="deleteAppointment(${a.id})">
+
+                    🗑️ Elimina
+
+                </button>
+
+            </div>
+
+        </div>
+
+        `;
+
+    }
+
 
     return `
 
@@ -2241,17 +2638,10 @@ function appointmentHTML(a){
 
         <div class="item-sub">
 
-            📅 ${formatDate(a.date)}
-
-            ${
+            📅 ${formatDateTime(
+                a.date,
                 a.time
-                ?
-                ` · 🕐 ${escapeHTML(
-                    a.time
-                )}`
-                :
-                ""
-            }
+            )}
 
         </div>
 
@@ -2260,68 +2650,23 @@ function appointmentHTML(a){
             a.work
             ?
             `<div class="item-sub">
-                🔧 ${escapeHTML(
-                    a.work
-                )}
+                🔧 ${escapeHTML(a.work)}
              </div>`
             :
             ""
         }
 
 
-        <div class="item-money">
-
-            <div class="money-box">
-
-                <small>
-                    Guadagno
-                </small>
-
-                <strong class="green">
-                    ${euro(a.income)}
-                </strong>
-
-            </div>
-
-
-            <div class="money-box">
-
-                <small>
-                    Spese
-                </small>
-
-                <strong class="red">
-                    ${euro(a.expense)}
-                </strong>
-
-            </div>
-
-
-            <div class="money-box">
-
-                <small>
-                    Netto
-                </small>
-
-                <strong class="blue">
-                    ${euro(
-                        Number(a.income || 0) -
-                        Number(a.expense || 0)
-                    )}
-                </strong>
-
-            </div>
-
-        </div>
+        <span class="badge badge-open">
+            ⏳ Da completare
+        </span>
 
 
         ${
             a.notes
             ?
             `<div class="item-sub">
-                📝 ${escapeHTML(
-                    a.notes
-                )}
+                📝 ${escapeHTML(a.notes)}
              </div>`
             :
             ""
@@ -2340,12 +2685,132 @@ function appointmentHTML(a){
 
 
             <button
-                class="danger"
-                onclick="deleteAppointment(${a.id})">
+                class="primary"
+                onclick="openCloseAppointment(${a.id})">
 
-                🗑️ Elimina
+                ✅ Chiudi
 
             </button>
+
+        </div>
+
+
+        <button
+            class="danger"
+            style="width:100%;margin-top:8px"
+            onclick="deleteAppointment(${a.id})">
+
+            🗑️ Elimina
+
+        </button>
+
+
+        <div id="closeBox-${a.id}"
+             class="edit-box hidden">
+
+            <h3 style="margin:0 0 12px;font-size:16px">
+
+                💰 Chiudi appuntamento
+
+            </h3>
+
+
+            <label>
+                Guadagno totale del lavoro (€)
+            </label>
+
+            <input
+                type="number"
+                id="closeIncome-${a.id}"
+                min="0"
+                step="0.01"
+                placeholder="0,00">
+
+
+            <label>
+                Spese (€)
+            </label>
+
+            <input
+                type="number"
+                id="closeExpense-${a.id}"
+                min="0"
+                step="0.01"
+                placeholder="0,00">
+
+
+            <label>
+                Modalità di pagamento
+            </label>
+
+            <select
+                id="paymentType-${a.id}"
+                onchange="toggleInstallmentFields(${a.id})">
+
+                <option value="single">
+                    💵 Pagamento unico
+                </option>
+
+                <option value="installments">
+                    💳 Pagamento dilazionato
+                </option>
+
+            </select>
+
+
+            <div id="installmentFields-${a.id}"
+                 class="hidden">
+
+                <label>
+                    Numero di rate
+                </label>
+
+                <select id="installmentCount-${a.id}">
+
+                    ${Array.from(
+                        {length:10},
+                        (_,i)=>
+                            `<option value="${i+1}">
+                                ${i+1} ${i===0?"rata":"rate"}
+                             </option>`
+                    ).join("")}
+
+                </select>
+
+
+                <div class="warning-box">
+
+                    Puoi dividere il pagamento in
+                    massimo <strong>10 rate</strong>.
+
+                    L'importo di ogni rata verrà
+                    calcolato automaticamente.
+
+                </div>
+
+            </div>
+
+
+            <div class="actions">
+
+                <button
+                    class="secondary"
+                    onclick="closeCloseAppointment(${a.id})">
+
+                    Annulla
+
+                </button>
+
+
+                <button
+                    class="success"
+                    onclick="completeAppointment(${a.id})">
+
+                    Conferma e chiudi
+
+                </button>
+
+            </div>
 
         </div>
 
@@ -2356,9 +2821,339 @@ function appointmentHTML(a){
 }
 
 
-/* =========================
+/* =====================================================
+   APERTURA CHIUSURA APPUNTAMENTO
+===================================================== */
+
+function openCloseAppointment(id){
+
+    const box =
+        document.getElementById(
+            "closeBox-"+id
+        );
+
+
+    if(box){
+
+        box.classList.remove(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   CHIUDI BOX
+===================================================== */
+
+function closeCloseAppointment(id){
+
+    const box =
+        document.getElementById(
+            "closeBox-"+id
+        );
+
+
+    if(box){
+
+        box.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   TOGGLE RATE
+===================================================== */
+
+function toggleInstallmentFields(id){
+
+    const type =
+        document
+            .getElementById(
+                "paymentType-"+id
+            )
+            .value;
+
+
+    const fields =
+        document
+            .getElementById(
+                "installmentFields-"+id
+            );
+
+
+    if(type==="installments"){
+
+        fields.classList.remove(
+            "hidden"
+        );
+
+    }
+
+    else{
+
+        fields.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   COMPLETA APPUNTAMENTO
+===================================================== */
+
+function completeAppointment(id){
+
+    const appointment =
+        appointments.find(
+            a =>
+                Number(a.id) ===
+                Number(id)
+        );
+
+
+    if(!appointment){
+
+        alert(
+            "Appuntamento non trovato."
+        );
+
+        return;
+
+    }
+
+
+    const income =
+        Number(
+            document
+                .getElementById(
+                    "closeIncome-"+id
+                )
+                .value
+        ) || 0;
+
+
+    const expense =
+        Number(
+            document
+                .getElementById(
+                    "closeExpense-"+id
+                )
+                .value
+        ) || 0;
+
+
+    /*
+       REGOLA:
+       Guadagno e spesa devono essere entrambi
+       inseriti per chiudere l'appuntamento.
+    */
+
+    if(income <= 0){
+
+        alert(
+            "Per chiudere l'appuntamento devi inserire il guadagno."
+        );
+
+        return;
+
+    }
+
+
+    if(expense <= 0){
+
+        alert(
+            "Per chiudere l'appuntamento devi inserire la spesa."
+        );
+
+        return;
+
+    }
+
+
+    const paymentType =
+        document
+            .getElementById(
+                "paymentType-"+id
+            )
+            .value;
+
+
+    appointment.status =
+        "completed";
+
+
+    appointment.totalIncome =
+        income;
+
+
+    appointment.totalExpense =
+        expense;
+
+
+    appointment.income =
+        income;
+
+
+    appointment.expense =
+        expense;
+
+
+    appointment.net =
+        income-expense;
+
+
+    appointment.paymentType =
+        paymentType;
+
+
+    if(paymentType==="single"){
+
+        appointment.paidAmount =
+            income;
+
+        appointment.remainingAmount =
+            0;
+
+        appointment.installments = [];
+
+    }
+
+
+    else{
+
+        let count =
+            Number(
+                document
+                    .getElementById(
+                        "installmentCount-"+id
+                    )
+                    .value
+            ) || 1;
+
+
+        count =
+            Math.min(
+                10,
+                Math.max(
+                    1,
+                    count
+                )
+            );
+
+
+        appointment.paidAmount = 0;
+
+        appointment.remainingAmount =
+            income;
+
+
+        appointment.installments =
+            createInstallments(
+                income,
+                count
+            );
+
+    }
+
+
+    saveData();
+
+    refreshEverything();
+
+
+    alert(
+        paymentType==="installments"
+        ?
+        "Appuntamento chiuso. Pagamento dilazionato creato."
+        :
+        "Appuntamento chiuso e pagamento registrato."
+    );
+
+}
+
+
+/* =====================================================
+   CREA RATE
+===================================================== */
+
+function createInstallments(total,count){
+
+    const installments = [];
+
+    const base =
+        Math.floor(
+            (
+                total/count
+            ) * 100
+        ) / 100;
+
+
+    let assigned = 0;
+
+
+    for(
+        let i=1;
+        i<=count;
+        i++
+    ){
+
+        let amount;
+
+
+        if(i===count){
+
+            amount =
+                Math.round(
+                    (
+                        total-assigned
+                    ) * 100
+                ) / 100;
+
+        }
+
+        else{
+
+            amount = base;
+
+        }
+
+
+        assigned += amount;
+
+
+        installments.push({
+
+            number:i,
+
+            amount:amount,
+
+            paid:false,
+
+            paidDate:null
+
+        });
+
+    }
+
+
+    return installments;
+
+}
+
+
+/* =====================================================
    ELIMINA APPUNTAMENTO
-========================= */
+===================================================== */
 
 function deleteAppointment(id){
 
@@ -2383,22 +3178,569 @@ function deleteAppointment(id){
 
     saveData();
 
-    renderAppointments();
-
-    updateDashboard();
-
-    renderClients();
-
-    renderIncome();
-
-    renderExpenses();
+    refreshEverything();
 
 }
 
 
-/* =========================
+/* =====================================================
+   RATE — CALCOLO
+===================================================== */
+
+function calculatePaymentData(a){
+
+    const installments =
+        Array.isArray(
+            a.installments
+        )
+        ?
+        a.installments
+        :
+        [];
+
+
+    const total =
+        Number(
+            a.totalIncome ||
+            a.income ||
+            0
+        );
+
+
+    const paid =
+        installments.length
+        ?
+        installments
+            .filter(r => r.paid)
+            .reduce(
+                (sum,r)=>
+                    sum+
+                    Number(
+                        r.amount || 0
+                    ),
+                0
+            )
+        :
+        Number(
+            a.paidAmount || 0
+        );
+
+
+    const remaining =
+        Math.max(
+            0,
+            total-paid
+        );
+
+
+    const count =
+        installments.length;
+
+
+    const paidCount =
+        installments.filter(
+            r => r.paid
+        ).length;
+
+
+    return {
+
+        total:total,
+
+        paid:paid,
+
+        remaining:remaining,
+
+        count:count,
+
+        paidCount:paidCount
+
+    };
+
+}
+
+
+/* =====================================================
+   SEGNA RATA PAGATA
+===================================================== */
+
+function markInstallmentPaid(
+    appointmentId,
+    installmentNumber
+){
+
+    const appointment =
+        appointments.find(
+            a =>
+                Number(a.id) ===
+                Number(appointmentId)
+        );
+
+
+    if(!appointment){
+
+        alert(
+            "Lavoro non trovato."
+        );
+
+        return;
+
+    }
+
+
+    const installment =
+        appointment.installments?.find(
+            r =>
+                Number(r.number) ===
+                Number(installmentNumber)
+        );
+
+
+    if(!installment){
+
+        alert(
+            "Rata non trovata."
+        );
+
+        return;
+
+    }
+
+
+    if(installment.paid){
+
+        return;
+
+    }
+
+
+    if(
+        !confirm(
+            `Confermi di aver ricevuto ${euro(installment.amount)} per la rata ${installment.number}?`
+        )
+    ){
+
+        return;
+
+    }
+
+
+    installment.paid = true;
+
+    installment.paidDate =
+        todayString();
+
+
+    const data =
+        calculatePaymentData(
+            appointment
+        );
+
+
+    appointment.paidAmount =
+        data.paid;
+
+
+    appointment.remainingAmount =
+        data.remaining;
+
+
+    /*
+       Quando tutte le rate sono pagate,
+       il pagamento viene chiuso definitivamente.
+    */
+
+    if(data.remaining <= 0){
+
+        appointment.paymentCompleted =
+            true;
+
+    }
+
+    else{
+
+        appointment.paymentCompleted =
+            false;
+
+    }
+
+
+    saveData();
+
+    refreshEverything();
+
+
+    alert(
+        data.remaining <= 0
+        ?
+        "Tutte le rate sono state pagate. Pagamento completato."
+        :
+        "Rata registrata come pagata."
+    );
+
+}
+
+
+/* =====================================================
+   HTML PAGAMENTO
+===================================================== */
+
+function paymentHTML(a){
+
+    const data =
+        calculatePaymentData(
+            a
+        );
+
+
+    const client =
+        getClientName(
+            a.clientId
+        );
+
+
+    const percentage =
+        data.total > 0
+        ?
+        Math.min(
+            100,
+            (
+                data.paid /
+                data.total
+            ) * 100
+        )
+        :
+        0;
+
+
+    return `
+
+    <div class="item">
+
+        <div class="item-title">
+
+            ${escapeHTML(client)}
+
+        </div>
+
+
+        <div class="item-sub">
+
+            🔧 ${escapeHTML(
+                a.work || "Lavoro"
+            )}
+
+        </div>
+
+
+        <div class="payment-summary">
+
+            <div class="payment-stat">
+
+                <small>
+                    Totale
+                </small>
+
+                <strong>
+                    ${euro(data.total)}
+                </strong>
+
+            </div>
+
+
+            <div class="payment-stat">
+
+                <small>
+                    Incassato
+                </small>
+
+                <strong class="green">
+                    ${euro(data.paid)}
+                </strong>
+
+            </div>
+
+
+            <div class="payment-stat">
+
+                <small>
+                    Residuo
+                </small>
+
+                <strong class="orange">
+                    ${euro(data.remaining)}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="payment-progress">
+
+            <div
+                class="payment-progress-bar"
+                style="width:${percentage}%">
+            </div>
+
+        </div>
+
+
+        <div class="item-sub">
+
+            ${data.paidCount}
+            /
+            ${data.count}
+            rate pagate
+
+        </div>
+
+
+        ${
+            a.installments?.length
+            ?
+            a.installments.map(
+                rate => `
+
+                <div class="rate">
+
+                    <div class="rate-top">
+
+                        <div class="rate-number">
+
+                            Rata ${rate.number}
+
+                        </div>
+
+                        <div class="rate-amount">
+
+                            ${euro(rate.amount)}
+
+                        </div>
+
+                    </div>
+
+
+                    ${
+                        rate.paid
+                        ?
+                        `<span class="badge badge-paid">
+                            ✅ Pagata
+                         </span>
+
+                         <div class="rate-date">
+                            Pagata il ${formatDate(rate.paidDate)}
+                         </div>`
+                        :
+                        `<span class="badge badge-pending">
+                            ⏳ Da pagare
+                         </span>
+
+                         <button
+                            class="success"
+                            onclick="markInstallmentPaid(
+                                ${a.id},
+                                ${rate.number}
+                            )">
+
+                            💶 Segna come pagata
+
+                         </button>`
+                    }
+
+                </div>
+
+                `
+            ).join("")
+            :
+            ""
+        }
+
+
+        <div class="item-sub"
+             style="margin-top:13px">
+
+            💸 Spese:
+            <strong class="red">
+                ${euro(
+                    a.totalExpense ||
+                    a.expense
+                )}
+            </strong>
+
+            ·
+
+            🟢 Netto attuale:
+            <strong class="blue">
+                ${euro(
+                    data.paid -
+                    Number(
+                        a.totalExpense ||
+                        a.expense ||
+                        0
+                    )
+                )}
+            </strong>
+
+        </div>
+
+    </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   RENDER PAGAMENTI
+===================================================== */
+
+function renderPayments(){
+
+    const container =
+        document.getElementById(
+            "paymentsList"
+        );
+
+
+    const summary =
+        document.getElementById(
+            "paymentsSummary"
+        );
+
+
+    const search =
+        (
+            document.getElementById(
+                "paymentSearch"
+            )?.value || ""
+        ).toLowerCase();
+
+
+    const active =
+        appointments.filter(
+            a =>
+                a.status === "completed" &&
+                a.paymentType === "installments" &&
+                calculatePaymentData(a).remaining > 0
+        );
+
+
+    const totalRemaining =
+        active.reduce(
+            (sum,a)=>
+                sum+
+                calculatePaymentData(a).remaining,
+            0
+        );
+
+
+    const totalPaid =
+        active.reduce(
+            (sum,a)=>
+                sum+
+                calculatePaymentData(a).paid,
+            0
+        );
+
+
+    summary.innerHTML = `
+
+        <div class="payment-summary">
+
+            <div class="payment-stat">
+
+                <small>
+                    👥 Clienti
+                </small>
+
+                <strong>
+                    ${new Set(
+                        active.map(
+                            a=>a.clientId
+                        )
+                    ).size}
+                </strong>
+
+            </div>
+
+
+            <div class="payment-stat">
+
+                <small>
+                    💰 Incassato
+                </small>
+
+                <strong class="green">
+                    ${euro(totalPaid)}
+                </strong>
+
+            </div>
+
+
+            <div class="payment-stat">
+
+                <small>
+                    💳 Da incassare
+                </small>
+
+                <strong class="orange">
+                    ${euro(totalRemaining)}
+                </strong>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    const filtered =
+        active.filter(
+            a =>
+                getClientName(
+                    a.clientId
+                )
+                .toLowerCase()
+                .includes(search)
+        );
+
+
+    if(!filtered.length){
+
+        container.innerHTML =
+            `<div class="empty">
+                🎉 Nessun pagamento dilazionato da incassare.
+             </div>`;
+
+        return;
+
+    }
+
+
+    filtered.sort(
+        (a,b)=>
+            getClientName(a.clientId)
+                .localeCompare(
+                    getClientName(b.clientId)
+                )
+    );
+
+
+    container.innerHTML =
+        filtered
+            .map(
+                a =>
+                    paymentHTML(a)
+            )
+            .join("");
+
+}
+
+
+/* =====================================================
    PERIODI DASHBOARD
-========================= */
+===================================================== */
 
 function getPeriodDates(){
 
@@ -2533,9 +3875,9 @@ function getPeriodDates(){
 }
 
 
-/* =========================
+/* =====================================================
    DASHBOARD
-========================= */
+===================================================== */
 
 function updateDashboard(){
 
@@ -2568,8 +3910,23 @@ function updateDashboard(){
     }
 
 
-    const filtered =
+    /*
+       FINANZA:
+
+       Consideriamo gli appuntamenti completati
+       e calcoliamo l'incassato reale in base
+       alle rate effettivamente pagate.
+    */
+
+    const completed =
         appointments.filter(
+            a =>
+                a.status === "completed"
+        );
+
+
+    const filtered =
+        completed.filter(
             a =>
                 a.date >= range.from &&
                 a.date <= range.to
@@ -2581,7 +3938,7 @@ function updateDashboard(){
             (sum,a)=>
                 sum+
                 Number(
-                    a.income || 0
+                    a.paidAmount || 0
                 ),
             0
         );
@@ -2592,7 +3949,9 @@ function updateDashboard(){
             (sum,a)=>
                 sum+
                 Number(
-                    a.expense || 0
+                    a.totalExpense ||
+                    a.expense ||
+                    0
                 ),
             0
         );
@@ -2626,7 +3985,9 @@ function updateDashboard(){
             euro(net);
 
 
-    /* ANNO CORRENTE */
+    /* =================================================
+       ANNO
+    ================================================= */
 
     const currentYear =
         new Date()
@@ -2635,7 +3996,7 @@ function updateDashboard(){
 
 
     const yearly =
-        appointments.filter(
+        completed.filter(
             a =>
                 (a.date || "")
                     .startsWith(
@@ -2649,7 +4010,7 @@ function updateDashboard(){
             (sum,a)=>
                 sum+
                 Number(
-                    a.income || 0
+                    a.paidAmount || 0
                 ),
             0
         );
@@ -2660,7 +4021,9 @@ function updateDashboard(){
             (sum,a)=>
                 sum+
                 Number(
-                    a.expense || 0
+                    a.totalExpense ||
+                    a.expense ||
+                    0
                 ),
             0
         );
@@ -2702,19 +4065,103 @@ function updateDashboard(){
             yearly.length;
 
 
-    /* DETTAGLIO */
+    /* =================================================
+       APPUNTAMENTI APERTI
+    ================================================= */
+
+    const openContainer =
+        document.getElementById(
+            "dashboardOpenAppointments"
+        );
+
+
+    const open =
+        getOpenAppointments()
+            .sort(
+                (a,b)=>
+                    `${a.date}${a.time || ""}`
+                        .localeCompare(
+                            `${b.date}${b.time || ""}`
+                        )
+            );
+
+
+    if(!open.length){
+
+        openContainer.innerHTML =
+            `<div class="empty">
+                🎉 Nessun appuntamento da completare.
+             </div>`;
+
+    }
+
+    else{
+
+        openContainer.innerHTML =
+            open
+                .map(
+                    a =>
+                        appointmentHTML(a)
+                )
+                .join("");
+
+    }
+
+
+    /* =================================================
+       PAGAMENTI
+    ================================================= */
+
+    const paymentContainer =
+        document.getElementById(
+            "dashboardPayments"
+        );
+
+
+    const paymentAppointments =
+        completed.filter(
+            a =>
+                a.paymentType === "installments" &&
+                calculatePaymentData(a).remaining > 0
+        );
+
+
+    if(!paymentAppointments.length){
+
+        paymentContainer.innerHTML =
+            `<div class="empty">
+                🎉 Nessun pagamento da incassare.
+             </div>`;
+
+    }
+
+    else{
+
+        paymentContainer.innerHTML =
+            paymentAppointments
+                .map(
+                    a =>
+                        paymentHTML(a)
+                )
+                .join("");
+
+    }
+
+
+    /* =================================================
+       INCASSI DEL PERIODO
+    ================================================= */
 
     const container =
-        document
-            .getElementById(
-                "dashboardAppointments"
-            );
+        document.getElementById(
+            "dashboardAppointments"
+        );
 
 
     if(!filtered.length){
 
         container.innerHTML =
-            '<div class="empty">Nessun appuntamento nel periodo selezionato.</div>';
+            '<div class="empty">Nessun incasso nel periodo selezionato.</div>';
 
         return;
 
@@ -2723,9 +4170,9 @@ function updateDashboard(){
 
     filtered.sort(
         (a,b)=>
-            `${a.date}${a.time || ""}`
+            `${b.date}${b.time || ""}`
                 .localeCompare(
-                    `${b.date}${b.time || ""}`
+                    `${a.date}${a.time || ""}`
                 )
     );
 
@@ -2734,25 +4181,145 @@ function updateDashboard(){
         filtered
             .map(
                 a =>
-                    appointmentHTML(a)
+                    completedIncomeHTML(a)
             )
             .join("");
 
 }
 
 
-/* =========================
+/* =====================================================
+   HTML INCASSO COMPLETATO
+===================================================== */
+
+function completedIncomeHTML(a){
+
+    const data =
+        calculatePaymentData(a);
+
+
+    const expense =
+        Number(
+            a.totalExpense ||
+            a.expense ||
+            0
+        );
+
+
+    return `
+
+    <div class="item">
+
+        <div class="item-title">
+
+            ${escapeHTML(
+                getClientName(
+                    a.clientId
+                )
+            )}
+
+        </div>
+
+
+        <div class="item-sub">
+
+            📅 ${formatDate(a.date)}
+
+            ${
+                a.work
+                ?
+                " · 🔧 "+
+                escapeHTML(a.work)
+                :
+                ""
+            }
+
+        </div>
+
+
+        <div class="item-money">
+
+            <div class="money-box">
+
+                <small>
+                    Incassato
+                </small>
+
+                <strong class="green">
+                    ${euro(data.paid)}
+                </strong>
+
+            </div>
+
+
+            <div class="money-box">
+
+                <small>
+                    Spese
+                </small>
+
+                <strong class="red">
+                    ${euro(expense)}
+                </strong>
+
+            </div>
+
+
+            <div class="money-box">
+
+                <small>
+                    Netto
+                </small>
+
+                <strong class="blue">
+                    ${euro(
+                        data.paid-expense
+                    )}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        ${
+            data.remaining > 0
+            ?
+            `<span class="badge badge-pending">
+                💳 Residuo ${euro(data.remaining)}
+             </span>`
+            :
+            `<span class="badge badge-paid">
+                ✅ Pagato completamente
+             </span>`
+        }
+
+    </div>
+
+    `;
+
+}
+
+
+/* =====================================================
    GUADAGNI
-========================= */
+===================================================== */
 
 function renderIncome(){
 
+    const completed =
+        appointments.filter(
+            a =>
+                a.status === "completed"
+        );
+
+
     const total =
-        appointments.reduce(
+        completed.reduce(
             (sum,a)=>
                 sum+
                 Number(
-                    a.income || 0
+                    a.paidAmount || 0
                 ),
             0
         );
@@ -2767,13 +4334,12 @@ function renderIncome(){
 
 
     const container =
-        document
-            .getElementById(
-                "incomeList"
-            );
+        document.getElementById(
+            "incomeList"
+        );
 
 
-    if(!appointments.length){
+    if(!completed.length){
 
         container.innerHTML =
             '<div class="empty">Nessun guadagno registrato.</div>';
@@ -2784,7 +4350,7 @@ function renderIncome(){
 
 
     const list =
-        [...appointments].sort(
+        [...completed].sort(
             (a,b)=>
                 `${b.date}${b.time || ""}`
                     .localeCompare(
@@ -2795,62 +4361,141 @@ function renderIncome(){
 
     container.innerHTML =
         list.map(
-            a => `
+            a => {
 
-            <div class="item">
+                const data =
+                    calculatePaymentData(a);
 
-                <div class="item-title">
 
-                    ${escapeHTML(
-                        getClientName(
-                            a.clientId
-                        )
-                    )}
+                const expense =
+                    Number(
+                        a.totalExpense ||
+                        a.expense ||
+                        0
+                    );
+
+
+                return `
+
+                <div class="item">
+
+                    <div class="item-title">
+
+                        ${escapeHTML(
+                            getClientName(
+                                a.clientId
+                            )
+                        )}
+
+                    </div>
+
+
+                    <div class="item-sub">
+
+                        ${formatDate(a.date)}
+
+                        ${
+                            a.work
+                            ?
+                            " · "+
+                            escapeHTML(a.work)
+                            :
+                            ""
+                        }
+
+                    </div>
+
+
+                    <div class="item-money">
+
+                        <div class="money-box">
+
+                            <small>
+                                Totale lavoro
+                            </small>
+
+                            <strong>
+                                ${euro(data.total)}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="money-box">
+
+                            <small>
+                                Incassato
+                            </small>
+
+                            <strong class="green">
+                                ${euro(data.paid)}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="money-box">
+
+                            <small>
+                                Residuo
+                            </small>
+
+                            <strong class="orange">
+                                ${euro(data.remaining)}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="item-sub">
+
+                        💸 Spese:
+                        ${euro(expense)}
+
+                        ·
+
+                        🟢 Netto attuale:
+                        <strong class="blue">
+                            ${euro(
+                                data.paid-expense
+                            )}
+                        </strong>
+
+                    </div>
 
                 </div>
 
-                <div class="item-sub">
+                `;
 
-                    ${formatDate(a.date)}
-
-                    ${
-                        a.work
-                        ?
-                        " · "+
-                        escapeHTML(a.work)
-                        :
-                        ""
-                    }
-
-                </div>
-
-                <div style="margin-top:10px"
-                     class="green">
-
-                    ${euro(a.income)}
-
-                </div>
-
-            </div>
-
-            `
+            }
         ).join("");
 
 }
 
 
-/* =========================
+/* =====================================================
    SPESE
-========================= */
+===================================================== */
 
 function renderExpenses(){
 
+    const completed =
+        appointments.filter(
+            a =>
+                a.status === "completed"
+        );
+
+
     const total =
-        appointments.reduce(
+        completed.reduce(
             (sum,a)=>
                 sum+
                 Number(
-                    a.expense || 0
+                    a.totalExpense ||
+                    a.expense ||
+                    0
                 ),
             0
         );
@@ -2865,19 +4510,20 @@ function renderExpenses(){
 
 
     const container =
-        document
-            .getElementById(
-                "expenseList"
-            );
+        document.getElementById(
+            "expenseList"
+        );
 
 
     const list =
-        appointments
+        completed
             .filter(
                 a =>
                     Number(
-                        a.expense || 0
-                    )>0
+                        a.totalExpense ||
+                        a.expense ||
+                        0
+                    ) > 0
             )
             .sort(
                 (a,b)=>
@@ -2934,7 +4580,10 @@ function renderExpenses(){
                 <div style="margin-top:10px"
                      class="red">
 
-                    ${euro(a.expense)}
+                    ${euro(
+                        a.totalExpense ||
+                        a.expense
+                    )}
 
                 </div>
 
@@ -2946,15 +4595,15 @@ function renderExpenses(){
 }
 
 
-/* =========================
+/* =====================================================
    BACKUP
-========================= */
+===================================================== */
 
 function exportBackup(){
 
     const backup = {
 
-        version:"5.0",
+        version:"6.0",
 
         createdAt:
             new Date().toISOString(),
@@ -3025,9 +4674,9 @@ function exportBackup(){
 }
 
 
-/* =========================
+/* =====================================================
    IMPORT BACKUP
-========================= */
+===================================================== */
 
 function importBackup(event){
 
@@ -3093,6 +4742,8 @@ function importBackup(event){
                     backup.appointments;
 
 
+                migrateData();
+
                 saveData();
 
                 refreshEverything();
@@ -3123,9 +4774,9 @@ function importBackup(event){
 }
 
 
-/* =========================
+/* =====================================================
    ELIMINA TUTTO
-========================= */
+===================================================== */
 
 function deleteAllData(){
 
@@ -3166,9 +4817,9 @@ function deleteAllData(){
 }
 
 
-/* =========================
+/* =====================================================
    AGGIORNA TUTTO
-========================= */
+===================================================== */
 
 function refreshEverything(){
 
@@ -3182,14 +4833,16 @@ function refreshEverything(){
 
     renderExpenses();
 
+    renderPayments();
+
     updateDashboard();
 
 }
 
 
-/* =========================
+/* =====================================================
    SICUREZZA HTML
-========================= */
+===================================================== */
 
 function escapeHTML(value){
 
@@ -3225,9 +4878,12 @@ function escapeHTML(value){
 }
 
 
-/* =========================
+/* =====================================================
    AVVIO
-========================= */
+===================================================== */
+
+migrateData();
+
 
 document
     .getElementById(
