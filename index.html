@@ -754,7 +754,7 @@ Salva cliente
 class="search"
 id="clientSearch"
 placeholder="🔎 Cerca cliente..."
-oninput="renderClients()">
+oninput="renderClients">
 
 <div id="clientsList"></div>
 
@@ -771,9 +771,13 @@ oninput="renderClients()">
 
 <h2>📅 Nuovo appuntamento</h2>
 
-<label>Cliente</label>
+<label>Nome cliente</label>
 
-<select id="appointmentClient"></select>
+<input
+type="text"
+id="appointmentClientName"
+placeholder="Nome e cognome del cliente"
+autocomplete="off">
 
 <label>Data</label>
 
@@ -1052,8 +1056,6 @@ oninput="updateCompletion()">
 
 <label>Numero di rate</label>
 
-<!-- ELENCO A TENDINA, MASSIMO 10 -->
-
 <select
 id="completionInstallmentCount"
 onchange="buildInstallmentInputs()">
@@ -1269,6 +1271,27 @@ return String(value || "")
 
 
 /* =========================
+   CLIENTE
+========================= */
+
+function getClientName(clientId){
+
+const client =
+clients.find(
+c =>
+Number(c.id) === Number(clientId)
+);
+
+return client
+?
+client.name
+:
+"Cliente non trovato";
+
+}
+
+
+/* =========================
    MIGRAZIONE
 ========================= */
 
@@ -1298,6 +1321,14 @@ a.completed = false;
 
 if(!a.paymentMode){
 a.paymentMode = "single";
+}
+
+if(a.deposit === undefined){
+a.deposit = 0;
+}
+
+if(a.installmentCount === undefined){
+a.installmentCount = 0;
 }
 
 return a;
@@ -1358,7 +1389,6 @@ renderClients();
 }
 
 if(page==="appointments"){
-populateClientSelect();
 renderAppointments();
 }
 
@@ -1387,6 +1417,30 @@ alert("Inserisci il nome del cliente.");
 return;
 
 }
+
+
+/*
+ * Evita di creare due clienti
+ * con lo stesso nome.
+ */
+
+const existing =
+clients.find(
+c =>
+String(c.name || "")
+.trim()
+.toLowerCase() ===
+name.toLowerCase()
+);
+
+if(existing){
+
+alert("Questo cliente esiste già.");
+
+return;
+
+}
+
 
 clients.push({
 
@@ -1418,7 +1472,6 @@ document.getElementById("clientPhone").value="";
 document.getElementById("clientEmail").value="";
 document.getElementById("clientNotes").value="";
 
-populateClientSelect();
 renderClients();
 
 alert("Cliente salvato.");
@@ -1589,40 +1642,6 @@ Number(c.id) !== Number(id)
 saveData();
 
 renderClients();
-populateClientSelect();
-
-}
-
-
-/* =========================
-   SELECT CLIENTE
-========================= */
-
-function populateClientSelect(){
-
-const select =
-document.getElementById(
-"appointmentClient"
-);
-
-if(!clients.length){
-
-select.innerHTML =
-'<option value="">Prima crea un cliente</option>';
-
-return;
-
-}
-
-select.innerHTML =
-'<option value="">Seleziona cliente</option>' +
-
-clients.map(
-c =>
-`<option value="${c.id}">
-${escapeHTML(c.name)}
-</option>`
-).join("");
 
 }
 
@@ -1633,23 +1652,35 @@ ${escapeHTML(c.name)}
 
 function saveAppointment(){
 
-const clientId =
+const clientName =
 document.getElementById(
-"appointmentClient"
-).value;
+"appointmentClientName"
+).value.trim();
 
 const date =
 document.getElementById(
 "appointmentDate"
 ).value;
 
-if(!clientId){
+const time =
+document.getElementById(
+"appointmentTime"
+).value;
 
-alert("Seleziona un cliente.");
+const notes =
+document.getElementById(
+"appointmentNotes"
+).value.trim();
+
+
+if(!clientName){
+
+alert("Inserisci il nome del cliente.");
 
 return;
 
 }
+
 
 if(!date){
 
@@ -1659,23 +1690,54 @@ return;
 
 }
 
-appointments.push({
+
+/*
+ * Cerca il cliente esistente.
+ * Se non esiste viene creato automaticamente.
+ */
+
+let client =
+clients.find(
+c =>
+String(c.name || "")
+.trim()
+.toLowerCase() ===
+clientName.toLowerCase()
+);
+
+
+if(!client){
+
+client = {
 
 id:Date.now(),
 
-clientId:Number(clientId),
+name:clientName,
+
+phone:"",
+
+email:"",
+
+notes:""
+
+};
+
+clients.push(client);
+
+}
+
+
+appointments.push({
+
+id:Date.now()+Math.random(),
+
+clientId:Number(client.id),
 
 date:date,
 
-time:
-document.getElementById(
-"appointmentTime"
-).value,
+time:time,
 
-notes:
-document.getElementById(
-"appointmentNotes"
-).value.trim(),
+notes:notes,
 
 completed:false,
 
@@ -1695,6 +1757,7 @@ payments:[]
 
 });
 
+
 saveData();
 
 resetAppointmentForm();
@@ -1709,7 +1772,7 @@ alert("Appuntamento salvato.");
 function resetAppointmentForm(){
 
 document.getElementById(
-"appointmentClient"
+"appointmentClientName"
 ).value="";
 
 document.getElementById(
@@ -1760,6 +1823,7 @@ return;
 }
 
 if(!map[clientId]){
+
 map[clientId] = {
 
 clientId:clientId,
@@ -1814,9 +1878,11 @@ gap:10px">
 </div>
 
 <div class="item-sub">
+
 ${group.appointments.length}
 appuntament${group.appointments.length === 1 ? "o" : "i"}
 registrat${group.appointments.length === 1 ? "o" : "i"}
+
 </div>
 
 </div>
@@ -1948,9 +2014,13 @@ function getReceived(a){
 
 let total = 0;
 
+
 if(Number(a.deposit || 0) > 0){
+
 total += Number(a.deposit);
+
 }
+
 
 if(Array.isArray(a.installments)){
 
@@ -1958,6 +2028,7 @@ a.installments.forEach(
 r => {
 
 if(r.paid){
+
 total += Number(r.amount || 0);
 
 }
@@ -1966,17 +2037,21 @@ total += Number(r.amount || 0);
 
 }
 
+
 if(
 a.paymentMode === "single" &&
 a.completed &&
 Number(a.income || 0) > 0 &&
 Number(a.deposit || 0) === 0 &&
-(!a.installments || a.installments.length===0)
+(!a.installments ||
+a.installments.length===0)
 ){
 
-total = Number(a.income || 0);
+total =
+Number(a.income || 0);
 
 }
+
 
 return total;
 
@@ -2010,6 +2085,7 @@ const now = new Date();
 let from = new Date(now);
 let to = new Date(now);
 
+
 if(filter==="yesterday"){
 
 from.setDate(
@@ -2022,6 +2098,7 @@ now.getDate()-1
 
 }
 
+
 else if(filter==="week"){
 
 const day =
@@ -2033,6 +2110,7 @@ now.getDate()-day+1
 
 }
 
+
 else if(filter==="month"){
 
 from =
@@ -2043,6 +2121,7 @@ now.getMonth(),
 );
 
 }
+
 
 else if(filter==="lastMonth"){
 
@@ -2062,6 +2141,7 @@ now.getMonth(),
 
 }
 
+
 else if(filter==="custom"){
 
 const f =
@@ -2075,19 +2155,26 @@ document.getElementById(
 ).value;
 
 if(!f || !t){
+
 return null;
+
 }
 
 return {
+
 from:f,
+
 to:t
+
 };
 
 }
 
+
 return {
 
 from:dateToString(from),
+
 to:dateToString(to)
 
 };
@@ -2113,16 +2200,11 @@ const range =
 getPeriodDates();
 
 if(!range){
+
 return;
+
 }
 
-
-/*
- * IMPORTANTE:
- * gli appuntamenti completati
- * non vengono più mostrati
- * tra quelli da fare.
- */
 
 const filtered =
 appointments.filter(
@@ -2145,12 +2227,14 @@ sum + getReceived(a),
 0
 );
 
+
 const expenses =
 completedFiltered.reduce(
 (sum,a) =>
 sum + Number(a.expense || 0),
 0
 );
+
 
 document.getElementById(
 "dashIncome"
@@ -2182,6 +2266,7 @@ a =>
 && a.completed
 );
 
+
 const yearIncome =
 yearly.reduce(
 (sum,a) =>
@@ -2189,12 +2274,14 @@ sum + getReceived(a),
 0
 );
 
+
 const yearExpenses =
 yearly.reduce(
 (sum,a) =>
 sum + Number(a.expense || 0),
 0
 );
+
 
 document.getElementById(
 "yearIncome"
@@ -2231,10 +2318,12 @@ document.getElementById(
 "dashboardAppointments"
 );
 
+
 const pending =
 filtered.filter(
 a => !a.completed
 );
+
 
 if(!pending.length){
 
@@ -2245,6 +2334,7 @@ return;
 
 }
 
+
 pending.sort(
 (a,b) =>
 `${a.date}${a.time || ""}`
@@ -2253,9 +2343,11 @@ pending.sort(
 )
 );
 
+
 container.innerHTML =
 pending.map(
-a => dashboardAppointmentHTML(a)
+a =>
+dashboardAppointmentHTML(a)
 ).join("");
 
 }
@@ -2282,6 +2374,7 @@ a =>
 a.date >= today
 );
 
+
 list.sort(
 (a,b) =>
 `${a.date}${a.time || ""}`
@@ -2289,6 +2382,7 @@ list.sort(
 `${b.date}${b.time || ""}`
 )
 );
+
 
 if(!list.length){
 
@@ -2298,6 +2392,7 @@ container.innerHTML =
 return;
 
 }
+
 
 container.innerHTML =
 list.map(
@@ -2390,37 +2485,47 @@ function editDashboardAppointment(id){
 
 const a =
 appointments.find(
-x => Number(x.id) === Number(id)
+x =>
+Number(x.id) === Number(id)
 );
 
+
 if(!a){
+
 return;
+
 }
+
 
 showPage(
 "appointments",
 document.querySelectorAll(".nav button")[2]
 );
 
+
 document.getElementById(
-"appointmentClient"
+"appointmentClientName"
 ).value =
-String(a.clientId);
+getClientName(a.clientId);
+
 
 document.getElementById(
 "appointmentDate"
 ).value =
 a.date || "";
 
+
 document.getElementById(
 "appointmentTime"
 ).value =
 a.time || "";
 
+
 document.getElementById(
 "appointmentNotes"
 ).value =
 a.notes || "";
+
 
 window.scrollTo({
 top:0,
@@ -2438,50 +2543,64 @@ function openCompletionModal(id){
 
 const a =
 appointments.find(
-x => Number(x.id) === Number(id)
+x =>
+Number(x.id) === Number(id)
 );
 
+
 if(!a){
+
 return;
+
 }
 
+
 completionAppointmentId = id;
+
 
 document.getElementById(
 "completionClient"
 ).textContent =
 getClientName(a.clientId);
 
+
 document.getElementById(
 "completionIncome"
 ).value =
 a.income || "";
+
 
 document.getElementById(
 "completionExpense"
 ).value =
 a.expense || "";
 
+
 document.getElementById(
 "completionPaymentMode"
 ).value =
 a.paymentMode || "single";
+
 
 document.getElementById(
 "completionDeposit"
 ).value =
 a.deposit || "";
 
+
 document.getElementById(
 "completionInstallmentCount"
 ).value =
 a.installmentCount || 2;
 
+
 toggleCompletionInstallments();
+
 
 document.getElementById(
 "completionModal"
 ).classList.remove("hidden");
+
 
 updateCompletion();
 
@@ -2506,6 +2625,7 @@ document.getElementById(
 "completionPaymentMode"
 ).value;
 
+
 document.getElementById(
 "completionInstallments"
 ).classList.toggle(
@@ -2513,9 +2633,13 @@ document.getElementById(
 mode !== "installments"
 );
 
+
 if(mode === "installments"){
+
 buildInstallmentInputs();
+
 }
+
 
 updateCompletion();
 
@@ -2535,10 +2659,12 @@ document.getElementById(
 ).value
 ) || 2;
 
+
 const container =
 document.getElementById(
 "installmentInputs"
 );
+
 
 const appointment =
 appointments.find(
@@ -2547,23 +2673,33 @@ Number(a.id) ===
 Number(completionAppointmentId)
 );
 
+
 const oldRates =
 appointment &&
-Array.isArray(appointment.installments)
+Array.isArray(
+appointment.installments
+)
 ?
 appointment.installments
 :
 [];
 
+
 let html = "";
 
-for(let i=1;i<=count;i++){
+
+for(
+let i=1;
+i<=count;
+i++
+){
 
 const old =
 oldRates.find(
 r =>
 Number(r.number) === i
 );
+
 
 html += `
 
@@ -2594,7 +2730,9 @@ oninput="updateCompletion()">
 
 }
 
+
 container.innerHTML = html;
+
 
 updateCompletion();
 
@@ -2614,6 +2752,7 @@ document.getElementById(
 ).value
 ) || 0;
 
+
 const expense =
 Number(
 document.getElementById(
@@ -2621,13 +2760,17 @@ document.getElementById(
 ).value
 ) || 0;
 
+
 const mode =
 document.getElementById(
 "completionPaymentMode"
 ).value;
 
+
 let deposit = 0;
+
 let installmentsTotal = 0;
+
 
 if(mode === "installments"){
 
@@ -2638,6 +2781,7 @@ document.getElementById(
 ).value
 ) || 0;
 
+
 const count =
 Number(
 document.getElementById(
@@ -2645,12 +2789,18 @@ document.getElementById(
 ).value
 ) || 2;
 
-for(let i=1;i<=count;i++){
+
+for(
+let i=1;
+i<=count;
+i++
+){
 
 const input =
 document.getElementById(
 "rate-"+i
 );
+
 
 if(input){
 
@@ -2669,6 +2819,7 @@ installmentsTotal = income;
 
 }
 
+
 const received =
 mode === "single"
 ?
@@ -2676,13 +2827,16 @@ income
 :
 deposit + installmentsTotal;
 
+
 const net =
 received - expense;
+
 
 document.getElementById(
 "completionTotal"
 ).textContent =
 euro(income);
+
 
 document.getElementById(
 "completionDepositView"
@@ -2695,6 +2849,7 @@ deposit
 income
 );
 
+
 document.getElementById(
 "completionInstallmentsView"
 ).textContent =
@@ -2703,6 +2858,7 @@ mode === "installments"
 euro(installmentsTotal)
 :
 euro(0);
+
 
 document.getElementById(
 "completionNet"
@@ -2719,8 +2875,11 @@ euro(net);
 function completeAppointment(){
 
 if(completionAppointmentId === null){
+
 return;
+
 }
+
 
 const appointment =
 appointments.find(
@@ -2728,6 +2887,7 @@ a =>
 Number(a.id) ===
 Number(completionAppointmentId)
 );
+
 
 if(!appointment){
 
@@ -2737,12 +2897,14 @@ return;
 
 }
 
+
 const income =
 Number(
 document.getElementById(
 "completionIncome"
 ).value
 ) || 0;
+
 
 const expense =
 Number(
@@ -2751,10 +2913,12 @@ document.getElementById(
 ).value
 ) || 0;
 
+
 const mode =
 document.getElementById(
 "completionPaymentMode"
 ).value;
+
 
 if(income <= 0){
 
@@ -2764,9 +2928,12 @@ return;
 
 }
 
+
 if(expense < 0){
 
-alert("Le spese non possono essere negative.");
+alert(
+"Le spese non possono essere negative."
+);
 
 return;
 
@@ -2777,17 +2944,23 @@ return;
 
 if(mode === "single"){
 
-appointment.income = income;
+appointment.income =
+income;
 
-appointment.expense = expense;
+appointment.expense =
+expense;
 
-appointment.paymentMode = "single";
+appointment.paymentMode =
+"single";
 
-appointment.deposit = 0;
+appointment.deposit =
+0;
 
-appointment.installmentCount = 1;
+appointment.installmentCount =
+1;
 
-appointment.installments = [];
+appointment.installments =
+[];
 
 appointment.payments = [
 
@@ -2821,6 +2994,7 @@ document.getElementById(
 ).value
 ) || 0;
 
+
 const count =
 Number(
 document.getElementById(
@@ -2828,13 +3002,17 @@ document.getElementById(
 ).value
 ) || 2;
 
+
 if(deposit < 0){
 
-alert("L'acconto non può essere negativo.");
+alert(
+"L'acconto non può essere negativo."
+);
 
 return;
 
 }
+
 
 if(deposit > income){
 
@@ -2846,19 +3024,29 @@ return;
 
 }
 
+
 const rates = [];
 
 let ratesTotal = 0;
 
-for(let i=1;i<=count;i++){
+
+for(
+let i=1;
+i<=count;
+i++
+){
 
 const input =
 document.getElementById(
 "rate-"+i
 );
 
+
 const amount =
-Number(input?.value || 0);
+Number(
+input?.value || 0
+);
+
 
 if(amount <= 0){
 
@@ -2869,6 +3057,7 @@ alert(
 return;
 
 }
+
 
 rates.push({
 
@@ -2882,16 +3071,21 @@ date:""
 
 });
 
+
 ratesTotal += amount;
 
 }
 
+
 const expected =
 income - deposit;
 
-if(Math.abs(
+
+if(
+Math.abs(
 ratesTotal - expected
-) > 0.009){
+) > 0.009
+){
 
 alert(
 "Il totale delle rate deve essere uguale al residuo dopo l'acconto: "+
@@ -2902,22 +3096,34 @@ return;
 
 }
 
-appointment.income = income;
 
-appointment.expense = expense;
+appointment.income =
+income;
+
+
+appointment.expense =
+expense;
+
 
 appointment.paymentMode =
 "installments";
 
-appointment.deposit = deposit;
+
+appointment.deposit =
+deposit;
+
 
 appointment.installmentCount =
 count;
 
+
 appointment.installments =
 rates;
 
-appointment.payments = [];
+
+appointment.payments =
+[];
+
 
 if(deposit > 0){
 
@@ -2942,16 +3148,21 @@ paid:true
 }
 
 
-appointment.completed = true;
+appointment.completed =
+true;
+
 
 appointment.net =
 income-expense;
 
+
 saveData();
+
 
 closeCompletionModal();
 
 refreshEverything();
+
 
 alert(
 "Appuntamento completato e registrato."
@@ -2968,23 +3179,32 @@ function getPaymentClients(){
 
 const map = {};
 
+
 appointments.forEach(a => {
 
 if(
 a.paymentMode !== "installments"
 ){
+
 return;
+
 }
+
 
 const remaining =
 getRemaining(a);
 
+
 if(remaining <= 0){
+
 return;
+
 }
+
 
 const clientId =
 Number(a.clientId);
+
 
 if(!map[clientId]){
 
@@ -3004,20 +3224,25 @@ remaining:0
 
 }
 
+
 map[clientId]
 .appointments
 .push(a);
 
+
 map[clientId].total +=
 Number(a.income || 0);
 
+
 map[clientId].received +=
 getReceived(a);
+
 
 map[clientId].remaining +=
 remaining;
 
 });
+
 
 return Object.values(map);
 
@@ -3031,6 +3256,7 @@ document.getElementById(
 "paymentsList"
 );
 
+
 const search =
 (
 document.getElementById(
@@ -3038,8 +3264,10 @@ document.getElementById(
 )?.value || ""
 ).toLowerCase();
 
+
 let groups =
 getPaymentClients();
+
 
 groups =
 groups.filter(
@@ -3057,6 +3285,7 @@ sum+g.received,
 0
 );
 
+
 const totalRemaining =
 groups.reduce(
 (sum,g) =>
@@ -3064,15 +3293,18 @@ sum+g.remaining,
 0
 );
 
+
 document.getElementById(
 "paymentsReceived"
 ).textContent =
 euro(totalReceived);
 
+
 document.getElementById(
 "paymentsRemaining"
 ).textContent =
 euro(totalRemaining);
+
 
 document.getElementById(
 "paymentsClients"
@@ -3089,12 +3321,6 @@ return;
 
 }
 
-
-/*
- * IMPORTANTE:
- * inizialmente viene mostrato
- * SOLO il nome del cliente.
- */
 
 container.innerHTML =
 groups.map(group => `
@@ -3145,9 +3371,12 @@ document.getElementById(
 "payment-client-"+clientId
 );
 
+
 if(element){
 
-element.classList.toggle("hidden");
+element.classList.toggle(
+"hidden"
+);
 
 }
 
@@ -3165,6 +3394,7 @@ Math.min(
 )
 :
 0;
+
 
 return `
 
@@ -3243,6 +3473,7 @@ Number(
 a.installmentCount || 1
 );
 
+
 const rates =
 Array.isArray(a.installments)
 ?
@@ -3250,13 +3481,17 @@ a.installments
 :
 [];
 
+
 const paid =
 getReceived(a);
+
 
 const remaining =
 getRemaining(a);
 
+
 let html = "";
+
 
 if(Number(a.deposit || 0) > 0){
 
@@ -3292,7 +3527,11 @@ ${euro(a.deposit)}
 }
 
 
-for(let i=1;i<=count;i++){
+for(
+let i=1;
+i<=count;
+i++
+){
 
 const rate =
 rates.find(
@@ -3300,15 +3539,21 @@ r =>
 Number(r.number) === i
 );
 
+
 if(!rate){
+
 continue;
+
 }
+
 
 const amount =
 Number(rate.amount || 0);
 
+
 const isPaid =
 Boolean(rate.paid);
+
 
 html += `
 
@@ -3430,9 +3675,13 @@ Number(a.id) ===
 Number(appointmentId)
 );
 
+
 if(!appointment){
+
 return;
+
 }
+
 
 const rate =
 appointment.installments.find(
@@ -3440,6 +3689,7 @@ r =>
 Number(r.number) ===
 Number(number)
 );
+
 
 if(!rate){
 
@@ -3449,13 +3699,17 @@ return;
 
 }
 
+
 if(rate.paid){
 
-alert("Questa rata è già stata pagata.");
+alert(
+"Questa rata è già stata pagata."
+);
 
 return;
 
 }
+
 
 if(!confirm(
 `Confermi il pagamento della rata ${number} di ${euro(rate.amount)}?`
@@ -3465,9 +3719,14 @@ return;
 
 }
 
-rate.paid = true;
 
-rate.date = todayString();
+rate.paid =
+true;
+
+
+rate.date =
+todayString();
+
 
 if(!Array.isArray(
 appointment.payments
@@ -3476,6 +3735,7 @@ appointment.payments
 appointment.payments=[];
 
 }
+
 
 appointment.payments.push({
 
@@ -3491,11 +3751,15 @@ paid:true
 
 });
 
+
 saveData();
 
 refreshEverything();
 
-alert("Pagamento registrato.");
+
+alert(
+"Pagamento registrato."
+);
 
 }
 
@@ -3508,7 +3772,7 @@ function exportBackup(){
 
 const backup = {
 
-version:"8.0",
+version:"8.1",
 
 createdAt:
 new Date().toISOString(),
@@ -3518,6 +3782,7 @@ clients:clients,
 appointments:appointments
 
 };
+
 
 const blob =
 new Blob(
@@ -3533,16 +3798,22 @@ type:"application/json"
 }
 );
 
+
 const url =
 URL.createObjectURL(blob);
+
 
 const link =
 document.createElement("a");
 
-link.href=url;
+
+link.href =
+url;
+
 
 link.download =
 `igea-impianti-backup-${todayString()}.json`;
+
 
 document.body.appendChild(link);
 
@@ -3552,7 +3823,10 @@ link.remove();
 
 URL.revokeObjectURL(url);
 
-alert("Backup creato correttamente.");
+
+alert(
+"Backup creato correttamente."
+);
 
 }
 
@@ -3562,12 +3836,17 @@ function importBackup(event){
 const file =
 event.target.files[0];
 
+
 if(!file){
+
 return;
+
 }
+
 
 const reader =
 new FileReader();
+
 
 reader.onload =
 function(){
@@ -3579,15 +3858,21 @@ JSON.parse(
 reader.result
 );
 
+
 if(
 !backup ||
-!Array.isArray(backup.clients) ||
-!Array.isArray(backup.appointments)
+!Array.isArray(
+backup.clients
+) ||
+!Array.isArray(
+backup.appointments
+)
 ){
 
 throw new Error();
 
 }
+
 
 if(!confirm(
 "L'importazione sostituirà tutti i dati attuali. Continuare?"
@@ -3599,11 +3884,14 @@ return;
 
 }
 
+
 clients =
 backup.clients;
 
+
 appointments =
 backup.appointments;
+
 
 migrateData();
 
@@ -3611,11 +3899,13 @@ saveData();
 
 refreshEverything();
 
+
 alert(
 "Backup importato correttamente."
 );
 
 }
+
 
 catch(error){
 
@@ -3625,9 +3915,11 @@ alert(
 
 }
 
+
 event.target.value="";
 
 };
+
 
 reader.readAsText(file);
 
@@ -3645,22 +3937,29 @@ prompt(
 "Per confermare scrivi: ELIMINA"
 );
 
+
 if(
 confirmation !== "ELIMINA"
 ){
 
-alert("Operazione annullata.");
+alert(
+"Operazione annullata."
+);
 
 return;
 
 }
 
+
 clients=[];
+
 appointments=[];
+
 
 saveData();
 
 refreshEverything();
+
 
 alert(
 "Tutti i dati sono stati eliminati."
@@ -3674,8 +3973,6 @@ alert(
 ========================= */
 
 function refreshEverything(){
-
-populateClientSelect();
 
 renderClients();
 
@@ -3694,10 +3991,12 @@ updateDashboard();
 
 migrateData();
 
+
 document.getElementById(
 "appointmentDate"
 ).value =
 todayString();
+
 
 refreshEverything();
 
