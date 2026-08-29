@@ -346,21 +346,18 @@ hr{
     width:100%;
     background:#fafafa;
     color:#111;
-    padding:17px 15px;
+    padding:16px;
     display:flex;
     align-items:center;
     justify-content:space-between;
     text-align:left;
     border-radius:0;
-    font-size:16px;
 }
 .payment-client-header:active{
     background:#f0f0f0;
 }
 .payment-client-name{
-    display:flex;
-    align-items:center;
-    gap:9px;
+    font-size:17px;
     font-weight:700;
 }
 .payment-client-arrow{
@@ -368,16 +365,14 @@ hr{
     color:#888;
     transition:transform .2s;
 }
-.payment-client.open
-.payment-client-arrow{
+.payment-client.open .payment-client-arrow{
     transform:rotate(180deg);
 }
 .payment-client-details{
     display:none;
-    padding:0 14px 14px;
+    padding:0 15px 15px;
 }
-.payment-client.open
-.payment-client-details{
+.payment-client.open .payment-client-details{
     display:block;
 }
 .payment-summary{
@@ -562,10 +557,12 @@ hr{
         </div>
     </div>
 </div>
+<!-- PROSSIMI APPUNTAMENTI -->
 <div class="card">
     <h2>📅 Prossimi appuntamenti</h2>
     <div id="futureAppointments"></div>
 </div>
+<!-- DETTAGLIO PERIODO -->
 <div class="card">
     <h2>📋 Dettaglio periodo</h2>
     <div id="dashboardAppointments"></div>
@@ -838,6 +835,72 @@ let appointments =
     );
 let editingAppointmentId = null;
 /* =========================
+   MIGRAZIONE DATI VECCHI
+========================= */
+function migrateData(){
+    appointments =
+        appointments.map(a => {
+            const income =
+                Number(a.income || 0);
+            const expense =
+                Number(a.expense || 0);
+            let payments =
+                Array.isArray(a.payments)
+                ? a.payments
+                : [];
+            /*
+             * Compatibilità con i vecchi dati:
+             * se un appuntamento aveva già un
+             * guadagno e nessun pagamento,
+             * viene considerato incassato.
+             */
+            if(
+                payments.length === 0 &&
+                income > 0 &&
+                a.paymentMode !== "installments"
+            ){
+                payments = [{
+                    id:Date.now()+Math.random(),
+                    number:1,
+                    amount:income,
+                    date:a.date || todayString()
+                }];
+            }
+            const completed =
+                a.completed !== undefined
+                ? Boolean(a.completed)
+                : false;
+            return {
+                ...a,
+                income:income,
+                expense:expense,
+                net:income-expense,
+                payments:payments,
+                paymentMode:
+                    a.paymentMode ||
+                    "single",
+                installmentCount:
+                    Number(
+                        a.installmentCount || 1
+                    ),
+                completed:completed
+            };
+        });
+}
+/* =========================
+   SALVATAGGIO
+========================= */
+function saveData(){
+    localStorage.setItem(
+        "gestionePro_clients",
+        JSON.stringify(clients)
+    );
+    localStorage.setItem(
+        "gestionePro_appointments",
+        JSON.stringify(appointments)
+    );
+}
+/* =========================
    EURO
 ========================= */
 function euro(value){
@@ -880,84 +943,6 @@ function formatDate(date){
             month:"2-digit",
             year:"numeric"
         }
-    );
-}
-/* =========================
-   MIGRAZIONE DATI
-========================= */
-function migrateData(){
-    appointments =
-        appointments.map(a => {
-            const income =
-                Number(a.income || 0);
-            const expense =
-                Number(a.expense || 0);
-            let payments =
-                Array.isArray(a.payments)
-                ? a.payments
-                : [];
-            /*
-             * Vecchi appuntamenti senza
-             * pagamenti: se erano pagamento
-             * unico e avevano un guadagno,
-             * li consideriamo incassati.
-             */
-            if(
-                payments.length === 0 &&
-                income > 0 &&
-                (a.paymentMode || "single") === "single"
-            ){
-                payments = [{
-                    id:Date.now()+Math.random(),
-                    number:1,
-                    amount:income,
-                    date:a.date || todayString()
-                }];
-            }
-            const received =
-                payments.reduce(
-                    (sum,p)=>
-                        sum+
-                        Number(p.amount || 0),
-                    0
-                );
-            /*
-             * IMPORTANTE:
-             * completato significa che
-             * l'intero guadagno è stato
-             * realmente incassato.
-             */
-            const completed =
-                income > 0 &&
-                received >= income;
-            return {
-                ...a,
-                income:income,
-                expense:expense,
-                net:income-expense,
-                payments:payments,
-                paymentMode:
-                    a.paymentMode ||
-                    "single",
-                installmentCount:
-                    Number(
-                        a.installmentCount || 1
-                    ),
-                completed:completed
-            };
-        });
-}
-/* =========================
-   SALVATAGGIO
-========================= */
-function saveData(){
-    localStorage.setItem(
-        "gestionePro_clients",
-        JSON.stringify(clients)
-    );
-    localStorage.setItem(
-        "gestionePro_appointments",
-        JSON.stringify(appointments)
     );
 }
 /* =========================
@@ -1390,8 +1375,23 @@ function saveAppointment(){
         1;
     let payments = [];
     /*
-     * Se modifichiamo un appuntamento
-     * manteniamo i pagamenti già registrati.
+     * Pagamento unico:
+     * viene registrato immediatamente come incassato.
+     */
+    if(
+        paymentMode === "single" &&
+        income > 0
+    ){
+        payments = [{
+            id:Date.now()+Math.random(),
+            number:1,
+            amount:income,
+            date:date
+        }];
+    }
+    /*
+     * Durante la modifica manteniamo
+     * tutti i pagamenti già registrati.
      */
     if(editingAppointmentId !== null){
         const old =
@@ -1406,36 +1406,13 @@ function saveAppointment(){
         }
     }
     /*
-     * Se pagamento unico,
-     * viene incassato immediatamente.
+     * IMPORTANTE:
+     * un nuovo appuntamento NON viene
+     * automaticamente completato.
+     *
+     * Sarà l'utente a premere
+     * "Completato" dalla Dashboard.
      */
-    if(
-        paymentMode === "single" &&
-        income > 0 &&
-        payments.length === 0
-    ){
-        payments = [{
-            id:Date.now()+Math.random(),
-            number:1,
-            amount:income,
-            date:date
-        }];
-    }
-    const received =
-        payments.reduce(
-            (sum,p)=>
-                sum+
-                Number(p.amount || 0),
-            0
-        );
-    /*
-     * L'appuntamento è completato
-     * SOLO quando l'intero importo
-     * è stato incassato.
-     */
-    const completed =
-        income > 0 &&
-        received >= income;
     const data = {
         clientId:Number(clientId),
         date:date,
@@ -1465,7 +1442,18 @@ function saveAppointment(){
         paymentMode:paymentMode,
         installmentCount:count,
         payments:payments,
-        completed:completed
+        completed:
+            editingAppointmentId !== null
+            ?
+            (
+                appointments.find(
+                    a =>
+                        Number(a.id) ===
+                        Number(editingAppointmentId)
+                )?.completed || false
+            )
+            :
+            false
     };
     if(editingAppointmentId !== null){
         const index =
@@ -1502,10 +1490,6 @@ function saveAppointment(){
         resetAppointmentForm();
         refreshEverything();
         alert(
-            completed
-            ?
-            "Appuntamento completato."
-            :
             "Appuntamento modificato."
         );
         return;
@@ -1518,12 +1502,35 @@ function saveAppointment(){
     resetAppointmentForm();
     refreshEverything();
     alert(
-        completed
-        ?
-        "Appuntamento completato e registrato."
-        :
-        "Appuntamento salvato."
+        "Appuntamento salvato. Quando avrai terminato il lavoro premi 'Completato' dalla Dashboard."
     );
+}
+/* =========================
+   COMPLETA APPUNTAMENTO
+========================= */
+function completeAppointment(id){
+    const appointment =
+        appointments.find(
+            a =>
+                Number(a.id) ===
+                Number(id)
+        );
+    if(!appointment){
+        alert(
+            "Appuntamento non trovato."
+        );
+        return;
+    }
+    const ok =
+        confirm(
+            `Confermi di aver completato l'appuntamento di ${getClientName(appointment.clientId)}?`
+        );
+    if(!ok){
+        return;
+    }
+    appointment.completed = true;
+    saveData();
+    refreshEverything();
 }
 /* =========================
    MODIFICA APPUNTAMENTO
@@ -1710,10 +1717,8 @@ function getRemaining(a){
    COMPLETATO
 ========================= */
 function isCompleted(a){
-    return (
-        Number(a.income || 0) > 0 &&
-        getReceived(a) >=
-        Number(a.income || 0)
+    return Boolean(
+        a.completed
     );
 }
 /* =========================
@@ -1754,9 +1759,9 @@ function renderAppointments(){
     }
     list.sort(
         (a,b)=>
-            `${a.date}${a.time || ""}`
+            `${b.date}${b.time || ""}`
                 .localeCompare(
-                    `${b.date}${b.time || ""}`
+                    `${a.date}${a.time || ""}`
                 )
     );
     container.innerHTML =
@@ -1780,7 +1785,14 @@ function appointmentHTML(a){
     let statusText =
         "";
     if(
-        !isCompleted(a) &&
+        isCompleted(a)
+    ){
+        statusClass =
+            "completed";
+        statusText =
+            "✅ Completato";
+    }
+    else if(
         remaining > 0
     ){
         statusClass =
@@ -1788,19 +1800,11 @@ function appointmentHTML(a){
         statusText =
             "💳 Pagamento in corso";
     }
-    else if(
-        !isCompleted(a)
-    ){
+    else{
         statusClass =
             "pending";
         statusText =
             "⏳ Da completare";
-    }
-    else{
-        statusClass =
-            "completed";
-        statusText =
-            "✅ Completato";
     }
     return `
     <div class="item ${statusClass}">
@@ -1873,10 +1877,7 @@ function appointmentHTML(a){
                     Netto reale
                 </small>
                 <strong class="blue">
-                    ${euro(
-                        received -
-                        Number(a.expense || 0)
-                    )}
+                    ${euro(received - Number(a.expense || 0))}
                 </strong>
             </div>
             <div class="money-box">
@@ -1913,6 +1914,86 @@ function appointmentHTML(a){
                 class="danger"
                 onclick="deleteAppointment(${a.id})">
                 🗑️ Elimina
+            </button>
+        </div>
+    </div>
+    `;
+}
+/* =========================
+   DASHBOARD APPUNTAMENTO
+========================= */
+function dashboardAppointmentHTML(a){
+    const received =
+        getReceived(a);
+    const remaining =
+        getRemaining(a);
+    return `
+    <div class="item pending">
+        <div class="item-title">
+            ${escapeHTML(
+                getClientName(
+                    a.clientId
+                )
+            )}
+        </div>
+        <div class="item-sub">
+            📅 ${formatDate(a.date)}
+            ${
+                a.time
+                ?
+                ` · 🕐 ${escapeHTML(a.time)}`
+                :
+                ""
+            }
+        </div>
+        ${
+            a.work
+            ?
+            `<div class="item-sub">
+                🔧 ${escapeHTML(a.work)}
+             </div>`
+            :
+            ""
+        }
+        <div class="badge orange-badge">
+            ⏳ Da completare
+        </div>
+        <div class="item-money">
+            <div class="money-box">
+                <small>
+                    Totale
+                </small>
+                <strong>
+                    ${euro(a.income)}
+                </strong>
+            </div>
+            <div class="money-box">
+                <small>
+                    Incassato
+                </small>
+                <strong class="green">
+                    ${euro(received)}
+                </strong>
+            </div>
+            <div class="money-box">
+                <small>
+                    Residuo
+                </small>
+                <strong class="orange">
+                    ${euro(remaining)}
+                </strong>
+            </div>
+        </div>
+        <div class="actions">
+            <button
+                class="secondary"
+                onclick="editAppointment(${a.id})">
+                ✏️ Modifica
+            </button>
+            <button
+                class="success"
+                onclick="completeAppointment(${a.id})">
+                ✅ Completato
             </button>
         </div>
     </div>
@@ -2032,44 +2113,26 @@ function updateDashboard(){
     if(!range){
         return;
     }
-    /*
-     * Nella Dashboard mostriamo
-     * solamente gli appuntamenti
-     * NON completamente incassati.
-     */
     const filtered =
         appointments.filter(
             a =>
                 a.date >= range.from &&
-                a.date <= range.to &&
-                !isCompleted(a)
+                a.date <= range.to
         );
     const income =
-        appointments
-            .filter(
-                a =>
-                    a.date >= range.from &&
-                    a.date <= range.to
-            )
-            .reduce(
-                (sum,a)=>
-                    sum+
-                    getReceived(a),
-                0
-            );
+        filtered.reduce(
+            (sum,a)=>
+                sum+
+                getReceived(a),
+            0
+        );
     const expenses =
-        appointments
-            .filter(
-                a =>
-                    a.date >= range.from &&
-                    a.date <= range.to
-            )
-            .reduce(
-                (sum,a)=>
-                    sum+
-                    Number(a.expense || 0),
-                0
-            );
+        filtered.reduce(
+            (sum,a)=>
+                sum+
+                Number(a.expense || 0),
+            0
+        );
     const net =
         income-expenses;
     document.getElementById(
@@ -2128,16 +2191,27 @@ function updateDashboard(){
     ).textContent =
         yearly.length;
     renderFutureAppointments();
+    /*
+     * Nel dettaglio periodo mostriamo
+     * solo gli appuntamenti ancora aperti.
+     * Quelli completati restano comunque
+     * nello storico Appuntamenti.
+     */
+    const activeFiltered =
+        filtered.filter(
+            a =>
+                !isCompleted(a)
+        );
     const container =
         document.getElementById(
             "dashboardAppointments"
         );
-    if(!filtered.length){
+    if(!activeFiltered.length){
         container.innerHTML =
             '<div class="empty">Nessun appuntamento da completare nel periodo selezionato.</div>';
         return;
     }
-    filtered.sort(
+    activeFiltered.sort(
         (a,b)=>
             `${a.date}${a.time || ""}`
                 .localeCompare(
@@ -2145,15 +2219,15 @@ function updateDashboard(){
                 )
     );
     container.innerHTML =
-        filtered
+        activeFiltered
             .map(
                 a =>
-                    appointmentHTML(a)
+                    dashboardAppointmentHTML(a)
             )
             .join("");
 }
 /* =========================
-   FUTURI APPUNTAMENTI
+   PROSSIMI APPUNTAMENTI
 ========================= */
 function renderFutureAppointments(){
     const container =
@@ -2163,11 +2237,9 @@ function renderFutureAppointments(){
     const today =
         todayString();
     /*
-     * Mostriamo solo appuntamenti
-     * non completamente pagati.
-     *
-     * Quelli completamente pagati
-     * spariscono immediatamente.
+     * Dashboard:
+     * vengono mostrati solamente gli
+     * appuntamenti NON completati.
      */
     let list =
         appointments.filter(
@@ -2190,7 +2262,7 @@ function renderFutureAppointments(){
     container.innerHTML =
         list.map(
             a =>
-                appointmentHTML(a)
+                dashboardAppointmentHTML(a)
         ).join("");
 }
 /* =========================
@@ -2200,6 +2272,10 @@ function getPaymentClients(){
     const map = {};
     appointments.forEach(
         a => {
+            /*
+             * Mostriamo solamente gli appuntamenti
+             * con pagamento a rate e con residuo.
+             */
             const remaining =
                 getRemaining(a);
             if(
@@ -2232,6 +2308,9 @@ function getPaymentClients(){
     );
     return Object.values(map);
 }
+/* =========================
+   RENDER PAGAMENTI
+========================= */
 function renderPayments(){
     const container =
         document.getElementById(
@@ -2254,14 +2333,22 @@ function renderPayments(){
                 .toLowerCase()
                 .includes(search)
         );
+    /*
+     * I riepiloghi generali devono
+     * considerare tutti i clienti
+     * con rate attive, non solo quelli
+     * filtrati dalla ricerca.
+     */
+    const allGroups =
+        getPaymentClients();
     const totalReceived =
-        groups.reduce(
+        allGroups.reduce(
             (sum,g)=>
                 sum+g.received,
             0
         );
     const totalRemaining =
-        groups.reduce(
+        allGroups.reduce(
             (sum,g)=>
                 sum+g.remaining,
             0
@@ -2277,7 +2364,7 @@ function renderPayments(){
     document.getElementById(
         "paymentsClients"
     ).textContent =
-        groups.length;
+        allGroups.length;
     if(!groups.length){
         container.innerHTML =
             '<div class="empty">Nessun pagamento dilazionato in corso.</div>';
@@ -2294,12 +2381,14 @@ function renderPayments(){
 /* =========================
    APERTURA CLIENTE PAGAMENTI
 ========================= */
-function togglePaymentClient(id){
+function togglePaymentClient(clientId){
     const element =
         document.getElementById(
-            "paymentClient-"+id
+            "payment-client-"+clientId
         );
-    if(!element) return;
+    if(!element){
+        return;
+    }
     element.classList.toggle("open");
 }
 /* =========================
@@ -2322,7 +2411,7 @@ function paymentClientHTML(group){
     return `
     <div
         class="payment-client"
-        id="paymentClient-${group.clientId}">
+        id="payment-client-${group.clientId}">
         <button
             class="payment-client-header"
             onclick="togglePaymentClient(${group.clientId})">
@@ -2566,37 +2655,31 @@ function registerPayment(
         date:
             todayString()
     });
-    /*
-     * Ricalcoliamo lo stato reale
-     * dell'appuntamento.
-     */
-    const received =
-        getReceived(appointment);
     appointment.received =
-        received;
+        getReceived(appointment);
     appointment.remaining =
         getRemaining(appointment);
-    appointment.completed =
-        Number(appointment.income || 0) > 0 &&
-        received >=
-        Number(appointment.income || 0);
     saveData();
     refreshEverything();
     /*
-     * Se l'ultima rata è stata pagata,
-     * l'appuntamento sparisce
-     * automaticamente dalla Dashboard.
+     * Riapri automaticamente il cliente
+     * che stava visualizzando le rate.
      */
-    if(appointment.completed){
-        alert(
-            "Ultima rata registrata. Appuntamento completato!"
-        );
-    }
-    else{
-        alert(
-            "Pagamento registrato."
-        );
-    }
+    setTimeout(
+        function(){
+            const element =
+                document.getElementById(
+                    "payment-client-"+appointment.clientId
+                );
+            if(element){
+                element.classList.add("open");
+            }
+        },
+        50
+    );
+    alert(
+        "Pagamento registrato."
+    );
 }
 /* =========================
    BACKUP
