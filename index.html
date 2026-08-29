@@ -1,46 +1,59 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+
 <link rel="manifest" href="manifest.json">
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Igea Impianti">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#ffffff">
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
 <title>Igea Impianti V6</title>
+
 <style>
+
 *{
     box-sizing:border-box;
     -webkit-tap-highlight-color:transparent;
 }
+
 body{
     margin:0;
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;
     background:#fff;
     color:#111;
 }
+
 .app{
     max-width:680px;
     margin:auto;
     min-height:100vh;
     padding-bottom:100px;
 }
+
+/* HEADER */
+
 header{
     padding:calc(18px + env(safe-area-inset-top)) 18px 15px;
     position:sticky;
     top:0;
     z-index:20;
-    background:rgba(255,255,255,.94);
+    background:rgba(255,255,255,.95);
     backdrop-filter:blur(18px);
     border-bottom:1px solid #e5e5e5;
 }
+
 .brand{
     display:flex;
     align-items:center;
     gap:11px;
 }
+
 .brand img{
     width:42px;
     height:42px;
@@ -48,19 +61,25 @@ header{
     border-radius:10px;
     flex-shrink:0;
 }
+
 .brand-text h1{
     margin:0;
     font-size:24px;
     line-height:1.1;
 }
+
 header p{
     margin:4px 0 0;
     color:#777;
     font-size:14px;
 }
+
+/* MAIN */
+
 main{
     padding:14px 16px;
 }
+
 .card{
     background:#fff;
     border:1px solid #dedede;
@@ -69,34 +88,45 @@ main{
     margin-bottom:14px;
     box-shadow:0 2px 8px rgba(0,0,0,.035);
 }
+
 .card h2{
     margin:0 0 15px;
     font-size:18px;
 }
+
+/* STATS */
+
 .stats{
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:9px;
 }
+
 .stat{
     background:#f6f6f6;
     border:1px solid #e4e4e4;
     border-radius:15px;
     padding:14px 9px;
 }
+
 .stat small{
     display:block;
     color:#777;
     font-size:11px;
     margin-bottom:7px;
 }
+
 .stat strong{
     font-size:16px;
 }
+
 .green{color:#16834b}
 .red{color:#d9364f}
 .blue{color:#1769aa}
-.orange{color:#b56b00}
+.orange{color:#b56a00}
+
+/* FORM */
+
 input,
 select,
 textarea{
@@ -111,21 +141,27 @@ textarea{
     margin-bottom:10px;
     -webkit-appearance:none;
 }
+
 input:focus,
 select:focus,
 textarea:focus{
     border-color:#888;
 }
+
 textarea{
     min-height:82px;
     resize:vertical;
 }
+
 label{
     display:block;
     color:#666;
     font-size:13px;
     margin:8px 0 6px;
 }
+
+/* BUTTON */
+
 button{
     border:0;
     border-radius:12px;
@@ -133,74 +169,101 @@ button{
     font-size:15px;
     font-weight:650;
     cursor:pointer;
+    touch-action:manipulation;
 }
+
 .primary{
     width:100%;
     background:#111;
     color:#fff;
     margin-top:5px;
 }
+
 .secondary{
     background:#eee;
     color:#111;
     border:1px solid #ddd;
 }
+
 .danger{
     background:#fff0f2;
     color:#d9364f;
     border:1px solid #ffd1d7;
 }
+
 .warning{
     background:#fff8e5;
     color:#9a7100;
     border:1px solid #f0df9b;
 }
+
 .success{
-    background:#edf9f2;
+    background:#eaf8f0;
     color:#16834b;
-    border:1px solid #c9ead6;
+    border:1px solid #c8ead6;
 }
+
 .actions{
     display:flex;
     gap:8px;
     margin-top:12px;
 }
+
 .actions button{
     flex:1;
 }
+
+.hidden{
+    display:none!important;
+}
+
+/* NAV */
+
 .nav{
     position:fixed;
     bottom:0;
     left:0;
     right:0;
     height:82px;
-    background:rgba(255,255,255,.97);
+    background:rgba(255,255,255,.98);
     backdrop-filter:blur(20px);
     border-top:1px solid #ddd;
     display:flex;
     justify-content:space-around;
+    align-items:stretch;
     z-index:50;
-    padding-bottom:env(safe-area-inset-bottom);
+    padding:0 3px env(safe-area-inset-bottom);
 }
+
 .nav button{
+    flex:1;
+    min-width:0;
+    height:100%;
     background:transparent;
-    color:#8a8a8a;
+    color:#888;
     font-size:10px;
-    padding:8px 5px;
-    min-width:58px;
+    padding:7px 2px;
+    border-radius:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
 }
+
 .nav button.active{
     color:#111;
     font-weight:700;
 }
+
 .nav-icon{
     display:block;
     font-size:21px;
-    margin-bottom:3px;
+    line-height:24px;
+    margin-bottom:4px;
 }
-.hidden{
-    display:none!important;
-}
+
+/* ITEMS */
+
 .item{
     background:#fafafa;
     border:1px solid #dedede;
@@ -208,35 +271,66 @@ button{
     padding:15px;
     margin-bottom:10px;
 }
+
 .item-title{
     font-size:17px;
     font-weight:700;
 }
+
 .item-sub{
     color:#777;
     font-size:13px;
     margin-top:5px;
     line-height:1.4;
 }
+
 .item-money{
     display:flex;
     margin-top:12px;
     padding-top:12px;
     border-top:1px solid #e5e5e5;
 }
+
 .money-box{
     flex:1;
     text-align:center;
 }
+
 .money-box small{
     display:block;
     color:#888;
     font-size:10px;
     margin-bottom:4px;
 }
+
 .money-box strong{
     font-size:15px;
 }
+
+.row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.filter-date{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.empty{
+    text-align:center;
+    color:#888;
+    padding:25px 8px;
+}
+
+.total-big{
+    font-size:32px;
+    font-weight:800;
+    margin-top:4px;
+}
+
 .badge{
     display:inline-block;
     padding:5px 9px;
@@ -246,60 +340,21 @@ button{
     font-size:11px;
     margin-top:8px;
 }
-.badge-green{
-    background:#eaf8ef;
+
+.badge.green-badge{
+    background:#eaf8f0;
     color:#16834b;
 }
-.badge-orange{
+
+.badge.orange-badge{
     background:#fff5df;
-    color:#a36a00;
+    color:#a66a00;
 }
-.badge-blue{
-    background:#edf5fc;
-    color:#1769aa;
-}
-.empty{
-    text-align:center;
-    color:#888;
-    padding:25px 8px;
-}
-.total-big{
-    font-size:32px;
-    font-weight:800;
-    margin-top:4px;
-}
+
 .search{
     margin-bottom:12px;
 }
-.filter-date{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-}
-.row{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-}
-.year-box{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-}
-.year-stat{
-    background:#f6f6f6;
-    border:1px solid #e1e1e1;
-    border-radius:14px;
-    padding:13px;
-}
-.year-stat small{
-    display:block;
-    color:#777;
-    margin-bottom:5px;
-}
-.year-stat strong{
-    font-size:18px;
-}
+
 .notice{
     background:#f7f7f7;
     border:1px solid #ddd;
@@ -309,11 +364,13 @@ button{
     font-size:13px;
     line-height:1.45;
 }
+
 hr{
     border:0;
     border-top:1px solid #e5e5e5;
     margin:16px 0;
 }
+
 .edit-box{
     background:#f5f5f5;
     border:1px solid #ddd;
@@ -321,477 +378,909 @@ hr{
     padding:13px;
     margin-top:12px;
 }
-.payment-card{
-    background:#fff;
-    border:1px solid #ddd;
-    border-radius:16px;
-    padding:15px;
-    margin-bottom:12px;
-}
-.payment-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
+
+.year-box{
+    display:grid;
+    grid-template-columns:1fr 1fr;
     gap:10px;
 }
-.payment-title{
-    font-size:17px;
-    font-weight:750;
+
+.year-stat{
+    background:#f6f6f6;
+    border:1px solid #e1e1e1;
+    border-radius:14px;
+    padding:13px;
 }
-.progress{
+
+.year-stat small{
+    display:block;
+    color:#777;
+    margin-bottom:5px;
+}
+
+.year-stat strong{
+    font-size:18px;
+}
+
+/* PAGAMENTI */
+
+.payment-summary{
+    background:#f6f6f6;
+    border:1px solid #e1e1e1;
+    border-radius:14px;
+    padding:13px;
+    margin-top:12px;
+}
+
+.payment-summary-row{
+    display:flex;
+    justify-content:space-between;
+    padding:5px 0;
+    font-size:14px;
+}
+
+.payment-progress{
     height:8px;
-    background:#e8e8e8;
-    border-radius:20px;
+    background:#e5e5e5;
+    border-radius:99px;
     overflow:hidden;
-    margin:12px 0;
+    margin:12px 0 5px;
 }
-.progress-bar{
+
+.payment-progress-bar{
     height:100%;
     background:#16834b;
-    border-radius:20px;
-    transition:.25s;
+    border-radius:99px;
+    transition:width .25s;
 }
-.rate{
+
+.installment{
+    background:#fff;
+    border:1px solid #ddd;
+    border-radius:13px;
+    padding:12px;
+    margin-top:8px;
+}
+
+.installment.paid{
+    background:#f1faf5;
+    border-color:#cce8d7;
+}
+
+.installment-head{
     display:flex;
     align-items:center;
     justify-content:space-between;
     gap:8px;
-    background:#f7f7f7;
-    border:1px solid #e2e2e2;
-    border-radius:12px;
-    padding:11px;
-    margin-top:8px;
 }
-.rate-left{
-    flex:1;
-}
-.rate-title{
+
+.installment-title{
     font-weight:700;
-    font-size:14px;
 }
-.rate-sub{
+
+.installment-info{
     color:#777;
     font-size:12px;
-    margin-top:3px;
+    margin-top:4px;
 }
-.rate button{
-    padding:9px 11px;
-    font-size:12px;
+
+.payment-button{
+    margin-top:9px;
+    width:100%;
 }
-.small-button{
-    padding:9px 11px;
-    font-size:12px;
+
+.future{
+    border-left:4px solid #1769aa;
 }
+
+.pending{
+    border-left:4px solid #b56a00;
+}
+
+.completed{
+    border-left:4px solid #16834b;
+}
+
+/* RESPONSIVE */
+
 @media(max-width:400px){
+
     .nav button{
-        min-width:48px;
         font-size:9px;
     }
+
     .nav-icon{
         font-size:19px;
     }
+
     .brand img{
         width:38px;
         height:38px;
     }
+
     .brand-text h1{
         font-size:22px;
     }
+
 }
+
 </style>
 </head>
+
 <body>
+
 <div class="app">
+
 <header>
-<div class="brand">
-<img src="icon.png" alt="Igea Impianti">
-<div class="brand-text">
-<h1>Igea Impianti</h1>
-<p id="pageSubtitle">Dashboard</p>
-</div>
-</div>
+
+    <div class="brand">
+
+        <img src="icon.png" alt="Igea Impianti">
+
+        <div class="brand-text">
+
+            <h1>Igea Impianti</h1>
+
+            <p id="pageSubtitle">Dashboard</p>
+
+        </div>
+
+    </div>
+
 </header>
+
 <main>
-<!-- DASHBOARD -->
+
+<!-- =========================
+     DASHBOARD
+========================= -->
+
 <section id="dashboard">
-<div class="card">
-<h2>📊 Riepilogo</h2>
 
-Periodo
+    <div class="card">
 
-<select id="periodFilter" onchange="updateDashboard()">
-<option value="today">Oggi</option>
-<option value="yesterday">Ieri</option>
-<option value="week">Questa settimana</option>
-<option value="month">Questo mese</option>
-<option value="lastMonth">Mese precedente</option>
-<option value="custom">Personalizzato</option>
-</select>
-<div id="customDates" class="filter-date hidden">
-<div>
+        <h2>📊 Riepilogo</h2>
 
-Dal
+        <label>Periodo</label>
 
-<input type="date" id="dateFrom" onchange="updateDashboard()">
-</div>
-<div>
+        <select id="periodFilter"
+                onchange="updateDashboard()">
 
-Al
+            <option value="today">Oggi</option>
+            <option value="yesterday">Ieri</option>
+            <option value="week">Questa settimana</option>
+            <option value="month">Questo mese</option>
+            <option value="lastMonth">Mese precedente</option>
+            <option value="custom">Personalizzato</option>
 
-<input type="date" id="dateTo" onchange="updateDashboard()">
-</div>
-</div>
-</div>
-<div class="stats">
-<div class="stat">
+        </select>
 
-💰 Incassato
+        <div id="customDates"
+             class="filter-date hidden">
 
-€0,00
+            <div>
 
-</div>
-<div class="stat">
+                <label>Dal</label>
 
-💸 Spese
+                <input type="date"
+                       id="dateFrom"
+                       onchange="updateDashboard()">
 
-€0,00
+            </div>
 
-</div>
-<div class="stat">
+            <div>
 
-🟢 Netto
+                <label>Al</label>
 
-€0,00
+                <input type="date"
+                       id="dateTo"
+                       onchange="updateDashboard()">
 
-</div>
-</div>
-<div class="card" style="margin-top:14px">
-<h2>📈 Anno corrente</h2>
-<div class="year-box">
-<div class="year-stat">
+            </div>
 
-💰 Incassato
+        </div>
 
-€0,00
+    </div>
 
-</div>
-<div class="year-stat">
+    <div class="stats">
 
-💸 Spese
+        <div class="stat">
 
-€0,00
+            <small>💰 Incassato</small>
 
-</div>
-<div class="year-stat">
+            <strong id="dashIncome"
+                    class="green">
+                €0,00
+            </strong>
 
-🟢 Netto
+        </div>
 
-€0,00
+        <div class="stat">
 
-</div>
-<div class="year-stat">
+            <small>💸 Spese</small>
 
-📅 Appuntamenti
+            <strong id="dashExpenses"
+                    class="red">
+                €0,00
+            </strong>
 
-0
+        </div>
 
-</div>
-</div>
-</div>
-<div class="card">
-<h2>📅 Appuntamenti da gestire</h2>
-<div id="dashboardAppointments"></div>
-</div>
+        <div class="stat">
+
+            <small>🟢 Netto</small>
+
+            <strong id="dashNet"
+                    class="blue">
+                €0,00
+            </strong>
+
+        </div>
+
+    </div>
+
+    <div class="card"
+         style="margin-top:14px">
+
+        <h2>📈 Anno corrente</h2>
+
+        <div class="year-box">
+
+            <div class="year-stat">
+
+                <small>💰 Incassato</small>
+
+                <strong id="yearIncome"
+                        class="green">
+                    €0,00
+                </strong>
+
+            </div>
+
+            <div class="year-stat">
+
+                <small>💸 Spese</small>
+
+                <strong id="yearExpenses"
+                        class="red">
+                    €0,00
+                </strong>
+
+            </div>
+
+            <div class="year-stat">
+
+                <small>🟢 Netto</small>
+
+                <strong id="yearNet"
+                        class="blue">
+                    €0,00
+                </strong>
+
+            </div>
+
+            <div class="year-stat">
+
+                <small>📅 Appuntamenti</small>
+
+                <strong id="yearAppointments">
+                    0
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- APPUNTAMENTI DA FARE -->
+
+    <div class="card">
+
+        <h2>📅 Prossimi appuntamenti</h2>
+
+        <div id="futureAppointments"></div>
+
+    </div>
+
+    <!-- APPUNTAMENTI DEL PERIODO -->
+
+    <div class="card">
+
+        <h2>📋 Dettaglio periodo</h2>
+
+        <div id="dashboardAppointments"></div>
+
+    </div>
+
 </section>
-<!-- CLIENTI -->
-<section id="clients" class="hidden">
-<div class="card">
-<h2>👥 Nuovo cliente</h2>
-<input id="clientName" placeholder="Nome e cognome">
-<input id="clientPhone" type="tel" placeholder="Telefono">
-<input id="clientEmail" type="email" placeholder="Email">
-<textarea id="clientNotes" placeholder="Note"></textarea>
-<button class="primary" onclick="saveClient()">
-Salva cliente
-</button>
-</div>
-<div class="card">
-<h2>👥 Clienti</h2>
-<div id="clientsList"></div>
-</div>
+
+
+<!-- =========================
+     CLIENTI
+========================= -->
+
+<section id="clients"
+         class="hidden">
+
+    <div class="card">
+
+        <h2>👥 Nuovo cliente</h2>
+
+        <input id="clientName"
+               placeholder="Nome e cognome">
+
+        <input id="clientPhone"
+               type="tel"
+               placeholder="Telefono">
+
+        <input id="clientEmail"
+               type="email"
+               placeholder="Email">
+
+        <textarea id="clientNotes"
+                  placeholder="Note"></textarea>
+
+        <button class="primary"
+                onclick="saveClient()">
+
+            Salva cliente
+
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <h2>👥 Clienti</h2>
+
+        <input class="search"
+               id="clientSearch"
+               placeholder="🔎 Cerca cliente..."
+               oninput="renderClients()">
+
+        <div id="clientsList"></div>
+
+    </div>
+
 </section>
-<!-- APPUNTAMENTI -->
-<section id="appointments" class="hidden">
-<div class="card">
-<h2 id="appointmentFormTitle">📅 Nuovo appuntamento</h2>
 
-Cliente
 
-Data
+<!-- =========================
+     APPUNTAMENTI
+========================= -->
 
-<input type="date" id="appointmentDate">
+<section id="appointments"
+         class="hidden">
 
-Ora
+    <div class="card">
 
-<input type="time" id="appointmentTime">
+        <h2 id="appointmentFormTitle">
+            📅 Nuovo appuntamento
+        </h2>
 
-Tipo di lavoro
+        <label>Cliente</label>
 
-Guadagno totale (€)
+        <select id="appointmentClient"></select>
 
-Spese (€)
+        <label>Data</label>
 
-Pagamento
+        <input type="date"
+               id="appointmentDate">
 
-<option value="single">Pagamento unico</option>
-<option value="installments">Pagamento dilazionato</option>
-</select>
-<div id="installmentBox" class="hidden">
+        <label>Ora</label>
 
-Numero rate
+        <input type="time"
+               id="appointmentTime">
 
-<select id="appointmentInstallments">
-<option value="2">2 rate</option>
-<option value="3">3 rate</option>
-<option value="4">4 rate</option>
-<option value="5">5 rate</option>
-<option value="6">6 rate</option>
-<option value="7">7 rate</option>
-<option value="8">8 rate</option>
-<option value="9">9 rate</option>
-<option value="10">10 rate</option>
-</select>
-<div class="notice">
+        <label>Tipo di lavoro</label>
 
-💳 Il pagamento può essere diviso in massimo 10 rate.
-Le rate verranno gestite nella sezione Pagamenti.
+        <input id="appointmentWork"
+               placeholder="Es. Installazione impianto">
 
-</div>
-</div>
-<div class="card"
-style="background:#f7f7f7;margin-top:12px">
+        <div class="row">
 
-🟢 NETTO PREVISTO
+            <div>
 
-<div id="appointmentNet"
-class="total-big green">
+                <label>Guadagno totale (€)</label>
 
-€0,00
+                <input type="number"
+                       id="appointmentIncome"
+                       min="0"
+                       step="0.01"
+                       placeholder="0,00"
+                       oninput="calculateNet()">
 
-</div>
-</div>
-<textarea id="appointmentNotes"
-placeholder="Note appuntamento"></textarea>
+            </div>
 
-Salva appuntamento
+            <div>
 
-</button>
+                <label>Spese (€)</label>
 
-Annulla modifica
+                <input type="number"
+                       id="appointmentExpense"
+                       min="0"
+                       step="0.01"
+                       placeholder="0,00"
+                       oninput="calculateNet()">
 
-</button>
-</div>
-<div class="card">
-<h2>📅 Appuntamenti</h2>
-<div id="appointmentsList"></div>
-</div>
+            </div>
+
+        </div>
+
+        <label>Pagamento</label>
+
+        <select id="paymentMode"
+                onchange="toggleInstallments()">
+
+            <option value="single">
+                Pagamento unico
+            </option>
+
+            <option value="installments">
+                Pagamento dilazionato
+            </option>
+
+        </select>
+
+        <div id="installmentOptions"
+             class="hidden">
+
+            <label>Numero rate</label>
+
+            <select id="installmentCount"
+                    onchange="previewInstallments()">
+
+                <option value="2">2 rate</option>
+                <option value="3">3 rate</option>
+                <option value="4">4 rate</option>
+                <option value="5">5 rate</option>
+                <option value="6">6 rate</option>
+                <option value="7">7 rate</option>
+                <option value="8">8 rate</option>
+                <option value="9">9 rate</option>
+                <option value="10">10 rate</option>
+
+            </select>
+
+            <div id="installmentPreview"
+                 class="notice">
+
+                Le rate verranno calcolate automaticamente.
+
+            </div>
+
+        </div>
+
+        <div class="card"
+             style="background:#f7f7f7;margin-top:3px">
+
+            <small style="color:#777">
+                🟢 NETTO
+            </small>
+
+            <div id="appointmentNet"
+                 class="total-big green">
+
+                €0,00
+
+            </div>
+
+        </div>
+
+        <textarea id="appointmentNotes"
+                  placeholder="Note appuntamento"></textarea>
+
+        <button class="primary"
+                id="saveAppointmentButton"
+                onclick="saveAppointment()">
+
+            Salva appuntamento
+
+        </button>
+
+        <button class="secondary hidden"
+                id="cancelEditButton"
+                style="width:100%;margin-top:8px"
+                onclick="cancelEditAppointment()">
+
+            Annulla modifica
+
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <h2>📅 Appuntamenti</h2>
+
+        <input class="search"
+               id="appointmentSearch"
+               placeholder="🔎 Cerca appuntamento..."
+               oninput="renderAppointments()">
+
+        <div id="appointmentsList"></div>
+
+    </div>
+
 </section>
-<!-- PAGAMENTI -->
-<section id="payments" class="hidden">
-<div class="card">
-<h2>💳 Pagamenti</h2>
-<div class="stats">
-<div class="stat">
 
-Incassato
 
-€0,00
-</div>
-<div class="stat">
+<!-- =========================
+     PAGAMENTI
+========================= -->
 
-Da incassare
+<section id="payments"
+         class="hidden">
 
-€0,00
-</div>
-<div class="stat">
+    <div class="card">
 
-Clienti
+        <h2>💳 Pagamenti</h2>
 
-<strong id="paymentClientsCount">
-0
-</strong>
-</div>
-</div>
-</div>
-<div class="card">
-<h2>👥 Clienti con pagamenti</h2>
-<div class="notice" style="margin-bottom:12px">
+        <div class="stats">
 
-Ogni cliente viene mostrato una sola volta.
-Le sue rate sono raggruppate al suo interno.
+            <div class="stat">
 
-</div>
-<div id="paymentsList"></div>
-</div>
+                <small>💰 Incassato</small>
+
+                <strong id="paymentsReceived"
+                        class="green">
+                    €0,00
+                </strong>
+
+            </div>
+
+            <div class="stat">
+
+                <small>⏳ Da incassare</small>
+
+                <strong id="paymentsRemaining"
+                        class="orange">
+                    €0,00
+                </strong>
+
+            </div>
+
+            <div class="stat">
+
+                <small>👥 Clienti</small>
+
+                <strong id="paymentsClients">
+                    0
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <input class="search"
+               id="paymentSearch"
+               placeholder="🔎 Cerca cliente..."
+               oninput="renderPayments()">
+
+        <div id="paymentsList"></div>
+
+    </div>
+
 </section>
-<!-- ALTRO -->
-<section id="settings" class="hidden">
-<div class="card">
-<h2>⚙️ Impostazioni e dati</h2>
-<div class="notice">
 
-I dati vengono salvati automaticamente sul dispositivo.
 
-Usa il backup per conservare una copia dei tuoi
-clienti, appuntamenti e dati economici.
+<!-- =========================
+     ALTRO
+========================= -->
 
-</div>
-<hr>
-<h2>💾 Backup</h2>
-<button class="primary" onclick="exportBackup()">
+<section id="settings"
+         class="hidden">
 
-📤 Esporta backup
+    <div class="card">
 
-</button>
-<p style="color:#777;font-size:12px">
+        <h2>⚙️ Impostazioni e dati</h2>
 
-Verrà creato un file JSON contenente tutti i dati dell’app.
+        <div class="notice">
 
-</p>
-<hr>
-<h2>📥 Importazione</h2>
-<label class="file-label">
+            I dati vengono salvati automaticamente
+            sul dispositivo.
 
-📥 Importa backup
+            Usa il backup per conservare una copia
+            di clienti, appuntamenti e pagamenti.
 
-</label>
-<p style="color:#777;font-size:12px">
+        </div>
 
-L’importazione sostituirà i dati attuali.
+        <hr>
 
-</p>
-<hr>
-<h2>🗑️ Zona pericolosa</h2>
+        <h2>💾 Backup</h2>
 
-Elimina tutti i dati
+        <button class="primary"
+                onclick="exportBackup()">
 
-</button>
-</div>
+            📤 Esporta backup
+
+        </button>
+
+        <p style="color:#777;font-size:12px">
+
+            Verrà creato un file JSON contenente
+            tutti i dati dell'app.
+
+        </p>
+
+        <hr>
+
+        <h2>📥 Importazione</h2>
+
+        <label class="file-label"
+               style="display:block;text-align:center;background:#eee;border:1px solid #ddd;border-radius:12px;padding:13px">
+
+            📥 Importa backup
+
+            <input type="file"
+                   id="backupFile"
+                   accept=".json,application/json"
+                   onchange="importBackup(event)"
+                   style="display:none">
+
+        </label>
+
+        <p style="color:#777;font-size:12px">
+
+            L'importazione sostituirà i dati attuali
+            con quelli presenti nel backup.
+
+        </p>
+
+        <hr>
+
+        <h2>🗑️ Zona pericolosa</h2>
+
+        <button class="danger"
+                style="width:100%"
+                onclick="deleteAllData()">
+
+            Elimina tutti i dati
+
+        </button>
+
+    </div>
+
 </section>
+
 </main>
-<!-- NAV -->
+
+
+<!-- =========================
+     NAVIGAZIONE
+========================= -->
+
 <nav class="nav">
 
-📊
-Dashboard
+    <button id="navDashboard"
+            class="active"
+            onclick="showPage('dashboard',this)">
 
-</button>
-<button onclick="showPage('clients',this)">
+        <span class="nav-icon">📊</span>
+        <span>Dashboard</span>
 
-👥
-Clienti
+    </button>
 
-</button>
-<button onclick="showPage('appointments',this)">
+    <button onclick="showPage('clients',this)">
 
-📅
-Appuntamenti
+        <span class="nav-icon">👥</span>
+        <span>Clienti</span>
 
-</button>
-<button onclick="showPage('payments',this)">
+    </button>
 
-💳
-Pagamenti
+    <button onclick="showPage('appointments',this)">
 
-</button>
-<button onclick="showPage('settings',this)">
+        <span class="nav-icon">📅</span>
+        <span>Appuntamenti</span>
 
-⚙️
-Altro
+    </button>
 
-</button>
+    <button onclick="showPage('payments',this)">
+
+        <span class="nav-icon">💳</span>
+        <span>Pagamenti</span>
+
+    </button>
+
+    <button onclick="showPage('settings',this)">
+
+        <span class="nav-icon">⚙️</span>
+        <span>Altro</span>
+
+    </button>
+
 </nav>
+
 </div>
+
+
 <script>
+
 "use strict";
+
 /* =========================
    DATI
 ========================= */
+
 let clients =
-JSON.parse(
-localStorage.getItem("gestionePro_clients") || "[]"
-);
+    JSON.parse(
+        localStorage.getItem(
+            "gestionePro_clients"
+        ) || "[]"
+    );
+
 let appointments =
-JSON.parse(
-localStorage.getItem("gestionePro_appointments") || "[]"
-);
+    JSON.parse(
+        localStorage.getItem(
+            "gestionePro_appointments"
+        ) || "[]"
+    );
+
 let editingAppointmentId = null;
+
+
 /* =========================
-   MIGRAZIONE V5
+   MIGRAZIONE DATI VECCHI
 ========================= */
-appointments.forEach(a => {
-    if(typeof a.income !== "number"){
-        a.income = Number(a.income || 0);
-    }
-    if(typeof a.expense !== "number"){
-        a.expense = Number(a.expense || 0);
-    }
-    if(!Array.isArray(a.payments)){
-        a.payments = [];
-    }
-    if(!a.paymentType){
-        a.paymentType = "single";
-    }
-    if(!a.installments){
-        a.installments = 1;
-    }
-    if(!a.closed){
-        a.closed = false;
-    }
-});
+
+function migrateData(){
+
+    appointments =
+        appointments.map(a => {
+
+            const income =
+                Number(a.income || 0);
+
+            const expense =
+                Number(a.expense || 0);
+
+            let payments =
+                Array.isArray(a.payments)
+                ? a.payments
+                : [];
+
+            /*
+             * Se il vecchio appuntamento
+             * aveva un guadagno registrato,
+             * lo consideriamo già incassato.
+             */
+
+            if(
+                payments.length === 0 &&
+                income > 0
+            ){
+
+                payments = [{
+                    id:Date.now()+Math.random(),
+                    number:1,
+                    amount:income,
+                    date:a.date || todayString()
+                }];
+
+            }
+
+            const received =
+                payments.reduce(
+                    (sum,p)=>
+                        sum+
+                        Number(p.amount || 0),
+                    0
+                );
+
+            const completed =
+                income > 0 &&
+                expense >= 0;
+
+            return {
+
+                ...a,
+
+                income:income,
+
+                expense:expense,
+
+                net:income-expense,
+
+                payments:payments,
+
+                paymentMode:
+                    a.paymentMode ||
+                    "single",
+
+                installmentCount:
+                    Number(
+                        a.installmentCount || 1
+                    ),
+
+                completed:
+                    a.completed !== undefined
+                    ? a.completed
+                    : completed
+
+            };
+
+        });
+
+}
+
+
 /* =========================
    SALVATAGGIO
 ========================= */
+
 function saveData(){
+
     localStorage.setItem(
         "gestionePro_clients",
         JSON.stringify(clients)
     );
+
     localStorage.setItem(
         "gestionePro_appointments",
         JSON.stringify(appointments)
     );
+
 }
+
+
 /* =========================
    EURO
 ========================= */
+
 function euro(value){
-    return Number(value || 0).toLocaleString(
-        "it-IT",
-        {
-            style:"currency",
-            currency:"EUR"
-        }
-    );
+
+    return Number(value || 0)
+        .toLocaleString(
+            "it-IT",
+            {
+                style:"currency",
+                currency:"EUR"
+            }
+        );
+
 }
+
+
 /* =========================
    DATE
 ========================= */
+
 function todayString(){
+
     return dateToString(new Date());
+
 }
+
+
 function dateToString(date){
-    const y = date.getFullYear();
-    const m = String(
-        date.getMonth()+1
-    ).padStart(2,"0");
-    const d = String(
-        date.getDate()
-    ).padStart(2,"0");
+
+    const y =
+        date.getFullYear();
+
+    const m =
+        String(
+            date.getMonth()+1
+        ).padStart(2,"0");
+
+    const d =
+        String(
+            date.getDate()
+        ).padStart(2,"0");
+
     return `${y}-${m}-${d}`;
+
 }
+
+
 function formatDate(date){
+
     if(!date) return "";
+
     return new Date(
         date+"T00:00:00"
     ).toLocaleDateString(
@@ -802,1072 +1291,1176 @@ function formatDate(date){
             year:"numeric"
         }
     );
+
 }
+
+
 /* =========================
    NAVIGAZIONE
 ========================= */
+
 function showPage(page,button){
+
     document
-    .querySelectorAll("main > section")
-    .forEach(section=>{
-        section.classList.add("hidden");
-    });
+        .querySelectorAll(
+            "main > section"
+        )
+        .forEach(
+            section =>
+                section.classList.add("hidden")
+        );
+
     document
-    .getElementById(page)
-    .classList.remove("hidden");
+        .getElementById(page)
+        .classList.remove("hidden");
+
     document
-    .querySelectorAll(".nav button")
-    .forEach(btn=>{
-        btn.classList.remove("active");
-    });
+        .querySelectorAll(
+            ".nav button"
+        )
+        .forEach(
+            btn =>
+                btn.classList.remove("active")
+        );
+
     if(button){
         button.classList.add("active");
     }
+
     const titles = {
+
         dashboard:"Dashboard",
         clients:"Clienti",
         appointments:"Appuntamenti",
         payments:"Pagamenti",
         settings:"Impostazioni"
+
     };
+
     document
-    .getElementById("pageSubtitle")
-    .textContent = titles[page];
+        .getElementById("pageSubtitle")
+        .textContent =
+            titles[page];
+
     if(page==="dashboard"){
         updateDashboard();
     }
+
     if(page==="clients"){
         renderClients();
     }
+
     if(page==="appointments"){
         populateClientSelect();
         renderAppointments();
     }
+
     if(page==="payments"){
         renderPayments();
     }
+
 }
+
+
 /* =========================
-   CALCOLO NETTO
+   NETTO
 ========================= */
+
 function calculateNet(){
+
     const income =
-    Number(
-        document.getElementById(
-            "appointmentIncome"
-        ).value
-    ) || 0;
+        Number(
+            document.getElementById(
+                "appointmentIncome"
+            ).value
+        ) || 0;
+
     const expense =
-    Number(
-        document.getElementById(
-            "appointmentExpense"
-        ).value
-    ) || 0;
+        Number(
+            document.getElementById(
+                "appointmentExpense"
+            ).value
+        ) || 0;
+
     document
-    .getElementById("appointmentNet")
-    .textContent = euro(
-        income-expense
-    );
+        .getElementById(
+            "appointmentNet"
+        )
+        .textContent =
+            euro(income-expense);
+
+    previewInstallments();
+
 }
-document
-.getElementById("appointmentIncome")
-.addEventListener(
-    "input",
-    calculateNet
-);
-document
-.getElementById("appointmentExpense")
-.addEventListener(
-    "input",
-    calculateNet
-);
+
+
 /* =========================
-   RATE
+   PAGAMENTO RATE
 ========================= */
+
 function toggleInstallments(){
-    const type =
-    document.getElementById(
-        "appointmentPaymentType"
-    ).value;
+
+    const mode =
+        document.getElementById(
+            "paymentMode"
+        ).value;
+
     document
-    .getElementById("installmentBox")
-    .classList.toggle(
-        "hidden",
-        type !== "installments"
-    );
+        .getElementById(
+            "installmentOptions"
+        )
+        .classList.toggle(
+            "hidden",
+            mode !== "installments"
+        );
+
+    previewInstallments();
+
 }
+
+
+function previewInstallments(){
+
+    const mode =
+        document.getElementById(
+            "paymentMode"
+        ).value;
+
+    const box =
+        document.getElementById(
+            "installmentPreview"
+        );
+
+    if(mode !== "installments"){
+
+        box.innerHTML =
+            "Pagamento unico.";
+
+        return;
+
+    }
+
+    const total =
+        Number(
+            document.getElementById(
+                "appointmentIncome"
+            ).value
+        ) || 0;
+
+    const count =
+        Number(
+            document.getElementById(
+                "installmentCount"
+            ).value
+        ) || 2;
+
+    if(total <= 0){
+
+        box.innerHTML =
+            "Inserisci prima il guadagno totale.";
+
+        return;
+
+    }
+
+    const base =
+        Math.floor(
+            (total/count)*100
+        )/100;
+
+    const last =
+        total -
+        base*(count-1);
+
+    box.innerHTML = `
+
+        <strong>
+            ${count} rate
+        </strong>
+
+        <br>
+
+        ${euro(base)}
+        per le prime ${count-1} rate
+
+        <br>
+
+        ${euro(last)}
+        per l'ultima rata
+
+    `;
+
+}
+
+
 /* =========================
    CLIENTI
 ========================= */
+
 function saveClient(){
+
     const name =
-    document
-    .getElementById("clientName")
-    .value
-    .trim();
+        document
+            .getElementById(
+                "clientName"
+            )
+            .value
+            .trim();
+
     if(!name){
+
         alert(
             "Inserisci il nome del cliente."
         );
+
         return;
+
     }
+
     clients.push({
+
         id:Date.now(),
+
         name:name,
+
         phone:
-        document
-        .getElementById("clientPhone")
-        .value
-        .trim(),
+            document
+                .getElementById(
+                    "clientPhone"
+                )
+                .value
+                .trim(),
+
         email:
-        document
-        .getElementById("clientEmail")
-        .value
-        .trim(),
+            document
+                .getElementById(
+                    "clientEmail"
+                )
+                .value
+                .trim(),
+
         notes:
-        document
-        .getElementById("clientNotes")
-        .value
-        .trim()
+            document
+                .getElementById(
+                    "clientNotes"
+                )
+                .value
+                .trim()
+
     });
+
     saveData();
+
     document.getElementById("clientName").value="";
     document.getElementById("clientPhone").value="";
     document.getElementById("clientEmail").value="";
     document.getElementById("clientNotes").value="";
+
     renderClients();
     populateClientSelect();
+
     alert("Cliente salvato.");
+
 }
-function getClientName(id){
-    const client =
-    clients.find(
-        c => Number(c.id) === Number(id)
-    );
-    return client
-    ? client.name
-    : "Cliente eliminato";
+
+
+function renderClients(){
+
+    const container =
+        document.getElementById(
+            "clientsList"
+        );
+
+    const search =
+        (
+            document.getElementById(
+                "clientSearch"
+            )?.value || ""
+        ).toLowerCase();
+
+    const filtered =
+        clients.filter(
+            c =>
+                (c.name || "")
+                    .toLowerCase()
+                    .includes(search)
+        );
+
+    if(!filtered.length){
+
+        container.innerHTML =
+            '<div class="empty">Nessun cliente trovato.</div>';
+
+        return;
+
+    }
+
+    container.innerHTML =
+        filtered.map(
+            client=>{
+
+                const linked =
+                    appointments.filter(
+                        a =>
+                            Number(a.clientId) ===
+                            Number(client.id)
+                    );
+
+                const total =
+                    linked.reduce(
+                        (sum,a)=>
+                            sum+
+                            Number(a.income || 0),
+                        0
+                    );
+
+                const received =
+                    linked.reduce(
+                        (sum,a)=>
+                            sum+
+                            getReceived(a),
+                        0
+                    );
+
+                const expenses =
+                    linked.reduce(
+                        (sum,a)=>
+                            sum+
+                            Number(a.expense || 0),
+                        0
+                    );
+
+                const net =
+                    received-expenses;
+
+                const remaining =
+                    Math.max(
+                        0,
+                        total-received
+                    );
+
+                return `
+
+                <div class="item">
+
+                    <div class="item-title">
+                        ${escapeHTML(client.name)}
+                    </div>
+
+                    ${
+                        client.phone
+                        ?
+                        `<div class="item-sub">
+                            📞 ${escapeHTML(client.phone)}
+                         </div>`
+                        :
+                        ""
+                    }
+
+                    ${
+                        client.email
+                        ?
+                        `<div class="item-sub">
+                            ✉️ ${escapeHTML(client.email)}
+                         </div>`
+                        :
+                        ""
+                    }
+
+                    ${
+                        client.notes
+                        ?
+                        `<div class="item-sub">
+                            📝 ${escapeHTML(client.notes)}
+                         </div>`
+                        :
+                        ""
+                    }
+
+                    <div class="badge">
+                        ${linked.length} appuntamenti
+                    </div>
+
+                    ${
+                        remaining > 0
+                        ?
+                        `<div class="badge orange-badge">
+                            ⏳ ${euro(remaining)} da incassare
+                         </div>`
+                        :
+                        ""
+                    }
+
+                    <div class="item-money">
+
+                        <div class="money-box">
+                            <small>Incassato</small>
+                            <strong class="green">
+                                ${euro(received)}
+                            </strong>
+                        </div>
+
+                        <div class="money-box">
+                            <small>Spese</small>
+                            <strong class="red">
+                                ${euro(expenses)}
+                            </strong>
+                        </div>
+
+                        <div class="money-box">
+                            <small>Netto</small>
+                            <strong class="blue">
+                                ${euro(net)}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                    <div class="actions">
+
+                        <button
+                            class="danger"
+                            onclick="deleteClient(${client.id})">
+
+                            Elimina
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                `;
+
+            }
+        ).join("");
+
 }
+
+
 function deleteClient(id){
+
     const linked =
-    appointments.some(
-        a => Number(a.clientId) === Number(id)
-    );
+        appointments.some(
+            a =>
+                Number(a.clientId) ===
+                Number(id)
+        );
+
     if(linked){
+
         alert(
             "Questo cliente ha appuntamenti collegati. Elimina prima gli appuntamenti."
         );
+
         return;
+
     }
-    if(!confirm("Eliminare questo cliente?")){
+
+    if(
+        !confirm(
+            "Eliminare questo cliente?"
+        )
+    ){
+
         return;
+
     }
+
     clients =
-    clients.filter(
-        c => Number(c.id) !== Number(id)
-    );
+        clients.filter(
+            c =>
+                Number(c.id) !==
+                Number(id)
+        );
+
     saveData();
+
     renderClients();
     populateClientSelect();
+
 }
-function renderClients(){
-    const container =
-    document.getElementById("clientsList");
-    const search =
-    (
-        document.getElementById(
-            "clientSearch"
-        )?.value || ""
-    ).toLowerCase();
-    const filtered =
-    clients.filter(
-        c =>
-        (c.name || "")
-        .toLowerCase()
-        .includes(search)
-    );
-    if(!filtered.length){
-        container.innerHTML =
-        '<div class="empty">Nessun cliente trovato.</div>';
-        return;
-    }
-    container.innerHTML =
-    filtered.map(client=>{
-        const linked =
-        appointments.filter(
-            a =>
-            Number(a.clientId) ===
-            Number(client.id)
-        );
-        const income =
-        linked.reduce(
-            (sum,a)=>
-            sum + getPaidAmount(a),
-            0
-        );
-        const expenses =
-        linked.reduce(
-            (sum,a)=>
-            sum + Number(a.expense || 0),
-            0
-        );
-        const remaining =
-        linked.reduce(
-            (sum,a)=>
-            sum + getRemainingAmount(a),
-            0
-        );
-        return `
-        <div class="item">
-            <div class="item-title">
-                ${escapeHTML(client.name)}
-            </div>
-            ${
-                client.phone
-                ?
-                `<div class="item-sub">
-                    📞 ${escapeHTML(client.phone)}
-                </div>`
-                :""
-            }
-            ${
-                client.email
-                ?
-                `<div class="item-sub">
-                    ✉️ ${escapeHTML(client.email)}
-                </div>`
-                :""
-            }
-            <div class="badge">
-                ${linked.length} appuntamenti
-            </div>
-            <div class="item-money">
-                <div class="money-box">
-                    <small>Incassato</small>
-                    <strong class="green">
-                        ${euro(income)}
-                    </strong>
-                </div>
-                <div class="money-box">
-                    <small>Spese</small>
-                    <strong class="red">
-                        ${euro(expenses)}
-                    </strong>
-                </div>
-                <div class="money-box">
-                    <small>Residuo</small>
-                    <strong class="orange">
-                        ${euro(remaining)}
-                    </strong>
-                </div>
-            </div>
-            <div class="actions">
-                <button
-                class="danger"
-                onclick="deleteClient(${client.id})">
-                    Elimina
-                </button>
-            </div>
-        </div>
-        `;
-    }).join("");
-}
+
+
 /* =========================
    SELECT CLIENTE
 ========================= */
+
 function populateClientSelect(){
+
     const select =
-    document.getElementById(
-        "appointmentClient"
-    );
+        document.getElementById(
+            "appointmentClient"
+        );
+
     if(!clients.length){
+
         select.innerHTML =
-        '<option value="">Prima crea un cliente</option>';
+            '<option value="">Prima crea un cliente</option>';
+
         return;
+
     }
+
     select.innerHTML =
-    '<option value="">Seleziona cliente</option>' +
-    clients.map(
-        c =>
-        `<option value="${c.id}">
-            ${escapeHTML(c.name)}
-        </option>`
-    ).join("");
+        '<option value="">Seleziona cliente</option>' +
+
+        clients.map(
+            c =>
+                `<option value="${c.id}">
+                    ${escapeHTML(c.name)}
+                 </option>`
+        ).join("");
+
 }
+
+
 /* =========================
    SALVA APPUNTAMENTO
 ========================= */
+
 function saveAppointment(){
+
     const clientId =
-    document.getElementById(
-        "appointmentClient"
-    ).value;
+        document.getElementById(
+            "appointmentClient"
+        ).value;
+
     const date =
-    document.getElementById(
-        "appointmentDate"
-    ).value;
+        document.getElementById(
+            "appointmentDate"
+        ).value;
+
     if(!clientId){
+
         alert("Seleziona un cliente.");
+
         return;
+
     }
+
     if(!date){
+
         alert("Inserisci la data.");
+
         return;
+
     }
+
     const income =
-    Number(
-        document.getElementById(
-            "appointmentIncome"
-        ).value
-    ) || 0;
+        Number(
+            document.getElementById(
+                "appointmentIncome"
+            ).value
+        ) || 0;
+
     const expense =
-    Number(
+        Number(
+            document.getElementById(
+                "appointmentExpense"
+            ).value
+        ) || 0;
+
+    const paymentMode =
         document.getElementById(
-            "appointmentExpense"
-        ).value
-    ) || 0;
-    const paymentType =
-    document.getElementById(
-        "appointmentPaymentType"
-    ).value;
-    const installments =
-    paymentType === "installments"
-    ?
-    Number(
-        document.getElementById(
-            "appointmentInstallments"
-        ).value
-    )
-    :
-    1;
-    const data = {
-        clientId:Number(clientId),
-        date:date,
-        time:
-        document
-        .getElementById("appointmentTime")
-        .value,
-        work:
-        document
-        .getElementById("appointmentWork")
-        .value
-        .trim(),
-        income:income,
-        expense:expense,
-        net:income-expense,
-        notes:
-        document
-        .getElementById("appointmentNotes")
-        .value
-        .trim(),
-        paymentType:paymentType,
-        installments:installments
-    };
-    if(editingAppointmentId !== null){
-        const index =
-        appointments.findIndex(
-            a =>
-            Number(a.id) ===
-            Number(editingAppointmentId)
-        );
-        if(index !== -1){
-            appointments[index] = {
-                ...appointments[index],
-                ...data
-            };
-            rebuildPayments(
-                appointments[index]
-            );
-            updateClosedStatus(
-                appointments[index]
-            );
-        }
-        editingAppointmentId = null;
-        document
-        .getElementById(
-            "appointmentFormTitle"
+            "paymentMode"
+        ).value;
+
+    const count =
+        paymentMode === "installments"
+        ?
+        Number(
+            document.getElementById(
+                "installmentCount"
+            ).value
         )
-        .textContent =
-        "📅 Nuovo appuntamento";
-        document
-        .getElementById(
-            "saveAppointmentButton"
-        )
-        .textContent =
-        "Salva appuntamento";
-        document
-        .getElementById(
-            "cancelEditButton"
-        )
-        .classList.add("hidden");
-        saveData();
-        resetAppointmentForm();
-        refreshEverything();
-        alert("Appuntamento modificato.");
-        return;
-    }
-    const appointment = {
-        id:Date.now(),
-        ...data,
-        payments:[],
-        closed:false
-    };
+        :
+        1;
+
     /*
-       Pagamento unico:
-       la rata viene creata ma NON
-       considerata pagata automaticamente.
-    */
-    createPaymentSchedule(
-        appointment
-    );
-    updateClosedStatus(
-        appointment
-    );
-    appointments.push(
-        appointment
-    );
-    saveData();
-    resetAppointmentForm();
-    refreshEverything();
-    alert("Appuntamento salvato.");
-}
-/* =========================
-   CREAZIONE RATE
-========================= */
-function createPaymentSchedule(a){
-    a.payments = [];
-    const total =
-    Number(a.income || 0);
-    if(total <= 0){
-        return;
+     * Un appuntamento viene chiuso
+     * solamente quando sono presenti
+     * guadagno e spesa.
+     */
+
+    const completed =
+        income > 0 &&
+        expense >= 0;
+
+    let payments = [];
+
+    /*
+     * Se pagamento unico,
+     * il guadagno viene considerato
+     * incassato subito.
+     */
+
+    if(
+        paymentMode === "single" &&
+        income > 0
+    ){
+
+        payments = [{
+            id:Date.now()+Math.random(),
+            number:1,
+            amount:income,
+            date:date
+        }];
+
     }
-    const number =
-    Math.max(
-        1,
-        Math.min(
-            10,
-            Number(a.installments || 1)
-        )
-    );
-    const base =
-    Math.floor(
-        (total / number) * 100
-    ) / 100;
-    let remaining = total;
-    for(let i=1;i<=number;i++){
-        const amount =
-        i === number
-        ?
-        Math.round(
-            remaining * 100
-        ) / 100
-        :
-        base;
-        remaining -= amount;
-        a.payments.push({
-            id:Date.now()+i,
-            number:i,
-            amount:
-            Math.round(
-                amount*100
-            )/100,
-            paid:false,
-            date:null
-        });
-    }
-}
-/* =========================
-   RICOSTRUISCI RATE
-========================= */
-function rebuildPayments(a){
-    const oldPayments =
-    Array.isArray(a.payments)
-    ? a.payments
-    : [];
-    const oldPaid =
-    oldPayments.filter(
-        p => p.paid
-    );
-    const total =
-    Number(a.income || 0);
-    const number =
-    Math.max(
-        1,
-        Math.min(
-            10,
-            Number(a.installments || 1)
-        )
-    );
-    if(total <= 0){
-        a.payments=[];
-        return;
-    }
-    const base =
-    Math.floor(
-        (total / number)*100
-    )/100;
-    let remaining=total;
-    const newPayments=[];
-    for(let i=1;i<=number;i++){
-        const amount =
-        i===number
-        ?
-        Math.round(remaining*100)/100
-        :
-        base;
-        remaining-=amount;
+
+    /*
+     * Se stiamo modificando,
+     * manteniamo le rate già registrate.
+     */
+
+    if(editingAppointmentId !== null){
+
         const old =
-        oldPaid[i-1];
-        newPayments.push({
-            id:
-            old?.id ||
-            Date.now()+i,
-            number:i,
-            amount:
-            Math.round(amount*100)/100,
-            paid:
-            !!old,
-            date:
-            old?.date || null
-        });
+            appointments.find(
+                a =>
+                    Number(a.id) ===
+                    Number(editingAppointmentId)
+            );
+
+        if(old && Array.isArray(old.payments)){
+
+            payments =
+                old.payments;
+
+        }
+
     }
-    a.payments =
-    newPayments;
+
+    const data = {
+
+        clientId:Number(clientId),
+
+        date:date,
+
+        time:
+            document
+                .getElementById(
+                    "appointmentTime"
+                )
+                .value,
+
+        work:
+            document
+                .getElementById(
+                    "appointmentWork"
+                )
+                .value
+                .trim(),
+
+        income:income,
+
+        expense:expense,
+
+        net:income-expense,
+
+        notes:
+            document
+                .getElementById(
+                    "appointmentNotes"
+                )
+                .value
+                .trim(),
+
+        paymentMode:paymentMode,
+
+        installmentCount:count,
+
+        payments:payments,
+
+        completed:completed
+
+    };
+
+    if(editingAppointmentId !== null){
+
+        const index =
+            appointments.findIndex(
+                a =>
+                    Number(a.id) ===
+                    Number(editingAppointmentId)
+            );
+
+        if(index !== -1){
+
+            appointments[index] = {
+
+                ...appointments[index],
+
+                ...data
+
+            };
+
+        }
+
+        editingAppointmentId = null;
+
+        document
+            .getElementById(
+                "appointmentFormTitle"
+            )
+            .textContent =
+                "📅 Nuovo appuntamento";
+
+        document
+            .getElementById(
+                "saveAppointmentButton"
+            )
+            .textContent =
+                "Salva appuntamento";
+
+        document
+            .getElementById(
+                "cancelEditButton"
+            )
+            .classList.add("hidden");
+
+        saveData();
+
+        resetAppointmentForm();
+
+        refreshEverything();
+
+        alert(
+            "Appuntamento modificato."
+        );
+
+        return;
+
+    }
+
+    appointments.push({
+
+        id:Date.now(),
+
+        ...data
+
+    });
+
+    saveData();
+
+    resetAppointmentForm();
+
+    refreshEverything();
+
+    alert(
+        completed
+        ?
+        "Appuntamento completato e registrato."
+        :
+        "Appuntamento salvato. Rimarrà tra quelli da completare."
+    );
+
 }
+
+
 /* =========================
    MODIFICA APPUNTAMENTO
 ========================= */
+
 function editAppointment(id){
+
     const appointment =
-    appointments.find(
-        a =>
-        Number(a.id) === Number(id)
-    );
+        appointments.find(
+            a =>
+                Number(a.id) ===
+                Number(id)
+        );
+
     if(!appointment){
-        alert("Appuntamento non trovato.");
+
+        alert(
+            "Appuntamento non trovato."
+        );
+
         return;
+
     }
+
     editingAppointmentId =
-    appointment.id;
+        appointment.id;
+
     populateClientSelect();
-    document
-    .getElementById(
+
+    document.getElementById(
         "appointmentClient"
-    )
-    .value =
-    String(appointment.clientId);
-    document
-    .getElementById(
+    ).value =
+        String(
+            appointment.clientId
+        );
+
+    document.getElementById(
         "appointmentDate"
-    )
-    .value =
-    appointment.date || "";
-    document
-    .getElementById(
+    ).value =
+        appointment.date || "";
+
+    document.getElementById(
         "appointmentTime"
-    )
-    .value =
-    appointment.time || "";
-    document
-    .getElementById(
+    ).value =
+        appointment.time || "";
+
+    document.getElementById(
         "appointmentWork"
-    )
-    .value =
-    appointment.work || "";
-    document
-    .getElementById(
+    ).value =
+        appointment.work || "";
+
+    document.getElementById(
         "appointmentIncome"
-    )
-    .value =
-    appointment.income || "";
-    document
-    .getElementById(
+    ).value =
+        appointment.income || "";
+
+    document.getElementById(
         "appointmentExpense"
-    )
-    .value =
-    appointment.expense || "";
-    document
-    .getElementById(
-        "appointmentPaymentType"
-    )
-    .value =
-    appointment.paymentType || "single";
-    document
-    .getElementById(
-        "appointmentInstallments"
-    )
-    .value =
-    appointment.installments || 1;
-    document
-    .getElementById(
+    ).value =
+        appointment.expense || "";
+
+    document.getElementById(
         "appointmentNotes"
-    )
-    .value =
-    appointment.notes || "";
+    ).value =
+        appointment.notes || "";
+
+    document.getElementById(
+        "paymentMode"
+    ).value =
+        appointment.paymentMode || "single";
+
+    document.getElementById(
+        "installmentCount"
+    ).value =
+        appointment.installmentCount || 2;
+
     toggleInstallments();
+
     calculateNet();
-    document
-    .getElementById(
+
+    document.getElementById(
         "appointmentFormTitle"
-    )
-    .textContent =
-    "✏️ Modifica appuntamento";
-    document
-    .getElementById(
+    ).textContent =
+        "✏️ Modifica appuntamento";
+
+    document.getElementById(
         "saveAppointmentButton"
-    )
-    .textContent =
-    "Salva modifiche";
-    document
-    .getElementById(
+    ).textContent =
+        "Salva modifiche";
+
+    document.getElementById(
         "cancelEditButton"
-    )
-    .classList.remove("hidden");
+    ).classList.remove(
+        "hidden"
+    );
+
+    showPage(
+        "appointments",
+        document.querySelectorAll(".nav button")[2]
+    );
+
     window.scrollTo({
         top:0,
         behavior:"smooth"
     });
+
 }
+
+
 /* =========================
-   ANNULLA
+   ANNULLA MODIFICA
 ========================= */
+
 function cancelEditAppointment(){
-    editingAppointmentId=null;
-    document
-    .getElementById(
+
+    editingAppointmentId = null;
+
+    document.getElementById(
         "appointmentFormTitle"
-    )
-    .textContent =
-    "📅 Nuovo appuntamento";
-    document
-    .getElementById(
+    ).textContent =
+        "📅 Nuovo appuntamento";
+
+    document.getElementById(
         "saveAppointmentButton"
-    )
-    .textContent =
-    "Salva appuntamento";
-    document
-    .getElementById(
+    ).textContent =
+        "Salva appuntamento";
+
+    document.getElementById(
         "cancelEditButton"
-    )
-    .classList.add("hidden");
-    resetAppointmentForm();
-}
-/* =========================
-   RESET
-========================= */
-function resetAppointmentForm(){
-    document
-    .getElementById(
-        "appointmentClient"
-    )
-    .value="";
-    document
-    .getElementById(
-        "appointmentDate"
-    )
-    .value=todayString();
-    document
-    .getElementById(
-        "appointmentTime"
-    )
-    .value="";
-    document
-    .getElementById(
-        "appointmentWork"
-    )
-    .value="";
-    document
-    .getElementById(
-        "appointmentIncome"
-    )
-    .value="";
-    document
-    .getElementById(
-        "appointmentExpense"
-    )
-    .value="";
-    document
-    .getElementById(
-        "appointmentPaymentType"
-    )
-    .value="single";
-    document
-    .getElementById(
-        "appointmentInstallments"
-    )
-    .value="2";
-    document
-    .getElementById(
-        "appointmentNotes"
-    )
-    .value="";
-    document
-    .getElementById(
-        "appointmentNet"
-    )
-    .textContent=euro(0);
-    toggleInstallments();
-}
-/* =========================
-   STATO APPUNTAMENTO
-========================= */
-function updateClosedStatus(a){
-    /*
-       L'appuntamento viene chiuso
-       solamente quando sono stati
-       inseriti GUADAGNO e SPESA.
-    */
-    const income =
-    Number(a.income || 0);
-    const expense =
-    Number(a.expense || 0);
-    a.closed =
-    income > 0 &&
-    expense >= 0;
-}
-/* =========================
-   PAGAMENTI
-========================= */
-function getPaidAmount(a){
-    if(!Array.isArray(a.payments)){
-        return 0;
-    }
-    return a.payments.reduce(
-        (sum,p)=>
-        sum +
-        (p.paid
-        ? Number(p.amount || 0)
-        : 0),
-        0
+    ).classList.add(
+        "hidden"
     );
+
+    resetAppointmentForm();
+
 }
-function getRemainingAmount(a){
-    const total =
-    Number(a.income || 0);
+
+
+/* =========================
+   RESET FORM
+========================= */
+
+function resetAppointmentForm(){
+
+    document.getElementById(
+        "appointmentClient"
+    ).value="";
+
+    document.getElementById(
+        "appointmentDate"
+    ).value =
+        todayString();
+
+    document.getElementById(
+        "appointmentTime"
+    ).value="";
+
+    document.getElementById(
+        "appointmentWork"
+    ).value="";
+
+    document.getElementById(
+        "appointmentIncome"
+    ).value="";
+
+    document.getElementById(
+        "appointmentExpense"
+    ).value="";
+
+    document.getElementById(
+        "appointmentNotes"
+    ).value="";
+
+    document.getElementById(
+        "paymentMode"
+    ).value="single";
+
+    document.getElementById(
+        "installmentCount"
+    ).value="2";
+
+    document.getElementById(
+        "installmentOptions"
+    ).classList.add("hidden");
+
+    document.getElementById(
+        "appointmentNet"
+    ).textContent =
+        euro(0);
+
+}
+
+
+/* =========================
+   CLIENTE
+========================= */
+
+function getClientName(id){
+
+    const client =
+        clients.find(
+            c =>
+                Number(c.id) ===
+                Number(id)
+        );
+
+    return client
+        ? client.name
+        : "Cliente eliminato";
+
+}
+
+
+/* =========================
+   INCASSATO
+========================= */
+
+function getReceived(a){
+
+    if(
+        Array.isArray(a.payments)
+    ){
+
+        return a.payments.reduce(
+            (sum,p)=>
+                sum+
+                Number(p.amount || 0),
+            0
+        );
+
+    }
+
+    return 0;
+
+}
+
+
+/* =========================
+   RESIDUO
+========================= */
+
+function getRemaining(a){
+
     return Math.max(
         0,
-        total-getPaidAmount(a)
+        Number(a.income || 0) -
+        getReceived(a)
     );
+
 }
-function getPaidRateCount(a){
-    if(!Array.isArray(a.payments)){
-        return 0;
-    }
-    return a.payments.filter(
-        p => p.paid
-    ).length;
-}
+
+
 /* =========================
-   SEGNA RATA PAGATA
+   APPUNTAMENTO COMPLETATO
 ========================= */
-function payInstallment(
-    appointmentId,
-    paymentId
-){
-    const appointment =
-    appointments.find(
-        a =>
-        Number(a.id) ===
-        Number(appointmentId)
+
+function isCompleted(a){
+
+    return Boolean(
+        a.completed
     );
-    if(!appointment) return;
-    const payment =
-    appointment.payments.find(
-        p =>
-        Number(p.id) ===
-        Number(paymentId)
-    );
-    if(!payment) return;
-    if(payment.paid){
-        if(
-            !confirm(
-                "Questa rata risulta già pagata. Vuoi annullare il pagamento?"
-            )
-        ){
-            return;
-        }
-        payment.paid=false;
-        payment.date=null;
-    }
-    else{
-        if(
-            !confirm(
-                `Confermi il pagamento della rata ${payment.number} di ${euro(payment.amount)}?`
-            )
-        ){
-            return;
-        }
-        payment.paid=true;
-        payment.date=todayString();
-    }
-    saveData();
-    refreshEverything();
+
 }
+
+
 /* =========================
-   PAGAMENTI RAGGRUPPATI
+   RENDER APPUNTAMENTI
 ========================= */
-function renderPayments(){
+
+function renderAppointments(){
+
     const container =
-    document.getElementById(
-        "paymentsList"
-    );
-    /*
-       Raggruppiamo tutti gli appuntamenti
-       per cliente.
-    */
-    const grouped={};
-    appointments.forEach(a=>{
-        if(
-            Number(a.income || 0) <= 0
-        ){
-            return;
-        }
-        if(!Array.isArray(a.payments)){
-            return;
-        }
-        const remaining =
-        getRemainingAmount(a);
-        /*
-           Mostriamo solo chi ha
-           ancora qualcosa da pagare.
-        */
-        if(remaining <= 0){
-            return;
-        }
-        const key =
-        String(a.clientId);
-        if(!grouped[key]){
-            grouped[key]=[];
-        }
-        grouped[key].push(a);
-    });
-    const clientIds =
-    Object.keys(grouped);
-    let totalPaid=0;
-    let totalRemaining=0;
-    appointments.forEach(a=>{
-        totalPaid += getPaidAmount(a);
-        totalRemaining +=
-        getRemainingAmount(a);
-    });
-    document
-    .getElementById(
-        "paymentTotalPaid"
-    )
-    .textContent=euro(totalPaid);
-    document
-    .getElementById(
-        "paymentTotalRemaining"
-    )
-    .textContent=euro(totalRemaining);
-    document
-    .getElementById(
-        "paymentClientsCount"
-    )
-    .textContent=clientIds.length;
-    if(!clientIds.length){
+        document.getElementById(
+            "appointmentsList"
+        );
+
+    const search =
+        (
+            document.getElementById(
+                "appointmentSearch"
+            )?.value || ""
+        ).toLowerCase();
+
+    let list =
+        appointments.filter(
+            a => {
+
+                const client =
+                    getClientName(
+                        a.clientId
+                    ).toLowerCase();
+
+                const work =
+                    (
+                        a.work || ""
+                    ).toLowerCase();
+
+                return (
+                    client.includes(search) ||
+                    work.includes(search)
+                );
+
+            }
+        );
+
+    if(!list.length){
+
         container.innerHTML =
-        '<div class="empty">🎉 Nessun pagamento residuo.</div>';
+            '<div class="empty">Nessun appuntamento trovato.</div>';
+
         return;
+
     }
+
+    list.sort(
+        (a,b)=>
+            `${a.date}${a.time || ""}`
+                .localeCompare(
+                    `${b.date}${b.time || ""}`
+                )
+    );
+
     container.innerHTML =
-    clientIds.map(clientId=>{
-        const list =
-        grouped[clientId];
-        const clientName =
-        getClientName(clientId);
-        const clientPaid =
-        list.reduce(
-            (sum,a)=>
-            sum+getPaidAmount(a),
-            0
-        );
-        const clientRemaining =
-        list.reduce(
-            (sum,a)=>
-            sum+getRemainingAmount(a),
-            0
-        );
-        const clientTotal =
-        clientPaid+clientRemaining;
-        const percentage =
-        clientTotal > 0
-        ?
-        Math.min(
-            100,
-            Math.round(
-                clientPaid/
-                clientTotal*
-                100
+        list
+            .map(
+                a =>
+                    appointmentHTML(a)
             )
-        )
-        :
-        0;
-        return `
-        <div class="payment-card">
-            <div class="payment-header">
-                <div>
-                    <div class="payment-title">
-                        👤 ${escapeHTML(clientName)}
-                    </div>
-                    <div class="item-sub">
-                        ${list.length}
-                        ${
-                            list.length===1
-                            ?"appuntamento"
-                            :"appuntamenti"
-                        }
-                    </div>
-                </div>
-                <span class="badge badge-orange">
-                    ${euro(clientRemaining)}
-                    residui
-                </span>
-            </div>
-            <div class="progress">
-                <div
-                class="progress-bar"
-                style="width:${percentage}%">
-                </div>
-            </div>
-            <div class="item-sub">
-                Pagato:
-                <b class="green">
-                    ${euro(clientPaid)}
-                </b>
-                · Totale:
-                <b>
-                    ${euro(clientTotal)}
-                </b>
-            </div>
-            ${list.map(a=>`
-                <div class="edit-box">
-                    <div class="item-title">
-                        ${escapeHTML(
-                            a.work ||
-                            "Appuntamento"
-                        )}
-                    </div>
-                    <div class="item-sub">
-                        📅 ${formatDate(a.date)}
-                    </div>
-                    <div class="item-sub">
-                        Totale:
-                        <b>${euro(a.income)}</b>
-                        · Pagato:
-                        <b class="green">
-                            ${euro(
-                                getPaidAmount(a)
-                            )}
-                        </b>
-                        · Residuo:
-                        <b class="orange">
-                            ${euro(
-                                getRemainingAmount(a)
-                            )}
-                        </b>
-                    </div>
-                    <div style="margin-top:12px">
-                    ${
-                        a.payments.map(p=>`
-                        <div class="rate">
-                            <div class="rate-left">
-                                <div class="rate-title">
-                                    Rata ${p.number}
-                                    · ${euro(p.amount)}
-                                </div>
-                                <div class="rate-sub">
-                                    ${
-                                        p.paid
-                                        ?
-                                        `✅ Pagata
-                                        ${
-                                            p.date
-                                            ?
-                                            " il "+
-                                            formatDate(p.date)
-                                            :
-                                            ""
-                                        }`
-                                        :
-                                        "⏳ Da pagare"
-                                    }
-                                </div>
-                            </div>
-                            <button
-                            class="${
-                                p.paid
-                                ?"secondary"
-                                :"success"
-                            }"
-                            onclick="payInstallment(
-                                ${a.id},
-                                ${p.id}
-                            )">
-                            ${
-                                p.paid
-                                ?
-                                "Annulla"
-                                :
-                                "Segna pagata"
-                            }
-                            </button>
-                        </div>
-                        `).join("")
-                    }
-                    </div>
-                </div>
-            `).join("")}
-        </div>
-        `;
-    }).join("");
+            .join("");
+
 }
+
+
 /* =========================
-   APPUNTAMENTO HTML
+   HTML APPUNTAMENTO
 ========================= */
+
 function appointmentHTML(a){
-    const paid =
-    getPaidAmount(a);
+
+    const received =
+        getReceived(a);
+
     const remaining =
-    getRemainingAmount(a);
-    const future =
-    a.date > todayString();
-    const open =
-    !a.closed;
-    let status="";
-    if(future){
-        status=
-        `<span class="badge badge-blue">
-            📅 Futuro
-         </span>`;
+        getRemaining(a);
+
+    let statusClass =
+        "";
+
+    let statusText =
+        "";
+
+    if(
+        !isCompleted(a)
+    ){
+
+        statusClass =
+            "pending";
+
+        statusText =
+            "⏳ Da completare";
+
     }
-    else if(open){
-        status=
-        `<span class="badge badge-orange">
-            ⚠️ Da completare
-         </span>`;
+
+    else if(
+        remaining > 0
+    ){
+
+        statusClass =
+            "future";
+
+        statusText =
+            "💳 Pagamento in corso";
+
     }
-    else if(remaining>0){
-        status=
-        `<span class="badge badge-orange">
-            💳 In pagamento
-         </span>`;
-    }
+
     else{
-        status=
-        `<span class="badge badge-green">
-            ✅ Chiuso
-         </span>`;
+
+        statusClass =
+            "completed";
+
+        statusText =
+            "✅ Completato";
+
     }
+
     return `
-    <div class="item">
+
+    <div class="item ${statusClass}">
+
         <div class="item-title">
+
             ${escapeHTML(
-                getClientName(a.clientId)
+                getClientName(
+                    a.clientId
+                )
             )}
+
         </div>
+
         <div class="item-sub">
+
             📅 ${formatDate(a.date)}
+
             ${
                 a.time
                 ?
@@ -1875,7 +2468,9 @@ function appointmentHTML(a){
                 :
                 ""
             }
+
         </div>
+
         ${
             a.work
             ?
@@ -1885,40 +2480,97 @@ function appointmentHTML(a){
             :
             ""
         }
-        ${status}
+
+        <div class="badge">
+            ${statusText}
+        </div>
+
         <div class="item-money">
+
             <div class="money-box">
-                <small>Totale</small>
+
+                <small>
+                    Totale
+                </small>
+
                 <strong>
                     ${euro(a.income)}
                 </strong>
+
             </div>
+
             <div class="money-box">
-                <small>Incassato</small>
+
+                <small>
+                    Incassato
+                </small>
+
                 <strong class="green">
-                    ${euro(paid)}
+                    ${euro(received)}
                 </strong>
+
             </div>
+
             <div class="money-box">
-                <small>Residuo</small>
+
+                <small>
+                    Residuo
+                </small>
+
                 <strong class="orange">
                     ${euro(remaining)}
                 </strong>
+
             </div>
+
         </div>
-        <div class="item-sub">
-            💸 Spese:
-            <b class="red">
-                ${euro(a.expense)}
-            </b>
-            · 🟢 Netto incassato:
-            <b class="blue">
-                ${euro(
-                    paid-
-                    Number(a.expense || 0)
-                )}
-            </b>
+
+        <div class="item-money">
+
+            <div class="money-box">
+
+                <small>
+                    Spese
+                </small>
+
+                <strong class="red">
+                    ${euro(a.expense)}
+                </strong>
+
+            </div>
+
+            <div class="money-box">
+
+                <small>
+                    Netto reale
+                </small>
+
+                <strong class="blue">
+                    ${euro(received - Number(a.expense || 0))}
+                </strong>
+
+            </div>
+
+            <div class="money-box">
+
+                <small>
+                    Pagamento
+                </small>
+
+                <strong>
+                    ${
+                        a.paymentMode === "installments"
+                        ?
+                        `${a.installmentCount} rate`
+                        :
+                        "Unico"
+                    }
+                </strong>
+
+            </div>
+
         </div>
+
         ${
             a.notes
             ?
@@ -1928,482 +2580,1149 @@ function appointmentHTML(a){
             :
             ""
         }
+
         <div class="actions">
+
             <button
-            class="secondary"
-            onclick="editAppointment(${a.id})">
+                class="secondary"
+                onclick="editAppointment(${a.id})">
+
                 ✏️ Modifica
+
             </button>
+
             <button
-            class="danger"
-            onclick="deleteAppointment(${a.id})">
+                class="danger"
+                onclick="deleteAppointment(${a.id})">
+
                 🗑️ Elimina
+
             </button>
+
         </div>
+
     </div>
+
     `;
+
 }
-/* =========================
-   APPUNTAMENTI
-========================= */
-function renderAppointments(){
-    const container =
-    document.getElementById(
-        "appointmentsList"
-    );
-    const search =
-    (
-        document.getElementById(
-            "appointmentSearch"
-        )?.value || ""
-    ).toLowerCase();
-    let list =
-    appointments.filter(a=>{
-        const client =
-        getClientName(
-            a.clientId
-        ).toLowerCase();
-        const work =
-        (a.work || "")
-        .toLowerCase();
-        return (
-            client.includes(search) ||
-            work.includes(search)
-        );
-    });
-    if(!list.length){
-        container.innerHTML =
-        '<div class="empty">Nessun appuntamento trovato.</div>';
-        return;
-    }
-    /*
-       Prima gli appuntamenti futuri,
-       poi quelli aperti,
-       infine quelli chiusi.
-    */
-    list.sort((a,b)=>{
-        if(a.closed !== b.closed){
-            return a.closed ? 1 : -1;
-        }
-        return (
-            `${a.date}${a.time || ""}`
-        ).localeCompare(
-            `${b.date}${b.time || ""}`
-        );
-    });
-    container.innerHTML =
-    list.map(a=>appointmentHTML(a))
-    .join("");
-}
+
+
 /* =========================
    ELIMINA APPUNTAMENTO
 ========================= */
+
 function deleteAppointment(id){
+
     if(
         !confirm(
-            "Eliminare questo appuntamento e tutti i suoi pagamenti?"
+            "Eliminare questo appuntamento?"
         )
     ){
+
         return;
+
     }
+
     appointments =
-    appointments.filter(
-        a =>
-        Number(a.id) !== Number(id)
-    );
+        appointments.filter(
+            a =>
+                Number(a.id) !==
+                Number(id)
+        );
+
     saveData();
+
     refreshEverything();
+
 }
+
+
 /* =========================
    PERIODI
 ========================= */
+
 function getPeriodDates(){
+
     const filter =
-    document.getElementById(
-        "periodFilter"
-    ).value;
-    const now=new Date();
-    let from=new Date(now);
-    let to=new Date(now);
+        document.getElementById(
+            "periodFilter"
+        ).value;
+
+    const now =
+        new Date();
+
+    let from =
+        new Date(now);
+
+    let to =
+        new Date(now);
+
     if(filter==="yesterday"){
+
         from.setDate(
             now.getDate()-1
         );
+
         to.setDate(
             now.getDate()-1
         );
+
     }
+
     else if(filter==="week"){
+
         const day =
-        now.getDay() || 7;
+            now.getDay() || 7;
+
         from.setDate(
             now.getDate()-day+1
         );
+
     }
+
     else if(filter==="month"){
+
         from =
-        new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            1
-        );
+            new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                1
+            );
+
     }
+
     else if(filter==="lastMonth"){
+
         from =
-        new Date(
-            now.getFullYear(),
-            now.getMonth()-1,
-            1
-        );
+            new Date(
+                now.getFullYear(),
+                now.getMonth()-1,
+                1
+            );
+
         to =
-        new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            0
-        );
+            new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                0
+            );
+
     }
+
     else if(filter==="custom"){
+
         const f =
-        document.getElementById(
-            "dateFrom"
-        ).value;
+            document.getElementById(
+                "dateFrom"
+            ).value;
+
         const t =
-        document.getElementById(
-            "dateTo"
-        ).value;
+            document.getElementById(
+                "dateTo"
+            ).value;
+
         if(!f || !t){
+
             return null;
+
         }
+
         return {
             from:f,
             to:t
         };
+
     }
+
     return {
+
         from:
-        dateToString(from),
+            dateToString(from),
+
         to:
-        dateToString(to)
+            dateToString(to)
+
     };
+
 }
-/* =========================
-   INCASSI NEL PERIODO
-========================= */
-function getPaymentsInRange(
-    from,
-    to
-){
-    let income=0;
-    appointments.forEach(a=>{
-        if(!Array.isArray(a.payments)){
-            return;
-        }
-        a.payments.forEach(p=>{
-            if(
-                p.paid &&
-                p.date >= from &&
-                p.date <= to
-            ){
-                income +=
-                Number(p.amount || 0);
-            }
-        });
-    });
-    return income;
-}
+
+
 /* =========================
    DASHBOARD
 ========================= */
+
 function updateDashboard(){
+
     const filter =
+        document.getElementById(
+            "periodFilter"
+        ).value;
+
     document.getElementById(
-        "periodFilter"
-    ).value;
-    document
-    .getElementById("customDates")
-    .classList.toggle(
+        "customDates"
+    ).classList.toggle(
         "hidden",
         filter!=="custom"
     );
+
     const range =
-    getPeriodDates();
-    if(!range) return;
-    const income =
-    getPaymentsInRange(
-        range.from,
-        range.to
-    );
-    const expenses =
-    appointments.reduce(
-        (sum,a)=>{
-            if(
+        getPeriodDates();
+
+    if(!range){
+
+        return;
+
+    }
+
+    const filtered =
+        appointments.filter(
+            a =>
                 a.date >= range.from &&
                 a.date <= range.to
-            ){
-                return sum+
-                Number(a.expense || 0);
-            }
-            return sum;
-        },
-        0
-    );
+        );
+
+    const income =
+        filtered.reduce(
+            (sum,a)=>
+                sum+
+                getReceived(a),
+            0
+        );
+
+    const expenses =
+        filtered.reduce(
+            (sum,a)=>
+                sum+
+                Number(a.expense || 0),
+            0
+        );
+
     const net =
-    income-expenses;
-    document
-    .getElementById("dashIncome")
-    .textContent=euro(income);
-    document
-    .getElementById("dashExpenses")
-    .textContent=euro(expenses);
-    document
-    .getElementById("dashNet")
-    .textContent=euro(net);
-    /* ANNO */
-    const year =
-    new Date()
-    .getFullYear()
-    .toString();
-    const yearIncome =
-    getPaymentsInRange(
-        `${year}-01-01`,
-        `${year}-12-31`
-    );
-    const yearExpenses =
-    appointments.reduce(
-        (sum,a)=>{
-            if(
-                (a.date || "")
-                .startsWith(year)
-            ){
-                return sum+
-                Number(a.expense || 0);
-            }
-            return sum;
-        },
-        0
-    );
-    const yearNet =
-    yearIncome-yearExpenses;
-    document
-    .getElementById("yearIncome")
-    .textContent=euro(yearIncome);
-    document
-    .getElementById("yearExpenses")
-    .textContent=euro(yearExpenses);
-    document
-    .getElementById("yearNet")
-    .textContent=euro(yearNet);
-    const yearAppointments =
-    appointments.filter(
-        a =>
-        (a.date || "")
-        .startsWith(year)
-    ).length;
-    document
-    .getElementById("yearAppointments")
-    .textContent=
-    yearAppointments;
-    /* APPUNTAMENTI DA GESTIRE */
-    const container =
+        income-expenses;
+
     document.getElementById(
-        "dashboardAppointments"
+        "dashIncome"
+    ).textContent =
+        euro(income);
+
+    document.getElementById(
+        "dashExpenses"
+    ).textContent =
+        euro(expenses);
+
+    document.getElementById(
+        "dashNet"
+    ).textContent =
+        euro(net);
+
+    /* ANNO */
+
+    const year =
+        new Date()
+            .getFullYear()
+            .toString();
+
+    const yearly =
+        appointments.filter(
+            a =>
+                (a.date || "")
+                    .startsWith(year)
+        );
+
+    const yearIncome =
+        yearly.reduce(
+            (sum,a)=>
+                sum+
+                getReceived(a),
+            0
+        );
+
+    const yearExpenses =
+        yearly.reduce(
+            (sum,a)=>
+                sum+
+                Number(a.expense || 0),
+            0
+        );
+
+    document.getElementById(
+        "yearIncome"
+    ).textContent =
+        euro(yearIncome);
+
+    document.getElementById(
+        "yearExpenses"
+    ).textContent =
+        euro(yearExpenses);
+
+    document.getElementById(
+        "yearNet"
+    ).textContent =
+        euro(
+            yearIncome-yearExpenses
+        );
+
+    document.getElementById(
+        "yearAppointments"
+    ).textContent =
+        yearly.length;
+
+    /* PROSSIMI APPUNTAMENTI */
+
+    renderFutureAppointments();
+
+    /* DETTAGLIO */
+
+    const container =
+        document.getElementById(
+            "dashboardAppointments"
+        );
+
+    if(!filtered.length){
+
+        container.innerHTML =
+            '<div class="empty">Nessun appuntamento nel periodo selezionato.</div>';
+
+        return;
+
+    }
+
+    filtered.sort(
+        (a,b)=>
+            `${a.date}${a.time || ""}`
+                .localeCompare(
+                    `${b.date}${b.time || ""}`
+                )
     );
+
+    container.innerHTML =
+        filtered
+            .map(
+                a =>
+                    appointmentHTML(a)
+            )
+            .join("");
+
+}
+
+
+/* =========================
+   FUTURI / DA COMPLETARE
+========================= */
+
+function renderFutureAppointments(){
+
+    const container =
+        document.getElementById(
+            "futureAppointments"
+        );
+
     const today =
-    todayString();
+        todayString();
+
     /*
-       Dashboard:
-       - futuri sempre visibili
-       - appuntamenti di oggi
-       - appuntamenti passati ancora aperti
-       - appuntamenti chiusi e completamente pagati esclusi
-    */
-    const list =
-    appointments.filter(a=>{
-        if(a.date >= today){
-            return true;
-        }
-        if(!a.closed){
-            return true;
-        }
-        if(getRemainingAmount(a)>0){
-            return true;
-        }
-        return false;
-    });
+     * Mostriamo tutti gli appuntamenti
+     * futuri e tutti quelli non completati.
+     */
+
+    let list =
+        appointments.filter(
+            a =>
+                !isCompleted(a) ||
+                a.date >= today
+        );
+
     list.sort(
         (a,b)=>
-        `${a.date}${a.time || ""}`
-        .localeCompare(
-            `${b.date}${b.time || ""}`
-        )
+            `${a.date}${a.time || ""}`
+                .localeCompare(
+                    `${b.date}${b.time || ""}`
+                )
     );
+
     if(!list.length){
+
         container.innerHTML =
-        '<div class="empty">🎉 Nessun appuntamento da gestire.</div>';
+            '<div class="empty">Nessun appuntamento futuro.</div>';
+
         return;
+
     }
+
     container.innerHTML =
-    list.map(a=>appointmentHTML(a))
-    .join("");
+        list.map(
+            a =>
+                appointmentHTML(a)
+        ).join("");
+
 }
+
+
+/* =========================
+   PAGAMENTI
+========================= */
+
+function getPaymentClients(){
+
+    const map = {};
+
+    appointments.forEach(
+        a => {
+
+            const remaining =
+                getRemaining(a);
+
+            if(
+                remaining <= 0 ||
+                a.paymentMode !== "installments"
+            ){
+
+                return;
+
+            }
+
+            const clientId =
+                Number(a.clientId);
+
+            if(!map[clientId]){
+
+                map[clientId] = {
+
+                    clientId:clientId,
+
+                    appointments:[],
+
+                    total:0,
+
+                    received:0,
+
+                    remaining:0
+
+                };
+
+            }
+
+            map[clientId]
+                .appointments
+                .push(a);
+
+            map[clientId].total +=
+                Number(a.income || 0);
+
+            map[clientId].received +=
+                getReceived(a);
+
+            map[clientId].remaining +=
+                remaining;
+
+        }
+    );
+
+    return Object.values(map);
+
+}
+
+
+function renderPayments(){
+
+    const container =
+        document.getElementById(
+            "paymentsList"
+        );
+
+    const search =
+        (
+            document.getElementById(
+                "paymentSearch"
+            )?.value || ""
+        ).toLowerCase();
+
+    let groups =
+        getPaymentClients();
+
+    groups =
+        groups.filter(
+            group =>
+                getClientName(
+                    group.clientId
+                )
+                .toLowerCase()
+                .includes(search)
+        );
+
+    const totalReceived =
+        groups.reduce(
+            (sum,g)=>
+                sum+g.received,
+            0
+        );
+
+    const totalRemaining =
+        groups.reduce(
+            (sum,g)=>
+                sum+g.remaining,
+            0
+        );
+
+    document.getElementById(
+        "paymentsReceived"
+    ).textContent =
+        euro(totalReceived);
+
+    document.getElementById(
+        "paymentsRemaining"
+    ).textContent =
+        euro(totalRemaining);
+
+    document.getElementById(
+        "paymentsClients"
+    ).textContent =
+        groups.length;
+
+    if(!groups.length){
+
+        container.innerHTML =
+            '<div class="empty">Nessun pagamento dilazionato in corso.</div>';
+
+        return;
+
+    }
+
+    container.innerHTML =
+        groups
+            .map(
+                group =>
+                    paymentClientHTML(group)
+            )
+            .join("");
+
+}
+
+
+/* =========================
+   CLIENTE PAGAMENTI
+========================= */
+
+function paymentClientHTML(group){
+
+    const name =
+        getClientName(
+            group.clientId
+        );
+
+    const percentage =
+        group.total > 0
+        ?
+        Math.min(
+            100,
+            (group.received/group.total)*100
+        )
+        :
+        0;
+
+    return `
+
+    <div class="item">
+
+        <div class="item-title">
+
+            👤 ${escapeHTML(name)}
+
+        </div>
+
+        <div class="payment-summary">
+
+            <div class="payment-summary-row">
+
+                <span>Totale da pagare</span>
+
+                <strong>
+                    ${euro(group.total)}
+                </strong>
+
+            </div>
+
+            <div class="payment-summary-row">
+
+                <span>Già pagato</span>
+
+                <strong class="green">
+                    ${euro(group.received)}
+                </strong>
+
+            </div>
+
+            <div class="payment-summary-row">
+
+                <span>Residuo</span>
+
+                <strong class="orange">
+                    ${euro(group.remaining)}
+                </strong>
+
+            </div>
+
+            <div class="payment-progress">
+
+                <div
+                    class="payment-progress-bar"
+                    style="width:${percentage}%">
+                </div>
+
+            </div>
+
+            <small style="color:#777">
+                ${percentage.toFixed(0)}% pagato
+            </small>
+
+        </div>
+
+        ${
+            group.appointments
+                .map(
+                    a =>
+                        appointmentPaymentsHTML(a)
+                )
+                .join("")
+        }
+
+    </div>
+
+    `;
+
+}
+
+
+/* =========================
+   RATE APPUNTAMENTO
+========================= */
+
+function appointmentPaymentsHTML(a){
+
+    const total =
+        Number(a.income || 0);
+
+    const count =
+        Number(
+            a.installmentCount || 1
+        );
+
+    const payments =
+        Array.isArray(a.payments)
+        ?
+        a.payments
+        :
+        [];
+
+    const paid =
+        getReceived(a);
+
+    const remaining =
+        getRemaining(a);
+
+    /*
+     * Costruiamo virtualmente
+     * le rate mancanti.
+     */
+
+    const base =
+        count > 0
+        ?
+        Math.floor(
+            (total/count)*100
+        )/100
+        :
+        total;
+
+    const last =
+        total -
+        base*(count-1);
+
+    let rows = "";
+
+    for(
+        let i=1;
+        i<=count;
+        i++
+    ){
+
+        const existing =
+            payments.find(
+                p =>
+                    Number(p.number) ===
+                    Number(i)
+            );
+
+        const amount =
+            existing
+            ?
+            Number(existing.amount || 0)
+            :
+            (
+                i === count
+                ?
+                last
+                :
+                base
+            );
+
+        const isPaid =
+            Boolean(existing);
+
+        rows += `
+
+        <div class="installment ${
+            isPaid ? "paid" : ""
+        }">
+
+            <div class="installment-head">
+
+                <div class="installment-title">
+
+                    Rata ${i}/${count}
+
+                </div>
+
+                ${
+                    isPaid
+                    ?
+                    `<span class="badge green-badge">
+                        ✅ Pagata
+                     </span>`
+                    :
+                    `<span class="badge orange-badge">
+                        ⏳ Residua
+                     </span>`
+                }
+
+            </div>
+
+            <div class="installment-info">
+
+                Importo:
+                <strong>
+                    ${euro(amount)}
+                </strong>
+
+                ${
+                    isPaid
+                    ?
+                    `<br>
+                     Pagata il:
+                     ${formatDate(existing.date)}`
+                    :
+                    ""
+                }
+
+            </div>
+
+            ${
+                !isPaid
+                ?
+                `<button
+                    class="success payment-button"
+                    onclick="registerPayment(${a.id},${i},${amount})">
+
+                    💶 Registra pagamento
+
+                 </button>`
+                :
+                ""
+            }
+
+        </div>
+
+        `;
+
+    }
+
+    return `
+
+    <div style="margin-top:14px">
+
+        ${
+            a.work
+            ?
+            `<div class="item-sub"
+                  style="margin-bottom:7px">
+
+                🔧 ${escapeHTML(a.work)}
+
+             </div>`
+            :
+            ""
+        }
+
+        <strong>
+            ${formatDate(a.date)}
+        </strong>
+
+        <div class="item-sub">
+
+            Incassato:
+            <span class="green">
+                ${euro(paid)}
+            </span>
+
+            · Residuo:
+            <span class="orange">
+                ${euro(remaining)}
+            </span>
+
+        </div>
+
+        ${rows}
+
+    </div>
+
+    `;
+
+}
+
+
+/* =========================
+   REGISTRA PAGAMENTO
+========================= */
+
+function registerPayment(
+    appointmentId,
+    installmentNumber,
+    amount
+){
+
+    const appointment =
+        appointments.find(
+            a =>
+                Number(a.id) ===
+                Number(appointmentId)
+        );
+
+    if(!appointment){
+
+        alert(
+            "Appuntamento non trovato."
+        );
+
+        return;
+
+    }
+
+    if(
+        !Array.isArray(
+            appointment.payments
+        )
+    ){
+
+        appointment.payments=[];
+
+    }
+
+    const already =
+        appointment.payments.some(
+            p =>
+                Number(p.number) ===
+                Number(installmentNumber)
+        );
+
+    if(already){
+
+        alert(
+            "Questa rata risulta già pagata."
+        );
+
+        return;
+
+    }
+
+    const ok =
+        confirm(
+            `Confermi il pagamento della rata ${installmentNumber} di ${euro(amount)}?`
+        );
+
+    if(!ok){
+
+        return;
+
+    }
+
+    appointment.payments.push({
+
+        id:
+            Date.now()+Math.random(),
+
+        number:
+            installmentNumber,
+
+        amount:
+            Number(amount),
+
+        date:
+            todayString()
+
+    });
+
+    /*
+     * Aggiorniamo automaticamente
+     * il netto in base agli incassi.
+     */
+
+    appointment.received =
+        getReceived(appointment);
+
+    appointment.remaining =
+        getRemaining(appointment);
+
+    saveData();
+
+    refreshEverything();
+
+    alert(
+        "Pagamento registrato."
+    );
+
+}
+
+
 /* =========================
    BACKUP
 ========================= */
+
 function exportBackup(){
-    const backup={
+
+    const backup = {
+
         version:"6.0",
+
         createdAt:
-        new Date().toISOString(),
+            new Date().toISOString(),
+
         clients:clients,
+
         appointments:appointments
+
     };
+
+    const json =
+        JSON.stringify(
+            backup,
+            null,
+            2
+        );
+
     const blob =
-    new Blob(
-        [
-            JSON.stringify(
-                backup,
-                null,
-                2
-            )
-        ],
-        {
-            type:"application/json"
-        }
-    );
+        new Blob(
+            [json],
+            {
+                type:"application/json"
+            }
+        );
+
     const url =
-    URL.createObjectURL(blob);
+        URL.createObjectURL(blob);
+
     const link =
-    document.createElement("a");
+        document.createElement("a");
+
     link.href=url;
+
     link.download =
-    `igea-impianti-backup-${todayString()}.json`;
+        `igea-impianti-backup-${todayString()}.json`;
+
     document.body.appendChild(link);
+
     link.click();
+
     link.remove();
+
     URL.revokeObjectURL(url);
+
     alert(
         "Backup creato correttamente."
     );
+
 }
+
+
 /* =========================
    IMPORT
 ========================= */
+
 function importBackup(event){
+
     const file =
-    event.target.files[0];
+        event.target.files[0];
+
     if(!file) return;
+
     const reader =
-    new FileReader();
-    reader.onload=function(){
-        try{
-            const backup =
-            JSON.parse(
-                reader.result
-            );
-            if(
-                !backup ||
-                !Array.isArray(
-                    backup.clients
-                ) ||
-                !Array.isArray(
-                    backup.appointments
-                )
-            ){
-                throw new Error();
+        new FileReader();
+
+    reader.onload =
+        function(){
+
+            try{
+
+                const backup =
+                    JSON.parse(
+                        reader.result
+                    );
+
+                if(
+                    !backup ||
+                    !Array.isArray(
+                        backup.clients
+                    ) ||
+                    !Array.isArray(
+                        backup.appointments
+                    )
+                ){
+
+                    throw new Error(
+                        "Backup non valido"
+                    );
+
+                }
+
+                const ok =
+                    confirm(
+                        "L'importazione sostituirà tutti i dati attuali. Continuare?"
+                    );
+
+                if(!ok){
+
+                    event.target.value="";
+
+                    return;
+
+                }
+
+                clients =
+                    backup.clients;
+
+                appointments =
+                    backup.appointments;
+
+                migrateData();
+
+                saveData();
+
+                refreshEverything();
+
+                alert(
+                    "Backup importato correttamente."
+                );
+
             }
-            if(
-                !confirm(
-                    "L'importazione sostituirà tutti i dati attuali. Continuare?"
-                )
-            ){
-                event.target.value="";
-                return;
+
+            catch(error){
+
+                alert(
+                    "Errore: il file non è un backup valido di Igea Impianti."
+                );
+
             }
-            clients =
-            backup.clients;
-            appointments =
-            backup.appointments;
-            appointments.forEach(a=>{
-                if(!Array.isArray(a.payments)){
-                    a.payments=[];
-                }
-                if(!a.installments){
-                    a.installments=1;
-                }
-                if(!a.paymentType){
-                    a.paymentType="single";
-                }
-                updateClosedStatus(a);
-            });
-            saveData();
-            refreshEverything();
-            alert(
-                "Backup importato correttamente."
-            );
-        }
-        catch(error){
-            alert(
-                "Errore: il file non è un backup valido di Igea Impianti."
-            );
-        }
-        event.target.value="";
-    };
+
+            event.target.value="";
+
+        };
+
     reader.readAsText(file);
+
 }
+
+
 /* =========================
    ELIMINA TUTTO
 ========================= */
+
 function deleteAllData(){
+
     const confirmation =
-    prompt(
-        "Per confermare scrivi: ELIMINA"
-    );
+        prompt(
+            "Per confermare scrivi: ELIMINA"
+        );
+
     if(
-        confirmation !== "ELIMINA"
+        confirmation !==
+        "ELIMINA"
     ){
+
         alert(
             "Operazione annullata."
         );
+
         return;
+
     }
+
     clients=[];
     appointments=[];
+
     saveData();
+
     refreshEverything();
+
     alert(
         "Tutti i dati sono stati eliminati."
     );
+
 }
+
+
 /* =========================
    AGGIORNA TUTTO
 ========================= */
+
 function refreshEverything(){
+
     populateClientSelect();
+
     renderClients();
+
     renderAppointments();
+
     renderPayments();
+
     updateDashboard();
+
 }
+
+
 /* =========================
    SICUREZZA HTML
 ========================= */
+
 function escapeHTML(value){
-    return String(value || "")
+
+    return String(
+        value || ""
+    )
     .replaceAll("&","&amp;")
     .replaceAll("<","&lt;")
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
+
 }
+
+
 /* =========================
    AVVIO
 ========================= */
-document
-.getElementById(
+
+migrateData();
+
+saveData();
+
+document.getElementById(
     "appointmentDate"
-)
-.value=todayString();
+).value =
+    todayString();
+
 refreshEverything();
+
 </script>
+
 </body>
 </html>
