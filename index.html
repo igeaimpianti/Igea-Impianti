@@ -3890,7 +3890,57 @@ async function confirmCompletion(id){
 
     }
 
+/* =================================================
+   SALVATAGGIO SPESA DEL LAVORO
+================================================= */
 
+if(expense > 0){
+
+    const {
+        error:expenseError
+    } =
+    await supabaseClient
+        .from("expenses")
+        .insert({
+
+            description:
+                "Spesa lavoro - " +
+                client.name,
+
+            amount:
+                expense,
+
+            date:
+                today(),
+
+            category:
+                "Lavoro",
+
+            notes:
+                "Spesa associata all'appuntamento",
+
+            type:
+                "expense"
+
+        });
+
+
+    if(expenseError){
+
+        console.error(
+            expenseError
+        );
+
+        alert(
+            "Pagamento salvato, ma errore nel salvataggio della spesa:\n"+
+            expenseError.message
+        );
+
+        return;
+
+    }
+
+}
     /* =================================================
        COMPLETA APPUNTAMENTO
     ================================================= */
