@@ -1,15 +1,15 @@
 {
   "name": "Igea Impianti",
   "short_name": "Igea",
-  "start_url": "./",
+  "start_url": "./index.html?v=13",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0b0d12",
-  "theme_color": "#0b0d12",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "./icon.png",
+      "src": "./icon.png?v=13",
       "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any maskable"
