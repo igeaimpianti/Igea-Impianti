@@ -3,21 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Igea Impianti">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ffffff">
 
 <link rel="manifest" href="manifest.json?v=13">
-
 <link rel="icon" type="image/png" sizes="1024x1024" href="icon.png?v=13">
 <link rel="apple-touch-icon" href="icon.png?v=13">
 <link rel="apple-touch-icon" sizes="180x180" href="icon.png?v=13">
 <link rel="apple-touch-icon" sizes="167x167" href="icon.png?v=13">
 <link rel="apple-touch-icon" sizes="152x152" href="icon.png?v=13">
-
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#ffffff">
 
 <title>Igea Impianti V13</title>
 
@@ -142,9 +139,7 @@ textarea{
     resize:vertical;
 }
 
-input:focus,
-select:focus,
-textarea:focus{
+input:focus,select:focus,textarea:focus{
     border-color:#555;
 }
 
@@ -175,6 +170,12 @@ textarea:focus{
     background:#edf5fb;
     color:#1769aa;
     border:1px solid #d4e6f5;
+}
+
+.orangeBtn{
+    background:#fff5df;
+    color:#a66a00;
+    border:1px solid #f1ddb0;
 }
 
 .grid2{
@@ -360,7 +361,7 @@ textarea:focus{
     position:fixed;
     inset:0;
     z-index:500;
-    background:rgba(0,0,0,.45);
+    background:rgba(0,0,0,.48);
     display:flex;
     align-items:flex-end;
 }
@@ -378,6 +379,37 @@ textarea:focus{
     padding:20px 16px calc(20px + env(safe-area-inset-bottom));
     max-height:94vh;
     overflow:auto;
+}
+
+.modalbox h2{
+    margin-bottom:18px;
+}
+
+.payment-option{
+    border:1px solid #ddd;
+    border-radius:15px;
+    padding:14px;
+    margin-bottom:10px;
+}
+
+.payment-option.selected{
+    border:2px solid #111;
+    background:#f8f8f8;
+}
+
+.payment-option label{
+    margin:0;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#111;
+    font-weight:700;
+    font-size:15px;
+}
+
+.payment-option input[type="radio"]{
+    width:auto;
+    margin:0;
 }
 
 .toast{
@@ -448,27 +480,14 @@ textarea:focus{
     background:#16834b;
 }
 
-.divider{
-    height:1px;
-    background:#eee;
-    margin:16px 0;
-}
-
-.payment-box{
-    background:#f7f7f8;
-    border:1px solid #e3e3e5;
-    border-radius:14px;
-    padding:13px;
-    margin-top:8px;
-}
-
-.payment-box strong{
-    display:block;
-    margin-bottom:8px;
-}
-
 .hidden{
     display:none!important;
+}
+
+.history-title{
+    margin-top:24px;
+    padding-top:8px;
+    border-top:1px solid #eee;
 }
 
 @media(max-width:410px){
@@ -481,13 +500,7 @@ textarea:focus{
     }
 
     .actions{
-        gap:5px;
-    }
-
-    .actions button{
-        padding-left:8px;
-        padding-right:8px;
-        font-size:13px;
+        flex-wrap:wrap;
     }
 }
 </style>
@@ -496,145 +509,85 @@ textarea:focus{
 <body>
 
 <div id="loginScreen" class="login hidden">
-
     <div class="loginbox">
-
         <img src="icon.png" alt="Igea Impianti">
-
         <h1>Igea Impianti</h1>
-
         <p>Gestionale Cloud</p>
 
-        <input
-            id="loginEmail"
-            type="email"
-            placeholder="Email"
-            autocomplete="username">
+        <input id="loginEmail"
+               type="email"
+               placeholder="Email"
+               autocomplete="username">
 
-        <input
-            id="loginPassword"
-            type="password"
-            placeholder="Password"
-            autocomplete="current-password">
+        <input id="loginPassword"
+               type="password"
+               placeholder="Password"
+               autocomplete="current-password">
 
-        <button class="primary" onclick="login()">
-            Accedi
-        </button>
+        <button class="primary" onclick="login()">Accedi</button>
 
         <div id="loginMessage" class="sub"></div>
-
     </div>
-
 </div>
-
 
 <div class="app">
 
 <header>
-
     <div class="header">
-
         <div class="brand">
-
             <img src="icon.png" alt="Igea">
-
             <div>
                 <h1>Igea Impianti</h1>
                 <small id="pageTitle">Dashboard</small>
             </div>
-
         </div>
 
-        <button
-            class="secondary"
-            onclick="showPage('settings')">
+        <button class="secondary"
+                onclick="showPage('settings')">
             ⚙️
         </button>
-
     </div>
-
 </header>
-
 
 <main>
 
-<!-- =====================================================
-DASHBOARD
-===================================================== -->
-
+<!-- DASHBOARD -->
 <section id="dashboard">
 
     <div class="card">
 
         <h2>📊 Riepilogo</h2>
 
-        <select
-            id="dashboardPeriod"
-            onchange="renderDashboard()">
+        <select id="dashboardPeriod"
+                onchange="renderDashboard()">
 
-            <option value="month">
-                Questo mese
-            </option>
-
-            <option value="today">
-                Oggi
-            </option>
-
-            <option value="week">
-                Questa settimana
-            </option>
-
-            <option value="year">
-                Anno corrente
-            </option>
+            <option value="month">Questo mese</option>
+            <option value="today">Oggi</option>
+            <option value="week">Questa settimana</option>
+            <option value="year">Anno corrente</option>
 
         </select>
-
 
         <div class="grid3">
 
             <div class="stat">
-
                 <small>💰 Incassato</small>
-
-                <strong
-                    id="dashIncome"
-                    class="green">
-                    €0,00
-                </strong>
-
+                <strong id="dashIncome" class="green">€0,00</strong>
             </div>
 
-
             <div class="stat">
-
                 <small>💸 Spese</small>
-
-                <strong
-                    id="dashExpenses"
-                    class="red">
-                    €0,00
-                </strong>
-
+                <strong id="dashExpenses" class="red">€0,00</strong>
             </div>
 
-
             <div class="stat">
-
                 <small>🟢 Netto</small>
-
-                <strong
-                    id="dashNet"
-                    class="blueText">
-                    €0,00
-                </strong>
-
+                <strong id="dashNet" class="blueText">€0,00</strong>
             </div>
 
         </div>
 
     </div>
-
 
     <div class="card">
 
@@ -643,58 +596,28 @@ DASHBOARD
         <div class="grid2">
 
             <div class="stat">
-
                 <small>Incassato</small>
-
-                <strong
-                    id="yearIncome"
-                    class="green">
-                    €0,00
-                </strong>
-
+                <strong id="yearIncome" class="green">€0,00</strong>
             </div>
 
-
             <div class="stat">
-
                 <small>Spese</small>
-
-                <strong
-                    id="yearExpenses"
-                    class="red">
-                    €0,00
-                </strong>
-
+                <strong id="yearExpenses" class="red">€0,00</strong>
             </div>
 
-
             <div class="stat">
-
                 <small>Netto</small>
-
-                <strong
-                    id="yearNet"
-                    class="blueText">
-                    €0,00
-                </strong>
-
+                <strong id="yearNet" class="blueText">€0,00</strong>
             </div>
 
-
             <div class="stat">
-
                 <small>Lavori completati</small>
-
-                <strong id="completedJobs">
-                    0
-                </strong>
-
+                <strong id="completedJobs">0</strong>
             </div>
 
         </div>
 
     </div>
-
 
     <div class="card">
 
@@ -707,59 +630,47 @@ DASHBOARD
 </section>
 
 
-<!-- =====================================================
-CLIENTI
-===================================================== -->
-
+<!-- CLIENTI -->
 <section id="clients" class="hidden">
 
     <div class="card">
 
         <h2>👥 Nuovo cliente</h2>
 
-        <input
-            id="clientName"
-            placeholder="Nome e cognome">
+        <input id="clientName"
+               placeholder="Nome e cognome">
 
-        <input
-            id="clientPhone"
-            type="tel"
-            placeholder="Telefono">
+        <input id="clientPhone"
+               type="tel"
+               placeholder="Telefono">
 
-        <input
-            id="clientEmail"
-            type="email"
-            placeholder="Email">
+        <input id="clientEmail"
+               type="email"
+               placeholder="Email">
 
-        <input
-            id="clientAddress"
-            placeholder="Indirizzo">
+        <input id="clientAddress"
+               placeholder="Indirizzo">
 
-        <input
-            id="clientCity"
-            placeholder="Città">
+        <input id="clientCity"
+               placeholder="Città">
 
-        <textarea
-            id="clientNotes"
-            placeholder="Note"></textarea>
+        <textarea id="clientNotes"
+                  placeholder="Note"></textarea>
 
-        <button
-            class="primary"
-            onclick="createClient()">
+        <button class="primary"
+                onclick="createClient()">
             Salva cliente
         </button>
 
     </div>
 
-
     <div class="card">
 
         <h2>👥 Clienti</h2>
 
-        <input
-            id="clientSearch"
-            placeholder="🔎 Cerca cliente..."
-            oninput="renderClients()">
+        <input id="clientSearch"
+               placeholder="🔎 Cerca cliente..."
+               oninput="renderClients()">
 
         <div id="clientsList"></div>
 
@@ -768,10 +679,7 @@ CLIENTI
 </section>
 
 
-<!-- =====================================================
-APPUNTAMENTI
-===================================================== -->
-
+<!-- APPUNTAMENTI -->
 <section id="appointments" class="hidden">
 
     <div class="card">
@@ -780,150 +688,59 @@ APPUNTAMENTI
             📅 Nuovo appuntamento
         </h2>
 
-
         <label>Cliente</label>
 
         <div class="client-picker">
 
-            <input
-                id="appointmentClient"
-                placeholder="Scrivi o seleziona il cliente"
-                autocomplete="off"
-                onfocus="openClientPicker()"
-                oninput="openClientPicker()">
+            <input id="appointmentClient"
+                   placeholder="Scrivi o seleziona il cliente"
+                   autocomplete="off"
+                   onfocus="openClientPicker()"
+                   oninput="openClientPicker()">
 
-            <input
-                id="appointmentClientId"
-                type="hidden">
+            <input id="appointmentClientId"
+                   type="hidden">
 
-            <div
-                id="clientResults"
-                class="client-results hidden">
+            <div id="clientResults"
+                 class="client-results hidden">
             </div>
 
         </div>
-
-
-        <label>Titolo / intervento</label>
-
-        <input
-            id="appointmentTitle"
-            placeholder="Es. Installazione impianto">
-
 
         <div class="grid2">
 
             <div>
-
                 <label>Data</label>
 
-                <input
-                    id="appointmentDate"
-                    type="date">
-
+                <input id="appointmentDate"
+                       type="date">
             </div>
-
 
             <div>
-
                 <label>Ora</label>
 
-                <input
-                    id="appointmentTime"
-                    type="time">
-
+                <input id="appointmentTime"
+                       type="time">
             </div>
 
         </div>
-
-
-        <label>Importo lavoro</label>
-
-        <input
-            id="appointmentAmount"
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder="0,00"
-            oninput="updatePaymentPreview()">
-
-
-        <label>Tipo di pagamento</label>
-
-        <select
-            id="paymentType"
-            onchange="toggleInstallments()">
-
-            <option value="single">
-                💳 Pagamento unico
-            </option>
-
-            <option value="installments">
-                🔄 Pagamento a rate
-            </option>
-
-        </select>
-
-
-        <div
-            id="installmentBox"
-            class="payment-box hidden">
-
-            <strong>
-                🔄 Impostazione rate
-            </strong>
-
-            <label>Numero rate</label>
-
-            <select
-                id="installmentCount"
-                onchange="updatePaymentPreview()">
-
-                <option value="2">2 rate</option>
-                <option value="3">3 rate</option>
-                <option value="4">4 rate</option>
-                <option value="5">5 rate</option>
-                <option value="6">6 rate</option>
-                <option value="8">8 rate</option>
-                <option value="10">10 rate</option>
-                <option value="12">12 rate</option>
-
-            </select>
-
-            <div
-                id="paymentPreview"
-                class="sub">
-            </div>
-
-        </div>
-
-
-        <label>Descrizione</label>
-
-        <textarea
-            id="appointmentDescription"
-            placeholder="Descrizione intervento"></textarea>
-
 
         <label>Note</label>
 
-        <textarea
-            id="appointmentNotes"
-            placeholder="Note appuntamento"></textarea>
-
+        <textarea id="appointmentNotes"
+                  placeholder="Note appuntamento">
+        </textarea>
 
         <div class="actions">
 
-            <button
-                class="primary"
-                onclick="saveAppointment()">
+            <button class="primary"
+                    onclick="saveAppointment()">
                 Salva appuntamento
             </button>
 
-            <button
-                id="cancelAppointmentEdit"
-                class="secondary hidden"
-                onclick="resetAppointmentForm()">
+            <button id="cancelAppointmentEdit"
+                    class="secondary hidden"
+                    onclick="resetAppointmentForm()">
                 Annulla
             </button>
 
@@ -931,27 +748,28 @@ APPUNTAMENTI
 
     </div>
 
-
     <div class="card">
 
-        <h2>📚 Appuntamenti</h2>
+        <h2>📅 Appuntamenti programmati</h2>
 
-        <input
-            id="appointmentSearch"
-            placeholder="🔎 Cerca cliente o intervento..."
-            oninput="renderAppointments()">
+        <input id="appointmentSearch"
+               placeholder="🔎 Cerca cliente..."
+               oninput="renderAppointments()">
 
         <div id="appointmentsList"></div>
+
+        <h2 class="history-title">
+            📚 Storico appuntamenti
+        </h2>
+
+        <div id="appointmentHistory"></div>
 
     </div>
 
 </section>
 
 
-<!-- =====================================================
-PAGAMENTI
-===================================================== -->
-
+<!-- PAGAMENTI -->
 <section id="payments" class="hidden">
 
     <div class="card">
@@ -961,52 +779,37 @@ PAGAMENTI
         <div class="grid3">
 
             <div class="stat">
-
                 <small>Incassato</small>
-
-                <strong
-                    id="paymentsReceived"
-                    class="green">
+                <strong id="paymentsReceived"
+                        class="green">
                     €0,00
                 </strong>
-
             </div>
 
-
             <div class="stat">
-
                 <small>Residuo</small>
-
-                <strong
-                    id="paymentsRemaining"
-                    class="orange">
+                <strong id="paymentsRemaining"
+                        class="orange">
                     €0,00
                 </strong>
-
             </div>
 
-
             <div class="stat">
-
                 <small>Clienti</small>
-
                 <strong id="paymentsClients">
                     0
                 </strong>
-
             </div>
 
         </div>
 
     </div>
 
-
     <div class="card">
 
-        <input
-            id="paymentSearch"
-            placeholder="🔎 Cerca cliente..."
-            oninput="renderPayments()">
+        <input id="paymentSearch"
+               placeholder="🔎 Cerca cliente..."
+               oninput="renderPayments()">
 
         <div id="paymentsList"></div>
 
@@ -1015,55 +818,41 @@ PAGAMENTI
 </section>
 
 
-<!-- =====================================================
-SPESE
-===================================================== -->
-
+<!-- SPESE -->
 <section id="expenses" class="hidden">
 
     <div class="card">
 
         <h2>💸 Nuova spesa</h2>
 
-        <input
-            id="expenseDescription"
-            placeholder="Descrizione">
-
+        <input id="expenseDescription"
+               placeholder="Descrizione">
 
         <div class="grid2">
 
-            <input
-                id="expenseAmount"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="Importo">
+            <input id="expenseAmount"
+                   type="number"
+                   step="0.01"
+                   min="0"
+                   placeholder="Importo">
 
-            <input
-                id="expenseDate"
-                type="date">
+            <input id="expenseDate"
+                   type="date">
 
         </div>
 
+        <input id="expenseCategory"
+               placeholder="Categoria">
 
-        <input
-            id="expenseCategory"
-            placeholder="Categoria">
+        <textarea id="expenseNotes"
+                  placeholder="Note"></textarea>
 
-
-        <textarea
-            id="expenseNotes"
-            placeholder="Note"></textarea>
-
-
-        <button
-            class="primary"
-            onclick="createExpense()">
+        <button class="primary"
+                onclick="createExpense()">
             Salva spesa
         </button>
 
     </div>
-
 
     <div class="card">
 
@@ -1076,10 +865,7 @@ SPESE
 </section>
 
 
-<!-- =====================================================
-IMPOSTAZIONI
-===================================================== -->
-
+<!-- IMPOSTAZIONI -->
 <section id="settings" class="hidden">
 
     <div class="card">
@@ -1090,19 +876,16 @@ IMPOSTAZIONI
 
             <b>☁️ Database Cloud</b>
 
-            <div
-                id="cloudStatus"
-                class="sub">
+            <div id="cloudStatus"
+                 class="sub">
                 Connessione...
             </div>
 
         </div>
 
-
-        <button
-            class="danger"
-            style="width:100%"
-            onclick="logout()">
+        <button class="danger"
+                style="width:100%"
+                onclick="logout()">
             Esci dall'account
         </button>
 
@@ -1111,84 +894,57 @@ IMPOSTAZIONI
 </section>
 
 </main>
-
 </div>
 
 
-<!-- =====================================================
-NAV
-===================================================== -->
-
+<!-- NAV -->
 <nav class="nav">
 
-    <button
-        id="navDashboard"
-        class="active"
-        onclick="showPage('dashboard')">
-
+    <button id="navDashboard"
+            class="active"
+            onclick="showPage('dashboard')">
         <span>🏠</span>
         Dashboard
-
     </button>
 
-
-    <button
-        id="navClients"
-        onclick="showPage('clients')">
-
+    <button id="navClients"
+            onclick="showPage('clients')">
         <span>👥</span>
         Clienti
-
     </button>
 
-
-    <button
-        id="navAppointments"
-        onclick="showPage('appointments')">
-
+    <button id="navAppointments"
+            onclick="showPage('appointments')">
         <span>📅</span>
         Appuntamenti
-
     </button>
 
-
-    <button
-        id="navPayments"
-        onclick="showPage('payments')">
-
+    <button id="navPayments"
+            onclick="showPage('payments')">
         <span>💳</span>
         Pagamenti
-
     </button>
 
-
-    <button
-        id="navExpenses"
-        onclick="showPage('expenses')">
-
+    <button id="navExpenses"
+            onclick="showPage('expenses')">
         <span>💸</span>
         Spese
-
     </button>
 
 </nav>
 
 
-<div
-    id="modal"
-    class="modal hidden">
+<!-- MODALE -->
+<div id="modal" class="modal hidden">
 
-    <div
-        class="modalbox"
-        id="modalContent">
+    <div class="modalbox"
+         id="modalContent">
     </div>
 
 </div>
 
-
-<div
-    id="toast"
-    class="toast hidden">
+<div id="toast"
+     class="toast hidden">
 </div>
 
 
@@ -1196,9 +952,8 @@ NAV
 
 "use strict";
 
-
 /* =========================================================
-SUPABASE
+   SUPABASE
 ========================================================= */
 
 const SUPABASE_URL =
@@ -1215,7 +970,7 @@ const supabaseClient =
 
 
 /* =========================================================
-DATI
+   DATI
 ========================================================= */
 
 let currentUser = null;
@@ -1229,13 +984,12 @@ let editingAppointmentId = null;
 
 
 /* =========================================================
-UTILITY
+   UTILITY
 ========================================================= */
 
 function $(id){
     return document.getElementById(id);
 }
-
 
 function money(value){
 
@@ -1249,7 +1003,6 @@ function money(value){
 
 }
 
-
 function escapeHTML(value){
 
     return String(value ?? "")
@@ -1261,7 +1014,6 @@ function escapeHTML(value){
 
 }
 
-
 function today(){
 
     return new Date()
@@ -1270,42 +1022,18 @@ function today(){
 
 }
 
-
-function addMonths(dateString,months){
-
-    const d =
-        new Date(
-            dateString+"T00:00:00"
-        );
-
-    d.setMonth(
-        d.getMonth()+months
-    );
-
-    return d
-        .toISOString()
-        .slice(0,10);
-
-}
-
-
 function formatDate(date){
 
     if(!date) return "";
 
-    return new Date(
-        date+"T00:00:00"
-    ).toLocaleDateString(
-        "it-IT"
-    );
+    return new Date(date+"T00:00:00")
+        .toLocaleDateString("it-IT");
 
 }
 
-
 function toast(message){
 
-    $("toast").textContent =
-        message;
+    $("toast").textContent = message;
 
     $("toast")
         .classList
@@ -1319,27 +1047,18 @@ function toast(message){
 
 }
 
+function setCloudStatus(message,success=true){
 
-function setCloudStatus(
-    message,
-    success=true
-){
+    $("cloudStatus").textContent = message;
 
-    $("cloudStatus")
-        .textContent =
-        message;
-
-    $("cloudStatus")
-        .style.color =
-        success
-        ? "#16834b"
-        : "#c62845";
+    $("cloudStatus").style.color =
+        success ? "#16834b" : "#c62845";
 
 }
 
 
 /* =========================================================
-AUTENTICAZIONE
+   AUTENTICAZIONE
 ========================================================= */
 
 async function init(){
@@ -1349,10 +1068,7 @@ async function init(){
             session
         }
     } =
-    await supabaseClient
-        .auth
-        .getSession();
-
+    await supabaseClient.auth.getSession();
 
     if(!session){
 
@@ -1361,9 +1077,7 @@ async function init(){
             .remove("hidden");
 
         return;
-
     }
-
 
     currentUser =
         session.user;
@@ -1371,7 +1085,6 @@ async function init(){
     await loadDatabase();
 
 }
-
 
 async function login(){
 
@@ -1384,23 +1097,29 @@ async function login(){
         $("loginPassword")
         .value;
 
+    if(!email || !password){
+
+        $("loginMessage")
+            .textContent =
+            "Inserisci email e password.";
+
+        return;
+
+    }
 
     $("loginMessage")
         .textContent =
         "Accesso in corso...";
 
-
     const {
         data,
         error
     } =
-    await supabaseClient
-        .auth
+    await supabaseClient.auth
         .signInWithPassword({
             email,
             password
         });
-
 
     if(error){
 
@@ -1412,57 +1131,45 @@ async function login(){
 
     }
 
-
     currentUser =
         data.user;
-
 
     $("loginScreen")
         .classList
         .add("hidden");
 
-
     await loadDatabase();
 
 }
 
-
 async function logout(){
 
-    await supabaseClient
-        .auth
-        .signOut();
+    await supabaseClient.auth.signOut();
 
     location.reload();
 
 }
 
+supabaseClient.auth
+.onAuthStateChange(
+    (event,session)=>{
 
-supabaseClient
-    .auth
-    .onAuthStateChange(
-        (event,session)=>{
+        if(event === "SIGNED_OUT"){
 
-            if(
-                event ===
-                "SIGNED_OUT"
-            ){
+            currentUser = null;
 
-                currentUser =
-                    null;
-
-                $("loginScreen")
-                    .classList
-                    .remove("hidden");
-
-            }
+            $("loginScreen")
+                .classList
+                .remove("hidden");
 
         }
-    );
+
+    }
+);
 
 
 /* =========================================================
-CARICAMENTO DATABASE
+   DATABASE
 ========================================================= */
 
 async function loadDatabase(){
@@ -1470,7 +1177,6 @@ async function loadDatabase(){
     setCloudStatus(
         "☁️ Caricamento dati..."
     );
-
 
     const [
         clientsResult,
@@ -1483,45 +1189,24 @@ async function loadDatabase(){
         supabaseClient
             .from("clients")
             .select("*")
-            .order(
-                "name",
-                {
-                    ascending:true
-                }
-            ),
+            .order("name",{ascending:true}),
 
         supabaseClient
             .from("appointments")
             .select("*")
-            .order(
-                "date",
-                {
-                    ascending:false
-                }
-            ),
+            .order("date",{ascending:false}),
 
         supabaseClient
             .from("payments")
             .select("*")
-            .order(
-                "due_date",
-                {
-                    ascending:true
-                }
-            ),
+            .order("due_date",{ascending:true}),
 
         supabaseClient
             .from("expenses")
             .select("*")
-            .order(
-                "date",
-                {
-                    ascending:false
-                }
-            )
+            .order("date",{ascending:false})
 
     ]);
-
 
     const results = [
         clientsResult,
@@ -1530,13 +1215,10 @@ async function loadDatabase(){
         expensesResult
     ];
 
-
     const failed =
         results.find(
-            result =>
-                result.error
+            result => result.error
         );
-
 
     if(failed){
 
@@ -1545,8 +1227,7 @@ async function loadDatabase(){
         );
 
         setCloudStatus(
-            "Errore: "+
-            failed.error.message,
+            "Errore: "+failed.error.message,
             false
         );
 
@@ -1555,9 +1236,7 @@ async function loadDatabase(){
         );
 
         return;
-
     }
-
 
     clients =
         clientsResult.data || [];
@@ -1571,11 +1250,9 @@ async function loadDatabase(){
     expenses =
         expensesResult.data || [];
 
-
     setCloudStatus(
         "☁️ Database connesso"
     );
-
 
     setDefaultDates();
 
@@ -1585,7 +1262,7 @@ async function loadDatabase(){
 
 
 /* =========================================================
-NAVIGAZIONE
+   NAVIGAZIONE
 ========================================================= */
 
 function showPage(page){
@@ -1598,7 +1275,6 @@ function showPage(page){
         "expenses",
         "settings"
     ];
-
 
     pages.forEach(
         name=>{
@@ -1613,7 +1289,6 @@ function showPage(page){
         }
     );
 
-
     const navs = [
         "Dashboard",
         "Clients",
@@ -1621,7 +1296,6 @@ function showPage(page){
         "Payments",
         "Expenses"
     ];
-
 
     navs.forEach(
         name=>{
@@ -1633,14 +1307,11 @@ function showPage(page){
 
             button.classList.toggle(
                 "active",
-                name.toLowerCase()
-                ===
-                page
+                name.toLowerCase() === page
             );
 
         }
     );
-
 
     const titles = {
 
@@ -1653,47 +1324,30 @@ function showPage(page){
 
     };
 
-
     $("pageTitle")
         .textContent =
         titles[page];
 
-
-    if(
-        page ===
-        "dashboard"
-    )
+    if(page === "dashboard")
         renderDashboard();
 
-    if(
-        page ===
-        "clients"
-    )
+    if(page === "clients")
         renderClients();
 
-    if(
-        page ===
-        "appointments"
-    )
+    if(page === "appointments")
         renderAppointments();
 
-    if(
-        page ===
-        "payments"
-    )
+    if(page === "payments")
         renderPayments();
 
-    if(
-        page ===
-        "expenses"
-    )
+    if(page === "expenses")
         renderExpenses();
 
 }
 
 
 /* =========================================================
-CLIENTI
+   CLIENTI
 ========================================================= */
 
 async function createClient(){
@@ -1702,7 +1356,6 @@ async function createClient(){
         $("clientName")
         .value
         .trim();
-
 
     if(!name){
 
@@ -1713,7 +1366,6 @@ async function createClient(){
         return;
 
     }
-
 
     const alreadyExists =
         clients.some(
@@ -1726,7 +1378,6 @@ async function createClient(){
                 .toLowerCase()
         );
 
-
     if(alreadyExists){
 
         alert(
@@ -1737,10 +1388,9 @@ async function createClient(){
 
     }
 
-
     const payload = {
 
-        name:name,
+        name,
 
         phone:
             $("clientPhone")
@@ -1769,7 +1419,6 @@ async function createClient(){
 
     };
 
-
     const {
         data,
         error
@@ -1779,7 +1428,6 @@ async function createClient(){
         .insert(payload)
         .select()
         .single();
-
 
     if(error){
 
@@ -1792,9 +1440,7 @@ async function createClient(){
 
     }
 
-
     clients.push(data);
-
 
     clients.sort(
         (a,b)=>
@@ -1803,7 +1449,6 @@ async function createClient(){
                 "it"
             )
     );
-
 
     [
         "clientName",
@@ -1817,8 +1462,7 @@ async function createClient(){
         id=>$(id).value=""
     );
 
-
-    renderClients();
+    renderAll();
 
     toast(
         "Cliente salvato nel database"
@@ -1826,6 +1470,26 @@ async function createClient(){
 
 }
 
+function findClient(id){
+
+    return clients.find(
+        client =>
+            String(client.id) ===
+            String(id)
+    );
+
+}
+
+function clientName(id){
+
+    const client =
+        findClient(id);
+
+    return client
+        ? client.name
+        : "Cliente";
+
+}
 
 function renderClients(){
 
@@ -1835,7 +1499,6 @@ function renderClients(){
             ?.value || ""
         )
         .toLowerCase();
-
 
     const list =
         clients.filter(
@@ -1851,7 +1514,6 @@ function renderClients(){
                 .includes(query)
         );
 
-
     if(!list.length){
 
         $("clientsList").innerHTML =
@@ -1861,10 +1523,9 @@ function renderClients(){
 
     }
 
-
     $("clientsList").innerHTML =
         list.map(
-            client=>{
+            client => {
 
                 const count =
                     appointments.filter(
@@ -1872,11 +1533,8 @@ function renderClients(){
                             String(
                                 appointment.client_id
                             ) ===
-                            String(
-                                client.id
-                            )
+                            String(client.id)
                     ).length;
-
 
                 return `
 
@@ -1887,37 +1545,17 @@ function renderClients(){
                         <div>
 
                             <div class="item-title">
-                                ${escapeHTML(
-                                    client.name
-                                )}
+                                ${escapeHTML(client.name)}
                             </div>
 
                             <div class="sub">
-                                ${escapeHTML(
-                                    client.phone || ""
-                                )}
-
-                                ${
-                                    client.email
-                                    ?
-                                    " · "+
-                                    escapeHTML(
-                                        client.email
-                                    )
-                                    :
-                                    ""
-                                }
-
-                                ${
-                                    client.city
-                                    ?
-                                    " · "+
-                                    escapeHTML(
-                                        client.city
-                                    )
-                                    :
-                                    ""
-                                }
+                                ${escapeHTML(client.phone || "")}
+                                ${client.email
+                                    ? " · "+escapeHTML(client.email)
+                                    : ""}
+                                ${client.city
+                                    ? " · "+escapeHTML(client.city)
+                                    : ""}
                             </div>
 
                         </div>
@@ -1930,11 +1568,9 @@ function renderClients(){
 
                     </div>
 
-
                     <div class="badge blue">
                         ${count} appuntamenti
                     </div>
-
 
                     <div class="actions">
 
@@ -1962,33 +1598,6 @@ function renderClients(){
 
 }
 
-
-function findClient(id){
-
-    return clients.find(
-        client =>
-            String(client.id)
-            ===
-            String(id)
-    );
-
-}
-
-
-function clientName(id){
-
-    const client =
-        findClient(id);
-
-    return client
-        ?
-        client.name
-        :
-        "Cliente";
-
-}
-
-
 async function editClient(id){
 
     const client =
@@ -1996,40 +1605,32 @@ async function editClient(id){
 
     if(!client) return;
 
-
-    $("modalContent")
-        .innerHTML = `
+    $("modalContent").innerHTML = `
 
         <h2>✏️ Modifica cliente</h2>
 
-        <input
-            id="editClientName"
-            value="${escapeHTML(client.name)}"
-            placeholder="Nome e cognome">
+        <input id="editClientName"
+               value="${escapeHTML(client.name)}"
+               placeholder="Nome e cognome">
 
-        <input
-            id="editClientPhone"
-            value="${escapeHTML(client.phone || "")}"
-            placeholder="Telefono">
+        <input id="editClientPhone"
+               value="${escapeHTML(client.phone || "")}"
+               placeholder="Telefono">
 
-        <input
-            id="editClientEmail"
-            value="${escapeHTML(client.email || "")}"
-            placeholder="Email">
+        <input id="editClientEmail"
+               value="${escapeHTML(client.email || "")}"
+               placeholder="Email">
 
-        <input
-            id="editClientAddress"
-            value="${escapeHTML(client.address || "")}"
-            placeholder="Indirizzo">
+        <input id="editClientAddress"
+               value="${escapeHTML(client.address || "")}"
+               placeholder="Indirizzo">
 
-        <input
-            id="editClientCity"
-            value="${escapeHTML(client.city || "")}"
-            placeholder="Città">
+        <input id="editClientCity"
+               value="${escapeHTML(client.city || "")}"
+               placeholder="Città">
 
-        <textarea
-            id="editClientNotes"
-            placeholder="Note">${escapeHTML(client.notes || "")}</textarea>
+        <textarea id="editClientNotes"
+                  placeholder="Note">${escapeHTML(client.notes || "")}</textarea>
 
         <div class="actions">
 
@@ -2049,13 +1650,11 @@ async function editClient(id){
 
     `;
 
-
     $("modal")
         .classList
         .remove("hidden");
 
 }
-
 
 async function updateClient(id){
 
@@ -2063,7 +1662,6 @@ async function updateClient(id){
         $("editClientName")
         .value
         .trim();
-
 
     if(!name){
 
@@ -2074,7 +1672,6 @@ async function updateClient(id){
         return;
 
     }
-
 
     const payload = {
 
@@ -2107,7 +1704,6 @@ async function updateClient(id){
 
     };
 
-
     const {
         data,
         error
@@ -2119,30 +1715,21 @@ async function updateClient(id){
         .select()
         .single();
 
-
     if(error){
 
-        alert(
-            error.message
-        );
+        alert(error.message);
 
         return;
 
     }
 
-
     clients =
         clients.map(
             client =>
-                String(client.id)
-                ===
-                String(id)
-                ?
-                data
-                :
-                client
+                String(client.id) === String(id)
+                    ? data
+                    : client
         );
-
 
     closeModal();
 
@@ -2154,7 +1741,6 @@ async function updateClient(id){
 
 }
 
-
 async function deleteClient(id){
 
     const linkedAppointments =
@@ -2162,25 +1748,18 @@ async function deleteClient(id){
             appointment =>
                 String(
                     appointment.client_id
-                ) ===
-                String(id)
+                ) === String(id)
         );
-
 
     const linkedPayments =
         payments.some(
             payment =>
                 String(
                     payment.client_id
-                ) ===
-                String(id)
+                ) === String(id)
         );
 
-
-    if(
-        linkedAppointments ||
-        linkedPayments
-    ){
+    if(linkedAppointments || linkedPayments){
 
         alert(
             "Questo cliente ha appuntamenti o pagamenti collegati. "+
@@ -2191,14 +1770,11 @@ async function deleteClient(id){
 
     }
 
-
     if(
         !confirm(
             "Eliminare definitivamente questo cliente?"
         )
-    )
-        return;
-
+    ) return;
 
     const {
         error
@@ -2208,26 +1784,20 @@ async function deleteClient(id){
         .delete()
         .eq("id",id);
 
-
     if(error){
 
-        alert(
-            error.message
-        );
+        alert(error.message);
 
         return;
 
     }
 
-
     clients =
         clients.filter(
             client =>
-                String(client.id)
-                !==
+                String(client.id) !==
                 String(id)
         );
-
 
     renderAll();
 
@@ -2237,7 +1807,6 @@ async function deleteClient(id){
 
 }
 
-
 function clientHistory(id){
 
     const client =
@@ -2245,121 +1814,85 @@ function clientHistory(id){
 
     if(!client) return;
 
-
     const clientAppointments =
         appointments
         .filter(
             appointment =>
                 String(
                     appointment.client_id
-                ) ===
-                String(id)
+                ) === String(id)
         )
         .sort(
             (a,b)=>
-                (
-                    String(b.date)
-                )
+                String(b.date)
                 .localeCompare(
                     String(a.date)
                 )
         );
-
 
     const clientPayments =
         payments.filter(
             payment =>
                 String(
                     payment.client_id
-                ) ===
-                String(id)
+                ) === String(id)
         );
 
+    $("modalContent").innerHTML = `
 
-    $("modalContent")
-        .innerHTML = `
-
-        <h2>
-            👤 ${escapeHTML(client.name)}
-        </h2>
+        <h2>👤 ${escapeHTML(client.name)}</h2>
 
         <div class="sub">
             ${escapeHTML(client.phone || "")}
-
-            ${
-                client.email
-                ?
-                " · "+
-                escapeHTML(client.email)
-                :
-                ""
-            }
+            ${client.email
+                ? " · "+escapeHTML(client.email)
+                : ""}
         </div>
 
-        <div class="divider"></div>
+        <hr>
 
         <h3>📅 Appuntamenti</h3>
 
         ${
             clientAppointments.length
             ?
-            clientAppointments
-            .map(
+            clientAppointments.map(
                 appointment=>`
 
                 <div class="item">
 
                     <b>
-                        ${formatDate(
-                            appointment.date
-                        )}
-
-                        ${
-                            appointment.time
-                            ?
-                            " · "+
-                            escapeHTML(
+                        ${formatDate(appointment.date)}
+                        ${appointment.time
+                            ? " · "+
+                              escapeHTML(
                                 appointment.time.slice(0,5)
-                            )
-                            :
-                            ""
-                        }
+                              )
+                            : ""}
                     </b>
 
                     <div class="sub">
-
-                        ${escapeHTML(
-                            appointment.title ||
-                            "Intervento"
-                        )}
-
-                        ·
-
-                        ${money(
-                            appointment.amount
-                        )}
-
+                        ${appointment.status === "completato"
+                            ? "Completato"
+                            : appointment.status === "annullato"
+                                ? "Annullato"
+                                : "Programmato"}
                     </div>
 
                 </div>
 
                 `
-            )
-            .join("")
+            ).join("")
             :
             '<div class="empty">Nessun appuntamento.</div>'
         }
 
-
-        <h3 style="margin-top:16px">
-            💳 Pagamenti
-        </h3>
+        <h3>💳 Pagamenti</h3>
 
         ${
             clientPayments.length
             ?
-            clientPayments
-            .map(
+            clientPayments.map(
                 payment=>`
 
                 <div class="item">
@@ -2367,70 +1900,48 @@ function clientHistory(id){
                     <div class="between">
 
                         <b>
-                            ${money(
-                                payment.amount
-                            )}
+                            ${money(payment.amount)}
                         </b>
 
                         <span class="badge ${
-                            payment.status === "paid"
-                            ?
-                            "green"
-                            :
-                            "orange"
+                            payment.status === "pagato"
+                            ? "green"
+                            : "orange"
                         }">
-
-                            ${
-                                payment.status === "paid"
-                                ?
-                                "Pagato"
-                                :
-                                "Da pagare"
-                            }
-
+                            ${escapeHTML(payment.status)}
                         </span>
 
                     </div>
 
                     <div class="sub">
-
                         Scadenza:
-                        ${formatDate(
-                            payment.due_date
-                        )}
-
+                        ${formatDate(payment.due_date)}
                         ${
                             payment.payment_date
                             ?
-                            " · Pagato il "+
-                            formatDate(
-                                payment.payment_date
-                            )
+                            " · Pagato: "+
+                            formatDate(payment.payment_date)
                             :
                             ""
                         }
-
                     </div>
 
                 </div>
 
                 `
-            )
-            .join("")
+            ).join("")
             :
             '<div class="empty">Nessun pagamento.</div>'
         }
 
-
         <button
             class="secondary"
-            style="width:100%;margin-top:8px"
+            style="width:100%"
             onclick="closeModal()">
             Chiudi
         </button>
 
     `;
-
 
     $("modal")
         .classList
@@ -2440,7 +1951,7 @@ function clientHistory(id){
 
 
 /* =========================================================
-SELETTORE CLIENTE
+   SELETTORE CLIENTE
 ========================================================= */
 
 function openClientPicker(){
@@ -2453,7 +1964,6 @@ function openClientPicker(){
         .trim()
         .toLowerCase();
 
-
     const filtered =
         clients
         .filter(
@@ -2464,24 +1974,19 @@ function openClientPicker(){
         )
         .slice(0,40);
 
-
     if(!filtered.length){
 
-        $("clientResults")
-            .innerHTML = `
-
+        $("clientResults").innerHTML =
+            `
             <div class="client-result">
                 Nessun cliente trovato.
             </div>
-
             `;
 
     }else{
 
-        $("clientResults")
-            .innerHTML =
-            filtered
-            .map(
+        $("clientResults").innerHTML =
+            filtered.map(
                 client=>`
 
                 <div
@@ -2489,36 +1994,22 @@ function openClientPicker(){
                     onclick="selectAppointmentClient('${client.id}')">
 
                     <b>
-                        ${escapeHTML(
-                            client.name
-                        )}
+                        ${escapeHTML(client.name)}
                     </b>
 
                     <div class="sub">
-                        ${escapeHTML(
-                            client.phone || ""
-                        )}
-
-                        ${
-                            client.city
-                            ?
-                            " · "+
-                            escapeHTML(
-                                client.city
-                            )
-                            :
-                            ""
-                        }
+                        ${escapeHTML(client.phone || "")}
+                        ${client.city
+                            ? " · "+escapeHTML(client.city)
+                            : ""}
                     </div>
 
                 </div>
 
                 `
-            )
-            .join("");
+            ).join("");
 
     }
-
 
     $("clientResults")
         .classList
@@ -2526,14 +2017,12 @@ function openClientPicker(){
 
 }
 
-
 function selectAppointmentClient(id){
 
     const client =
         findClient(id);
 
     if(!client) return;
-
 
     $("appointmentClient")
         .value =
@@ -2548,7 +2037,6 @@ function selectAppointmentClient(id){
         .add("hidden");
 
 }
-
 
 document.addEventListener(
     "click",
@@ -2570,232 +2058,7 @@ document.addEventListener(
 
 
 /* =========================================================
-PAGAMENTO
-========================================================= */
-
-function toggleInstallments(){
-
-    const type =
-        $("paymentType")
-        .value;
-
-
-    $("installmentBox")
-        .classList
-        .toggle(
-            "hidden",
-            type !== "installments"
-        );
-
-
-    updatePaymentPreview();
-
-}
-
-
-function updatePaymentPreview(){
-
-    const amount =
-        Number(
-            $("appointmentAmount")
-            .value || 0
-        );
-
-
-    const type =
-        $("paymentType")
-        .value;
-
-
-    if(
-        type !==
-        "installments"
-    ){
-
-        $("paymentPreview")
-            .textContent =
-            amount > 0
-            ?
-            "Pagamento unico: "+
-            money(amount)
-            :
-            "";
-
-        return;
-
-    }
-
-
-    const count =
-        Number(
-            $("installmentCount")
-            .value || 1
-        );
-
-
-    if(amount <= 0){
-
-        $("paymentPreview")
-            .textContent =
-            "";
-
-        return;
-
-    }
-
-
-    const base =
-        Math.floor(
-            (amount/count)*100
-        )/100;
-
-
-    const last =
-        Math.round(
-            (
-                amount-
-                base*(count-1)
-            )*100
-        )/100;
-
-
-    $("paymentPreview")
-        .innerHTML =
-        `
-        ${count} rate.
-
-        <br>
-
-        Prime ${count-1} rate:
-        <b>${money(base)}</b>
-
-        <br>
-
-        Ultima rata:
-        <b>${money(last)}</b>
-        `;
-
-}
-
-
-function buildPaymentRows(
-    appointment
-){
-
-    const amount =
-        Number(
-            appointment.amount || 0
-        );
-
-
-    if(amount <= 0)
-        return [];
-
-
-    const type =
-        $("paymentType")
-        .value;
-
-
-    if(type === "single"){
-
-        return [
-
-            {
-                client_id:
-                    appointment.client_id,
-
-                appointment_id:
-                    appointment.id,
-
-                amount:amount,
-
-                status:"pending",
-
-                due_date:
-                    appointment.date,
-
-                payment_date:null,
-
-                method:null
-
-            }
-
-        ];
-
-    }
-
-
-    const count =
-        Number(
-            $("installmentCount")
-            .value || 1
-        );
-
-
-    const base =
-        Math.floor(
-            (amount/count)*100
-        )/100;
-
-
-    const last =
-        Math.round(
-            (
-                amount-
-                base*(count-1)
-            )*100
-        )/100;
-
-
-    const rows = [];
-
-
-    for(
-        let i=0;
-        i<count;
-        i++
-    ){
-
-        rows.push({
-
-            client_id:
-                appointment.client_id,
-
-            appointment_id:
-                appointment.id,
-
-            amount:
-                i === count-1
-                ?
-                last
-                :
-                base,
-
-            status:"pending",
-
-            due_date:
-                addMonths(
-                    appointment.date,
-                    i
-                ),
-
-            payment_date:null,
-
-            method:null
-
-        });
-
-    }
-
-
-    return rows;
-
-}
-
-
-/* =========================================================
-APPUNTAMENTI
+   APPUNTAMENTI
 ========================================================= */
 
 async function saveAppointment(){
@@ -2804,16 +2067,13 @@ async function saveAppointment(){
         $("appointmentClientId")
         .value;
 
-
     const typedName =
         $("appointmentClient")
         .value
         .trim();
 
-
     let client =
         findClient(clientId);
-
 
     if(!client && typedName){
 
@@ -2830,7 +2090,6 @@ async function saveAppointment(){
 
     }
 
-
     if(!client){
 
         alert(
@@ -2841,11 +2100,9 @@ async function saveAppointment(){
 
     }
 
-
     const date =
         $("appointmentDate")
         .value;
-
 
     if(!date){
 
@@ -2857,63 +2114,47 @@ async function saveAppointment(){
 
     }
 
-
-    const amount =
-        Number(
-            $("appointmentAmount")
-            .value || 0
-        );
-
-
     const payload = {
 
-        client_id:
-            client.id,
+        client_id:client.id,
 
-        date:
-
-            date,
+        date,
 
         time:
             $("appointmentTime")
             .value || null,
 
         title:
-            $("appointmentTitle")
-            .value
-            .trim(),
+            "Intervento",
 
-        description:
-            $("appointmentDescription")
-            .value
-            .trim(),
+        description:null,
 
         status:
-
             editingAppointmentId
-
             ?
-
             (
                 appointments.find(
                     a =>
-                        String(a.id)
-                        ===
-                        String(
-                            editingAppointmentId
-                        )
-                )?.status
-                ||
+                        a.id ===
+                        editingAppointmentId
+                )?.status ||
                 "programmato"
             )
-
             :
-
             "programmato",
 
         amount:
-
-            amount,
+            editingAppointmentId
+            ?
+            Number(
+                appointments.find(
+                    a =>
+                        a.id ===
+                        editingAppointmentId
+                )?.amount || 0
+            )
+            :
+            0,
 
         notes:
             $("appointmentNotes")
@@ -2922,9 +2163,7 @@ async function saveAppointment(){
 
     };
 
-
     let result;
-
 
     if(editingAppointmentId){
 
@@ -2950,7 +2189,6 @@ async function saveAppointment(){
 
     }
 
-
     if(result.error){
 
         alert(
@@ -2962,19 +2200,13 @@ async function saveAppointment(){
 
     }
 
-
     if(editingAppointmentId){
 
         appointments =
             appointments.map(
                 appointment =>
-                    String(
-                        appointment.id
-                    )
-                    ===
-                    String(
-                        editingAppointmentId
-                    )
+                    appointment.id ===
+                    editingAppointmentId
                     ?
                     result.data
                     :
@@ -2987,73 +2219,10 @@ async function saveAppointment(){
             result.data
         );
 
-
-        /*
-         * CREAZIONE AUTOMATICA PAGAMENTI
-         *
-         * Viene fatta solamente per un nuovo
-         * appuntamento, evitando di duplicare
-         * rate quando si modifica un appuntamento.
-         */
-
-        if(amount > 0){
-
-            const paymentRows =
-                buildPaymentRows(
-                    result.data
-                );
-
-
-            if(paymentRows.length){
-
-                const paymentResult =
-                    await supabaseClient
-                        .from("payments")
-                        .insert(
-                            paymentRows
-                        )
-                        .select();
-
-
-                if(paymentResult.error){
-
-                    /*
-                     * L'appuntamento è comunque
-                     * stato salvato. Mostriamo
-                     * chiaramente il problema
-                     * relativo alle rate.
-                     */
-
-                    console.error(
-                        paymentResult.error
-                    );
-
-                    alert(
-                        "Appuntamento salvato, ma non è stato possibile creare i pagamenti:\n"+
-                        paymentResult.error.message
-                    );
-
-                }else{
-
-                    payments =
-                        payments.concat(
-                            paymentResult.data || []
-                        );
-
-                }
-
-            }
-
-        }
-
     }
 
-
     const wasEditing =
-        Boolean(
-            editingAppointmentId
-        );
-
+        Boolean(editingAppointmentId);
 
     resetAppointmentForm();
 
@@ -3064,65 +2233,52 @@ async function saveAppointment(){
         ?
         "Appuntamento aggiornato"
         :
-        "Appuntamento e pagamento salvati"
+        "Appuntamento programmato"
     );
 
 }
 
 
+/* =========================================================
+   MODIFICA APPUNTAMENTO
+========================================================= */
+
 function editAppointment(id){
 
     const appointment =
         appointments.find(
-            a =>
-                String(a.id)
-                ===
-                String(id)
+            a => a.id === id
         );
 
-
     if(!appointment) return;
-
 
     const client =
         findClient(
             appointment.client_id
         );
 
-
     editingAppointmentId =
         id;
-
 
     $("appointmentFormTitle")
         .textContent =
         "✏️ Modifica appuntamento";
 
-
     $("cancelAppointmentEdit")
         .classList
         .remove("hidden");
-
 
     $("appointmentClient")
         .value =
         client?.name || "";
 
-
     $("appointmentClientId")
         .value =
         appointment.client_id;
 
-
-    $("appointmentTitle")
-        .value =
-        appointment.title || "";
-
-
     $("appointmentDate")
         .value =
         appointment.date;
-
 
     $("appointmentTime")
         .value =
@@ -3132,44 +2288,11 @@ function editAppointment(id){
         :
         "";
 
-
-    $("appointmentAmount")
-        .value =
-        appointment.amount || 0;
-
-
-    $("appointmentDescription")
-        .value =
-        appointment.description || "";
-
-
     $("appointmentNotes")
         .value =
         appointment.notes || "";
 
-
-    /*
-     * In modifica non ricreiamo automaticamente
-     * le rate già esistenti.
-     */
-
-    $("paymentType")
-        .value =
-        "single";
-
-
-    $("installmentBox")
-        .classList
-        .add("hidden");
-
-
-    updatePaymentPreview();
-
-
-    showPage(
-        "appointments"
-    );
-
+    showPage("appointments");
 
     window.scrollTo({
         top:0,
@@ -3178,63 +2301,800 @@ function editAppointment(id){
 
 }
 
-
 function resetAppointmentForm(){
 
     editingAppointmentId =
         null;
 
-
     $("appointmentFormTitle")
         .textContent =
         "📅 Nuovo appuntamento";
-
 
     $("cancelAppointmentEdit")
         .classList
         .add("hidden");
 
-
     [
         "appointmentClient",
         "appointmentClientId",
-        "appointmentTitle",
         "appointmentTime",
-        "appointmentAmount",
-        "appointmentDescription",
         "appointmentNotes"
     ]
     .forEach(
-        id=>{
-            $(id).value="";
-        }
+        id=>$(id).value=""
     );
-
 
     $("appointmentDate")
         .value =
         today();
 
-
-    $("paymentType")
-        .value =
-        "single";
+}
 
 
-    $("installmentCount")
-        .value =
-        "2";
+/* =========================================================
+   COMPLETA APPUNTAMENTO
+========================================================= */
 
+function openCompleteModal(id){
 
-    $("installmentBox")
+    const appointment =
+        appointments.find(
+            a => a.id === id
+        );
+
+    if(!appointment) return;
+
+    if(appointment.status !== "programmato"){
+
+        alert(
+            "Questo appuntamento non è programmato."
+        );
+
+        return;
+
+    }
+
+    const client =
+        findClient(
+            appointment.client_id
+        );
+
+    $("modalContent").innerHTML = `
+
+        <h2>✅ Completa appuntamento</h2>
+
+        <div class="item">
+
+            <b>
+                ${escapeHTML(
+                    client?.name || "Cliente"
+                )}
+            </b>
+
+            <div class="sub">
+                ${formatDate(appointment.date)}
+                ${
+                    appointment.time
+                    ?
+                    " · "+escapeHTML(
+                        appointment.time.slice(0,5)
+                    )
+                    :
+                    ""
+                }
+            </div>
+
+        </div>
+
+        <label>Importo totale del lavoro</label>
+
+        <input
+            id="completeTotal"
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="0,00">
+
+        <label>Pagamento</label>
+
+        <div
+            id="optionSingle"
+            class="payment-option selected"
+            onclick="selectPaymentType('single')">
+
+            <label>
+                <input
+                    type="radio"
+                    name="paymentType"
+                    value="single"
+                    checked
+                    onchange="selectPaymentType('single')">
+
+                💶 Pagamento unico
+            </label>
+
+        </div>
+
+        <div
+            id="optionInstallments"
+            class="payment-option"
+            onclick="selectPaymentType('installments')">
+
+            <label>
+                <input
+                    type="radio"
+                    name="paymentType"
+                    value="installments"
+                    onchange="selectPaymentType('installments')">
+
+                📅 Pagamento a rate
+            </label>
+
+        </div>
+
+        <div id="singlePaymentFields">
+
+            <label>Metodo di pagamento</label>
+
+            <select id="singleMethod">
+
+                <option value="contanti">
+                    Contanti
+                </option>
+
+                <option value="bonifico">
+                    Bonifico
+                </option>
+
+                <option value="carta">
+                    Carta
+                </option>
+
+                <option value="assegno">
+                    Assegno
+                </option>
+
+                <option value="altro">
+                    Altro
+                </option>
+
+            </select>
+
+            <label>Data pagamento</label>
+
+            <input
+                id="singlePaymentDate"
+                type="date"
+                value="${today()}">
+
+        </div>
+
+        <div
+            id="installmentFields"
+            class="hidden">
+
+            <label>Acconto pagato</label>
+
+            <input
+                id="installmentDeposit"
+                type="number"
+                step="0.01"
+                min="0"
+                value="0"
+                placeholder="0,00"
+                oninput="calculateInstallments()">
+
+            <label>Numero rate</label>
+
+            <input
+                id="installmentCount"
+                type="number"
+                min="1"
+                step="1"
+                value="2"
+                oninput="calculateInstallments()">
+
+            <label>Prima scadenza rata</label>
+
+            <input
+                id="firstDueDate"
+                type="date"
+                value="${today()}">
+
+            <label>Metodo pagamento</label>
+
+            <select id="installmentMethod">
+
+                <option value="bonifico">
+                    Bonifico
+                </option>
+
+                <option value="carta">
+                    Carta
+                </option>
+
+                <option value="contanti">
+                    Contanti
+                </option>
+
+                <option value="altro">
+                    Altro
+                </option>
+
+            </select>
+
+            <div
+                id="installmentPreview"
+                class="item">
+                Inserisci l'importo totale.
+            </div>
+
+        </div>
+
+        <div class="actions">
+
+            <button
+                class="secondary"
+                onclick="closeModal()">
+                Annulla
+            </button>
+
+            <button
+                class="success"
+                onclick="completeAppointment('${id}')">
+                ✅ Completa lavoro
+            </button>
+
+        </div>
+
+    `;
+
+    $("modal")
         .classList
-        .add("hidden");
-
-
-    updatePaymentPreview();
+        .remove("hidden");
 
 }
 
+function selectPaymentType(type){
+
+    const single =
+        type === "single";
+
+    $("optionSingle")
+        .classList
+        .toggle(
+            "selected",
+            single
+        );
+
+    $("optionInstallments")
+        .classList
+        .toggle(
+            "selected",
+            !single
+        );
+
+    $("singlePaymentFields")
+        .classList
+        .toggle(
+            "hidden",
+            !single
+        );
+
+    $("installmentFields")
+        .classList
+        .toggle(
+            "hidden",
+            single
+        );
+
+    const radio =
+        document.querySelector(
+            `input[name="paymentType"][value="${type}"]`
+        );
+
+    if(radio)
+        radio.checked = true;
+
+    calculateInstallments();
+
+}
+
+function calculateInstallments(){
+
+    if(
+        !$("completeTotal") ||
+        !$("installmentCount") ||
+        !$("installmentDeposit")
+    ) return;
+
+    const total =
+        Number(
+            $("completeTotal").value || 0
+        );
+
+    const count =
+        Math.max(
+            1,
+            Number(
+                $("installmentCount").value || 1
+            )
+        );
+
+    const deposit =
+        Math.max(
+            0,
+            Number(
+                $("installmentDeposit").value || 0
+            )
+        );
+
+    const remaining =
+        Math.max(
+            0,
+            total-deposit
+        );
+
+    const installment =
+        count > 0
+        ?
+        remaining/count
+        :
+        0;
+
+    $("installmentPreview")
+        .innerHTML = `
+
+        <b>Riepilogo rate</b>
+
+        <div class="sub">
+            Totale: ${money(total)}
+        </div>
+
+        <div class="sub">
+            Acconto: ${money(deposit)}
+        </div>
+
+        <div class="sub">
+            Residuo: ${money(remaining)}
+        </div>
+
+        <div class="sub">
+            ${count} rate da
+            <b>${money(installment)}</b>
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   COMPLETAMENTO + PAGAMENTO
+========================================================= */
+
+async function completeAppointment(id){
+
+    const appointment =
+        appointments.find(
+            a => a.id === id
+        );
+
+    if(!appointment) return;
+
+    const total =
+        Number(
+            $("completeTotal")
+            .value || 0
+        );
+
+    if(total <= 0){
+
+        alert(
+            "Inserisci l'importo totale del lavoro."
+        );
+
+        return;
+
+    }
+
+    const paymentType =
+        document.querySelector(
+            'input[name="paymentType"]:checked'
+        )?.value || "single";
+
+    let paymentRows = [];
+
+    if(paymentType === "single"){
+
+        const method =
+            $("singleMethod")
+            .value;
+
+        const paymentDate =
+            $("singlePaymentDate")
+            .value || today();
+
+        paymentRows.push({
+
+            client_id:
+                appointment.client_id,
+
+            appointment_id:
+                appointment.id,
+
+            amount:
+                total,
+
+            due_date:
+                paymentDate,
+
+            payment_date:
+                paymentDate,
+
+            status:
+                "pagato",
+
+            method,
+
+            notes:
+                "Pagamento unico"
+
+        });
+
+    }else{
+
+        const deposit =
+            Math.max(
+                0,
+                Number(
+                    $("installmentDeposit")
+                    .value || 0
+                )
+            );
+
+        const count =
+            Math.max(
+                1,
+                Math.floor(
+                    Number(
+                        $("installmentCount")
+                        .value || 1
+                    )
+                )
+            );
+
+        const firstDueDate =
+            $("firstDueDate")
+            .value || today();
+
+        const method =
+            $("installmentMethod")
+            .value;
+
+        if(deposit > total){
+
+            alert(
+                "L'acconto non può essere superiore al totale."
+            );
+
+            return;
+
+        }
+
+        if(deposit > 0){
+
+            paymentRows.push({
+
+                client_id:
+                    appointment.client_id,
+
+                appointment_id:
+                    appointment.id,
+
+                amount:
+                    deposit,
+
+                due_date:
+                    today(),
+
+                payment_date:
+                    today(),
+
+                status:
+                    "pagato",
+
+                method,
+
+                notes:
+                    "Acconto"
+
+            });
+
+        }
+
+        const remaining =
+            total-deposit;
+
+        if(remaining > 0){
+
+            const installmentAmount =
+                Math.round(
+                    (
+                        remaining/count
+                    ) * 100
+                ) / 100;
+
+            let assigned = 0;
+
+            for(let i=0;i<count;i++){
+
+                let amount =
+                    installmentAmount;
+
+                if(i === count-1){
+
+                    amount =
+                        Math.round(
+                            (
+                                remaining-assigned
+                            ) * 100
+                        ) / 100;
+
+                }
+
+                assigned += amount;
+
+                const due =
+                    addMonths(
+                        firstDueDate,
+                        i
+                    );
+
+                paymentRows.push({
+
+                    client_id:
+                        appointment.client_id,
+
+                    appointment_id:
+                        appointment.id,
+
+                    amount,
+
+                    due_date:
+                        due,
+
+                    payment_date:
+                        null,
+
+                    status:
+                        "da_pagare",
+
+                    method,
+
+                    notes:
+                        `Rata ${i+1}/${count}`
+
+                });
+
+            }
+
+        }
+
+    }
+
+    const {
+        data:insertedPayments,
+        error:paymentError
+    } =
+    await supabaseClient
+        .from("payments")
+        .insert(paymentRows)
+        .select();
+
+    if(paymentError){
+
+        alert(
+            "Errore salvataggio pagamento:\n"+
+            paymentError.message
+        );
+
+        return;
+
+    }
+
+    const {
+        data:updatedAppointment,
+        error:appointmentError
+    } =
+    await supabaseClient
+        .from("appointments")
+        .update({
+
+            status:
+                "completato",
+
+            amount:
+                total
+
+        })
+        .eq(
+            "id",
+            id
+        )
+        .select()
+        .single();
+
+    if(appointmentError){
+
+        /*
+         * Se il pagamento è stato salvato ma il completamento
+         * dell'appuntamento fallisce, segnaliamo il problema.
+         * Non cancelliamo automaticamente i pagamenti per
+         * evitare operazioni distruttive.
+         */
+
+        alert(
+            "Pagamento salvato, ma non è stato possibile "+
+            "completare l'appuntamento:\n"+
+            appointmentError.message
+        );
+
+        return;
+
+    }
+
+    appointments =
+        appointments.map(
+            appointment =>
+                appointment.id === id
+                ?
+                updatedAppointment
+                :
+                appointment
+        );
+
+    if(insertedPayments?.length){
+
+        payments.push(
+            ...insertedPayments
+        );
+
+    }
+
+    closeModal();
+
+    renderAll();
+
+    toast(
+        "Lavoro completato e pagamento registrato"
+    );
+
+}
+
+function addMonths(dateString,months){
+
+    const d =
+        new Date(
+            dateString+"T00:00:00"
+        );
+
+    const originalDay =
+        d.getDate();
+
+    d.setMonth(
+        d.getMonth()+months
+    );
+
+    /*
+     * Gestione fine mese.
+     */
+    if(
+        d.getDate() !== originalDay
+    ){
+
+        d.setDate(0);
+
+    }
+
+    return d
+        .toISOString()
+        .slice(0,10);
+
+}
+
+
+/* =========================================================
+   STATO APPUNTAMENTO
+========================================================= */
+
+async function cancelAppointment(id){
+
+    if(
+        !confirm(
+            "Vuoi annullare questo appuntamento?"
+        )
+    ) return;
+
+    const {
+        data,
+        error
+    } =
+    await supabaseClient
+        .from("appointments")
+        .update({
+            status:"annullato"
+        })
+        .eq("id",id)
+        .select()
+        .single();
+
+    if(error){
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    appointments =
+        appointments.map(
+            appointment =>
+                appointment.id === id
+                ?
+                data
+                :
+                appointment
+        );
+
+    renderAll();
+
+    toast(
+        "Appuntamento annullato"
+    );
+
+}
+
+async function reopenAppointment(id){
+
+    const {
+        data,
+        error
+    } =
+    await supabaseClient
+        .from("appointments")
+        .update({
+            status:"programmato"
+        })
+        .eq("id",id)
+        .select()
+        .single();
+
+    if(error){
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    appointments =
+        appointments.map(
+            appointment =>
+                appointment.id === id
+                ?
+                data
+                :
+                appointment
+        );
+
+    renderAll();
+
+    toast(
+        "Appuntamento riaperto"
+    );
+
+}
 
 async function deleteAppointment(id){
 
@@ -3243,31 +3103,25 @@ async function deleteAppointment(id){
             payment =>
                 String(
                     payment.appointment_id
-                )
-                ===
-                String(id)
+                ) === String(id)
         );
-
 
     if(linkedPayments){
 
         alert(
             "Questo appuntamento ha pagamenti collegati. "+
-            "Elimina prima i pagamenti dalla sezione Pagamenti."
+            "Non può essere eliminato prima di eliminare i pagamenti."
         );
 
         return;
 
     }
 
-
     if(
         !confirm(
             "Eliminare questo appuntamento?"
         )
-    )
-        return;
-
+    ) return;
 
     const {
         error
@@ -3277,28 +3131,19 @@ async function deleteAppointment(id){
         .delete()
         .eq("id",id);
 
-
     if(error){
 
-        alert(
-            error.message
-        );
+        alert(error.message);
 
         return;
 
     }
 
-
     appointments =
         appointments.filter(
             appointment =>
-                String(
-                    appointment.id
-                )
-                !==
-                String(id)
+                appointment.id !== id
         );
-
 
     renderAll();
 
@@ -3309,130 +3154,9 @@ async function deleteAppointment(id){
 }
 
 
-async function toggleAppointmentStatus(
-    id,
-    status
-){
-
-    const allowed = [
-        "programmato",
-        "confermato",
-        "completato",
-        "annullato"
-    ];
-
-
-    if(
-        !allowed.includes(status)
-    ){
-
-        alert(
-            "Stato appuntamento non valido."
-        );
-
-        return;
-
-    }
-
-
-    const {
-        data,
-        error
-    } =
-    await supabaseClient
-        .from("appointments")
-        .update({
-            status
-        })
-        .eq("id",id)
-        .select()
-        .single();
-
-
-    if(error){
-
-        alert(
-            error.message
-        );
-
-        return;
-
-    }
-
-
-    appointments =
-        appointments.map(
-            appointment =>
-                String(
-                    appointment.id
-                )
-                ===
-                String(id)
-                ?
-                data
-                :
-                appointment
-        );
-
-
-    renderAll();
-
-}
-
-
-function appointmentStatusLabel(
-    status
-){
-
-    const labels = {
-
-        programmato:"Programmato",
-
-        confermato:"Confermato",
-
-        completato:"Completato",
-
-        annullato:"Annullato"
-
-    };
-
-
-    return labels[status]
-        ||
-        "Programmato";
-
-}
-
-
-function appointmentBadgeClass(
-    status
-){
-
-    if(
-        status ===
-        "completato"
-    )
-        return "green";
-
-
-    if(
-        status ===
-        "confermato"
-    )
-        return "blue";
-
-
-    if(
-        status ===
-        "annullato"
-    )
-        return "red";
-
-
-    return "orange";
-
-}
-
+/* =========================================================
+   RENDER APPUNTAMENTI
+========================================================= */
 
 function renderAppointments(){
 
@@ -3443,9 +3167,13 @@ function renderAppointments(){
         )
         .toLowerCase();
 
-
-    const list =
+    const programmed =
         appointments
+        .filter(
+            appointment =>
+                appointment.status ===
+                "programmato"
+        )
         .filter(
             appointment =>
                 (
@@ -3453,17 +3181,7 @@ function renderAppointments(){
                         appointment.client_id
                     )
                     +" "+
-                    (
-                        appointment.title
-                        ||
-                        ""
-                    )
-                    +" "+
-                    (
-                        appointment.description
-                        ||
-                        ""
-                    )
+                    (appointment.notes || "")
                 )
                 .toLowerCase()
                 .includes(query)
@@ -3472,85 +3190,175 @@ function renderAppointments(){
             (a,b)=>
                 (
                     a.date+
-                    (
-                        a.time ||
-                        ""
-                    )
+                    (a.time || "")
                 )
                 .localeCompare(
                     b.date+
-                    (
-                        b.time ||
-                        ""
-                    )
+                    (b.time || "")
                 )
         );
 
+    if(!programmed.length){
 
-    if(!list.length){
+        $("appointmentsList").innerHTML =
+            '<div class="empty">Nessun appuntamento programmato.</div>';
 
-        $("appointmentsList")
-            .innerHTML =
-            '<div class="empty">Nessun appuntamento.</div>';
+    }else{
+
+        $("appointmentsList").innerHTML =
+            programmed.map(
+                appointment=>{
+
+                    return `
+
+                    <div class="item">
+
+                        <div class="between">
+
+                            <div>
+
+                                <div class="item-title">
+                                    ${escapeHTML(
+                                        clientName(
+                                            appointment.client_id
+                                        )
+                                    )}
+                                </div>
+
+                                <div class="sub">
+
+                                    ${formatDate(
+                                        appointment.date
+                                    )}
+
+                                    ${
+                                        appointment.time
+                                        ?
+                                        " · "+
+                                        escapeHTML(
+                                            appointment.time.slice(0,5)
+                                        )
+                                        :
+                                        ""
+                                    }
+
+                                </div>
+
+                            </div>
+
+                            <span class="badge orange">
+                                Programmato
+                            </span>
+
+                        </div>
+
+                        ${
+                            appointment.notes
+                            ?
+                            `
+                            <div class="sub">
+                                📝 ${escapeHTML(
+                                    appointment.notes
+                                )}
+                            </div>
+                            `
+                            :
+                            ""
+                        }
+
+                        <div class="actions">
+
+                            <button
+                                class="secondary"
+                                onclick="editAppointment('${appointment.id}')">
+                                Modifica
+                            </button>
+
+                            <button
+                                class="success"
+                                onclick="openCompleteModal('${appointment.id}')">
+                                ✅ Completa
+                            </button>
+
+                        </div>
+
+                        <div class="actions">
+
+                            <button
+                                class="orangeBtn"
+                                onclick="cancelAppointment('${appointment.id}')">
+                                Annulla
+                            </button>
+
+                            <button
+                                class="danger"
+                                onclick="deleteAppointment('${appointment.id}')">
+                                Elimina
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+    }
+
+
+    const history =
+        appointments
+        .filter(
+            appointment =>
+                appointment.status ===
+                "completato"
+                ||
+                appointment.status ===
+                "annullato"
+        )
+        .filter(
+            appointment =>
+                (
+                    clientName(
+                        appointment.client_id
+                    )
+                    +" "+
+                    (appointment.notes || "")
+                )
+                .toLowerCase()
+                .includes(query)
+        )
+        .sort(
+            (a,b)=>
+                (
+                    b.date+
+                    (b.time || "")
+                )
+                .localeCompare(
+                    a.date+
+                    (a.time || "")
+                )
+        );
+
+    if(!history.length){
+
+        $("appointmentHistory").innerHTML =
+            '<div class="empty">Nessun appuntamento nello storico.</div>';
 
         return;
 
     }
 
-
-    $("appointmentsList")
-        .innerHTML =
-        list
-        .map(
+    $("appointmentHistory").innerHTML =
+        history.map(
             appointment=>{
 
-                const status =
-                    appointment.status
-                    ||
-                    "programmato";
-
-
-                const linkedPayments =
-                    payments.filter(
-                        payment =>
-                            String(
-                                payment.appointment_id
-                            )
-                            ===
-                            String(
-                                appointment.id
-                            )
-                    );
-
-
-                const paid =
-                    linkedPayments
-                    .filter(
-                        payment =>
-                            payment.status
-                            ===
-                            "paid"
-                    )
-                    .reduce(
-                        (sum,payment)=>
-                            sum+
-                            Number(
-                                payment.amount || 0
-                            ),
-                        0
-                    );
-
-
-                const remaining =
-                    Math.max(
-                        0,
-                        Number(
-                            appointment.amount || 0
-                        )
-                        -
-                        paid
-                    );
-
+                const completed =
+                    appointment.status ===
+                    "completato";
 
                 return `
 
@@ -3585,40 +3393,33 @@ function renderAppointments(){
                                     ""
                                 }
 
-                                ·
-
-                                ${escapeHTML(
-                                    appointment.title ||
-                                    "Intervento"
-                                )}
-
                             </div>
 
                         </div>
 
-
                         <span class="badge ${
-                            appointmentBadgeClass(
-                                status
-                            )
+                            completed
+                            ? "green"
+                            : "red"
                         }">
 
-                            ${appointmentStatusLabel(
-                                status
-                            )}
+                            ${
+                                completed
+                                ? "Completato"
+                                : "Annullato"
+                            }
 
                         </span>
 
                     </div>
 
-
                     ${
-                        appointment.description
+                        appointment.notes
                         ?
                         `
                         <div class="sub">
-                            ${escapeHTML(
-                                appointment.description
+                            📝 ${escapeHTML(
+                                appointment.notes
                             )}
                         </div>
                         `
@@ -3626,75 +3427,41 @@ function renderAppointments(){
                         ""
                     }
 
-
-                    <div
-                        class="between"
-                        style="margin-top:10px">
-
-                        <b>
-                            ${money(
+                    ${
+                        completed
+                        ?
+                        `
+                        <div class="sub">
+                            💰 Totale lavoro:
+                            <b>${money(
                                 appointment.amount
-                            )}
-                        </b>
+                            )}</b>
+                        </div>
+                        `
+                        :
+                        ""
+                    }
+
+                    <div class="actions">
 
                         ${
-                            appointment.amount > 0
+                            !completed
                             ?
                             `
-                            <span class="sub">
-                                Incassato:
-                                ${money(paid)}
-                                · Residuo:
-                                ${money(remaining)}
-                            </span>
+                            <button
+                                class="secondary"
+                                onclick="reopenAppointment('${appointment.id}')">
+                                Riapri
+                            </button>
                             `
                             :
                             ""
                         }
 
-                    </div>
-
-
-                    <div class="actions">
-
                         <button
                             class="secondary"
                             onclick="editAppointment('${appointment.id}')">
                             Modifica
-                        </button>
-
-
-                        ${
-                            status !== "completato"
-                            ?
-                            `
-                            <button
-                                class="success"
-                                onclick="toggleAppointmentStatus(
-                                    '${appointment.id}',
-                                    'completato'
-                                )">
-                                Completa
-                            </button>
-                            `
-                            :
-                            `
-                            <button
-                                class="blue"
-                                onclick="toggleAppointmentStatus(
-                                    '${appointment.id}',
-                                    'programmato'
-                                )">
-                                Riapri
-                            </button>
-                            `
-                        }
-
-
-                        <button
-                            class="danger"
-                            onclick="deleteAppointment('${appointment.id}')">
-                            Elimina
                         </button>
 
                     </div>
@@ -3711,8 +3478,18 @@ function renderAppointments(){
 
 
 /* =========================================================
-PAGAMENTI
+   PAGAMENTI
 ========================================================= */
+
+function isPaymentPaid(payment){
+
+    return (
+        payment.status === "pagato"
+        ||
+        payment.status === "paid"
+    );
+
+}
 
 function renderPayments(){
 
@@ -3723,15 +3500,9 @@ function renderPayments(){
         )
         .toLowerCase();
 
-
     const received =
         payments
-        .filter(
-            payment =>
-                payment.status
-                ===
-                "paid"
-        )
+        .filter(isPaymentPaid)
         .reduce(
             (sum,payment)=>
                 sum+
@@ -3740,15 +3511,12 @@ function renderPayments(){
                 ),
             0
         );
-
 
     const remaining =
         payments
         .filter(
             payment =>
-                payment.status
-                !==
-                "paid"
+                !isPaymentPaid(payment)
         )
         .reduce(
             (sum,payment)=>
@@ -3759,26 +3527,21 @@ function renderPayments(){
             0
         );
 
-
     $("paymentsReceived")
         .textContent =
         money(received);
-
 
     $("paymentsRemaining")
         .textContent =
         money(remaining);
 
-
     $("paymentsClients")
         .textContent =
         new Set(
             payments.map(
-                p =>
-                    p.client_id
+                p=>p.client_id
             )
         ).size;
-
 
     const clientsWithPayments =
         clients.filter(
@@ -3791,30 +3554,21 @@ function renderPayments(){
                     payment =>
                         String(
                             payment.client_id
-                        )
-                        ===
-                        String(
-                            client.id
-                        )
+                        ) ===
+                        String(client.id)
                 )
         );
 
+    if(!clientsWithPayments.length){
 
-    if(
-        !clientsWithPayments.length
-    ){
-
-        $("paymentsList")
-            .innerHTML =
+        $("paymentsList").innerHTML =
             '<div class="empty">Nessun pagamento.</div>';
 
         return;
 
     }
 
-
-    $("paymentsList")
-        .innerHTML =
+    $("paymentsList").innerHTML =
         clientsWithPayments
         .map(
             client=>{
@@ -3824,13 +3578,9 @@ function renderPayments(){
                         payment =>
                             String(
                                 payment.client_id
-                            )
-                            ===
-                            String(
-                                client.id
-                            )
+                            ) ===
+                            String(client.id)
                     );
-
 
                 const total =
                     clientPayments.reduce(
@@ -3842,15 +3592,9 @@ function renderPayments(){
                         0
                     );
 
-
                 const paid =
                     clientPayments
-                    .filter(
-                        payment =>
-                            payment.status
-                            ===
-                            "paid"
-                    )
+                    .filter(isPaymentPaid)
                     .reduce(
                         (sum,payment)=>
                             sum+
@@ -3859,7 +3603,6 @@ function renderPayments(){
                             ),
                         0
                     );
-
 
                 const percentage =
                     total
@@ -3870,7 +3613,6 @@ function renderPayments(){
                     )
                     :
                     0;
-
 
                 return `
 
@@ -3901,18 +3643,12 @@ function renderPayments(){
 
                     </div>
 
-
                     <div class="progress">
-
-                        <i
-                            style="width:${percentage}%">
-                        </i>
-
+                        <i style="width:${percentage}%"></i>
                     </div>
 
-
                     ${clientPayments.map(
-                        (payment,index)=>`
+                        payment=>`
 
                         <div
                             class="item"
@@ -3920,50 +3656,39 @@ function renderPayments(){
 
                             <div class="between">
 
-                                <div>
-
-                                    <b>
-                                        ${money(
-                                            payment.amount
-                                        )}
-                                    </b>
-
-                                    <div class="sub">
-                                        ${
-                                            payment.appointment_id
-                                            ?
-                                            "Rata "+
-                                            (index+1)
-                                            :
-                                            "Pagamento"
-                                        }
-                                    </div>
-
-                                </div>
-
+                                <b>
+                                    ${money(
+                                        payment.amount
+                                    )}
+                                </b>
 
                                 <span class="badge ${
-                                    payment.status === "paid"
-                                    ?
-                                    "green"
-                                    :
-                                    "orange"
+                                    isPaymentPaid(payment)
+                                    ? "green"
+                                    : "orange"
                                 }">
 
                                     ${
-                                        payment.status === "paid"
-                                        ?
-                                        "Pagato"
-                                        :
-                                        "Da pagare"
+                                        isPaymentPaid(payment)
+                                        ? "Pagato"
+                                        : "Da pagare"
                                     }
 
                                 </span>
 
                             </div>
 
-
                             <div class="sub">
+
+                                ${
+                                    payment.notes
+                                    ?
+                                    escapeHTML(
+                                        payment.notes
+                                    )+" · "
+                                    :
+                                    ""
+                                }
 
                                 Scadenza:
                                 ${formatDate(
@@ -3994,11 +3719,10 @@ function renderPayments(){
 
                             </div>
 
-
                             <div class="actions">
 
                                 ${
-                                    payment.status !== "paid"
+                                    !isPaymentPaid(payment)
                                     ?
                                     `
                                     <button
@@ -4010,7 +3734,6 @@ function renderPayments(){
                                     :
                                     ""
                                 }
-
 
                                 <button
                                     class="danger"
@@ -4035,7 +3758,6 @@ function renderPayments(){
 
 }
 
-
 async function markPaymentPaid(id){
 
     const {
@@ -4046,20 +3768,19 @@ async function markPaymentPaid(id){
         .from("payments")
         .update({
 
-            status:"paid",
+            status:"pagato",
 
-            payment_date:
-                today()
+            payment_date:today()
 
         })
         .eq("id",id)
         .select()
         .single();
 
-
     if(error){
 
         alert(
+            "Errore registrazione pagamento:\n"+
             error.message
         );
 
@@ -4067,21 +3788,15 @@ async function markPaymentPaid(id){
 
     }
 
-
     payments =
         payments.map(
             payment =>
-                String(
-                    payment.id
-                )
-                ===
-                String(id)
+                payment.id === id
                 ?
                 data
                 :
                 payment
         );
-
 
     renderAll();
 
@@ -4091,16 +3806,13 @@ async function markPaymentPaid(id){
 
 }
 
-
 async function deletePayment(id){
 
     if(
         !confirm(
             "Eliminare questo pagamento?"
         )
-    )
-        return;
-
+    ) return;
 
     const {
         error
@@ -4110,28 +3822,19 @@ async function deletePayment(id){
         .delete()
         .eq("id",id);
 
-
     if(error){
 
-        alert(
-            error.message
-        );
+        alert(error.message);
 
         return;
 
     }
 
-
     payments =
         payments.filter(
             payment =>
-                String(
-                    payment.id
-                )
-                !==
-                String(id)
+                payment.id !== id
         );
-
 
     renderAll();
 
@@ -4143,7 +3846,7 @@ async function deletePayment(id){
 
 
 /* =========================================================
-SPESE
+   SPESE
 ========================================================= */
 
 async function createExpense(){
@@ -4153,18 +3856,15 @@ async function createExpense(){
         .value
         .trim();
 
-
     const amount =
         Number(
             $("expenseAmount")
             .value || 0
         );
 
-
     const date =
         $("expenseDate")
         .value;
-
 
     if(
         !description ||
@@ -4179,7 +3879,6 @@ async function createExpense(){
         return;
 
     }
-
 
     const payload = {
 
@@ -4201,7 +3900,6 @@ async function createExpense(){
 
     };
 
-
     const {
         data,
         error
@@ -4211,7 +3909,6 @@ async function createExpense(){
         .insert(payload)
         .select()
         .single();
-
 
     if(error){
 
@@ -4224,9 +3921,7 @@ async function createExpense(){
 
     }
 
-
     expenses.push(data);
-
 
     [
         "expenseDescription",
@@ -4235,16 +3930,12 @@ async function createExpense(){
         "expenseNotes"
     ]
     .forEach(
-        id=>{
-            $(id).value="";
-        }
+        id=>$(id).value=""
     );
-
 
     $("expenseDate")
         .value =
         today();
-
 
     renderAll();
 
@@ -4253,7 +3944,6 @@ async function createExpense(){
     );
 
 }
-
 
 function renderExpenses(){
 
@@ -4267,22 +3957,17 @@ function renderExpenses(){
                 )
         );
 
-
     if(!list.length){
 
-        $("expensesList")
-            .innerHTML =
+        $("expensesList").innerHTML =
             '<div class="empty">Nessuna spesa.</div>';
 
         return;
 
     }
 
-
-    $("expensesList")
-        .innerHTML =
-        list
-        .map(
+    $("expensesList").innerHTML =
+        list.map(
             expense=>`
 
             <div class="item">
@@ -4326,7 +4011,6 @@ function renderExpenses(){
 
                 </div>
 
-
                 ${
                     expense.notes
                     ?
@@ -4340,7 +4024,6 @@ function renderExpenses(){
                     :
                     ""
                 }
-
 
                 <button
                     class="danger"
@@ -4357,16 +4040,13 @@ function renderExpenses(){
 
 }
 
-
 async function deleteExpense(id){
 
     if(
         !confirm(
             "Eliminare questa spesa?"
         )
-    )
-        return;
-
+    ) return;
 
     const {
         error
@@ -4376,28 +4056,19 @@ async function deleteExpense(id){
         .delete()
         .eq("id",id);
 
-
     if(error){
 
-        alert(
-            error.message
-        );
+        alert(error.message);
 
         return;
 
     }
 
-
     expenses =
         expenses.filter(
             expense =>
-                String(
-                    expense.id
-                )
-                !==
-                String(id)
+                expense.id !== id
         );
-
 
     renderAll();
 
@@ -4409,7 +4080,7 @@ async function deleteExpense(id){
 
 
 /* =========================================================
-DASHBOARD
+   DASHBOARD
 ========================================================= */
 
 function isInPeriod(
@@ -4417,34 +4088,23 @@ function isInPeriod(
     period
 ){
 
-    if(!date)
-        return false;
-
+    if(!date) return false;
 
     const target =
         new Date(
             date+"T00:00:00"
         );
 
-
     const now =
         new Date();
 
-
-    if(
-        period ===
-        "today"
-    ){
+    if(period === "today"){
 
         return date === today();
 
     }
 
-
-    if(
-        period ===
-        "year"
-    ){
+    if(period === "year"){
 
         return (
             target.getFullYear()
@@ -4454,19 +4114,13 @@ function isInPeriod(
 
     }
 
-
-    if(
-        period ===
-        "month"
-    ){
+    if(period === "month"){
 
         return (
             target.getFullYear()
             ===
             now.getFullYear()
-
             &&
-
             target.getMonth()
             ===
             now.getMonth()
@@ -4474,64 +4128,38 @@ function isInPeriod(
 
     }
 
-
-    if(
-        period ===
-        "week"
-    ){
+    if(period === "week"){
 
         const current =
             new Date(now);
 
-
         const day =
             (
-                current.getDay()
-                +
-                6
-            )
-            %
-            7;
-
+                current.getDay()+6
+            ) % 7;
 
         const start =
             new Date(current);
 
-
         start.setDate(
-            current.getDate()
-            -
-            day
+            current.getDate()-day
         );
-
 
         start.setHours(
             0,0,0,0
         );
 
-
-        const end =
-            new Date(start);
-
-
-        end.setDate(
-            start.getDate()+7
-        );
-
-
         return (
             target >= start
             &&
-            target < end
+            target <= now
         );
 
     }
 
-
     return false;
 
 }
-
 
 function renderDashboard(){
 
@@ -4539,20 +4167,13 @@ function renderDashboard(){
         $("dashboardPeriod")
         .value;
 
-
     const income =
         payments
+        .filter(isPaymentPaid)
         .filter(
             payment =>
-                payment.status
-                ===
-                "paid"
-
-                &&
-
                 isInPeriod(
-                    payment.payment_date
-                    ||
+                    payment.payment_date ||
                     payment.due_date,
                     period
                 )
@@ -4565,7 +4186,6 @@ function renderDashboard(){
                 ),
             0
         );
-
 
     const expenseTotal =
         expenses
@@ -4585,16 +4205,13 @@ function renderDashboard(){
             0
         );
 
-
     $("dashIncome")
         .textContent =
         money(income);
 
-
     $("dashExpenses")
         .textContent =
         money(expenseTotal);
-
 
     $("dashNet")
         .textContent =
@@ -4603,26 +4220,17 @@ function renderDashboard(){
             expenseTotal
         );
 
-
     const year =
         new Date()
         .getFullYear();
 
-
     const yearIncome =
         payments
+        .filter(isPaymentPaid)
         .filter(
             payment =>
-                payment.status
-                ===
-                "paid"
-
-                &&
-
                 String(
-                    payment.payment_date
-                    ||
-                    ""
+                    payment.payment_date || ""
                 )
                 .startsWith(
                     year+""
@@ -4636,7 +4244,6 @@ function renderDashboard(){
                 ),
             0
         );
-
 
     const yearExpense =
         expenses
@@ -4658,16 +4265,13 @@ function renderDashboard(){
             0
         );
 
-
     $("yearIncome")
         .textContent =
         money(yearIncome);
 
-
     $("yearExpenses")
         .textContent =
         money(yearExpense);
-
 
     $("yearNet")
         .textContent =
@@ -4676,17 +4280,13 @@ function renderDashboard(){
             yearExpense
         );
 
-
     $("completedJobs")
         .textContent =
         appointments.filter(
             appointment =>
-                appointment.status
-                ===
+                appointment.status ===
                 "completato"
-
                 &&
-
                 String(
                     appointment.date
                 )
@@ -4695,23 +4295,18 @@ function renderDashboard(){
                 )
         ).length;
 
+    /*
+     * Dashboard:
+     * SOLO appuntamenti programmati.
+     */
 
     const upcoming =
         appointments
         .filter(
             appointment =>
-                appointment.status
-                !==
-                "completato"
-
+                appointment.status ===
+                "programmato"
                 &&
-
-                appointment.status
-                !==
-                "annullato"
-
-                &&
-
                 appointment.date >=
                 today()
         )
@@ -4719,40 +4314,26 @@ function renderDashboard(){
             (a,b)=>
                 (
                     a.date+
-                    (
-                        a.time ||
-                        ""
-                    )
+                    (a.time || "")
                 )
                 .localeCompare(
                     b.date+
-                    (
-                        b.time ||
-                        ""
-                    )
+                    (b.time || "")
                 )
         )
-        .slice(
-            0,
-            8
-        );
-
+        .slice(0,8);
 
     if(!upcoming.length){
 
-        $("dashboardAppointments")
-            .innerHTML =
-            '<div class="empty">Nessun appuntamento imminente.</div>';
+        $("dashboardAppointments").innerHTML =
+            '<div class="empty">Nessun appuntamento programmato.</div>';
 
         return;
 
     }
 
-
-    $("dashboardAppointments")
-        .innerHTML =
-        upcoming
-        .map(
+    $("dashboardAppointments").innerHTML =
+        upcoming.map(
             appointment=>`
 
             <div class="item">
@@ -4786,57 +4367,36 @@ function renderDashboard(){
                                 ""
                             }
 
-                            ·
-
-                            ${escapeHTML(
-                                appointment.title ||
-                                "Intervento"
-                            )}
-
                         </div>
 
                     </div>
 
-
-                    <b>
-                        ${money(
-                            appointment.amount
-                        )}
-                    </b>
+                    <span class="badge orange">
+                        Programmato
+                    </span>
 
                 </div>
 
-
                 ${
-                    appointment.amount > 0
+                    appointment.notes
                     ?
                     `
                     <div class="sub">
-
-                        Pagamento:
-
-                        ${
-                            payments.some(
-                                p =>
-                                    String(
-                                        p.appointment_id
-                                    )
-                                    ===
-                                    String(
-                                        appointment.id
-                                    )
-                            )
-                            ?
-                            "💳 presente"
-                            :
-                            "⚠️ non registrato"
-                        }
-
+                        📝 ${escapeHTML(
+                            appointment.notes
+                        )}
                     </div>
                     `
                     :
                     ""
                 }
+
+                <button
+                    class="success"
+                    style="width:100%;margin-top:10px"
+                    onclick="openCompleteModal('${appointment.id}')">
+                    ✅ Completa
+                </button>
 
             </div>
 
@@ -4848,14 +4408,13 @@ function renderDashboard(){
 
 
 /* =========================================================
-DATE
+   DATE
 ========================================================= */
 
 function setDefaultDates(){
 
     if(
-        !$("appointmentDate")
-            .value
+        !$("appointmentDate").value
     ){
 
         $("appointmentDate")
@@ -4864,10 +4423,8 @@ function setDefaultDates(){
 
     }
 
-
     if(
-        !$("expenseDate")
-            .value
+        !$("expenseDate").value
     ){
 
         $("expenseDate")
@@ -4880,7 +4437,7 @@ function setDefaultDates(){
 
 
 /* =========================================================
-MODALE
+   MODALE
 ========================================================= */
 
 function closeModal(){
@@ -4891,28 +4448,25 @@ function closeModal(){
 
 }
 
+$("modal").addEventListener(
+    "click",
+    event=>{
 
-$("modal")
-    .addEventListener(
-        "click",
-        event=>{
+        if(
+            event.target.id ===
+            "modal"
+        ){
 
-            if(
-                event.target.id
-                ===
-                "modal"
-            ){
-
-                closeModal();
-
-            }
+            closeModal();
 
         }
-    );
+
+    }
+);
 
 
 /* =========================================================
-RENDER GENERALE
+   RENDER
 ========================================================= */
 
 function renderAll(){
@@ -4931,7 +4485,7 @@ function renderAll(){
 
 
 /* =========================================================
-AVVIO
+   AVVIO
 ========================================================= */
 
 init();
