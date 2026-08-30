@@ -13,7 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#ffffff">
 
-<title>Igea Impianti V11</title>
+<title>Igea Impianti V12 Cloud</title>
 
 <style>
 
@@ -624,6 +624,62 @@ hr{
     line-height:1.45;
 }
 
+/* LOGIN */
+
+.login-screen{
+    position:fixed;
+    inset:0;
+    background:#fff;
+    z-index:500;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:25px;
+}
+
+.login-box{
+    width:100%;
+    max-width:420px;
+    text-align:center;
+}
+
+.login-logo{
+    width:80px;
+    height:80px;
+    object-fit:contain;
+    border-radius:20px;
+    margin-bottom:15px;
+}
+
+.login-box h1{
+    margin:0 0 5px;
+    font-size:28px;
+}
+
+.login-box p{
+    color:#777;
+    margin:0 0 25px;
+    font-size:14px;
+}
+
+.login-box input{
+    text-align:left;
+}
+
+.cloud-status{
+    font-size:11px;
+    text-align:center;
+    margin-top:8px;
+}
+
+.status-online{
+    color:#16834b;
+}
+
+.status-offline{
+    color:#b56a00;
+}
+
 @media(max-width:400px){
 
     .nav button{
@@ -649,6 +705,48 @@ hr{
 </head>
 
 <body>
+
+<!-- LOGIN -->
+
+<div id="loginScreen" class="login-screen hidden">
+
+<div class="login-box">
+
+<img src="icon.png" class="login-logo" alt="Igea Impianti">
+
+<h1>Igea Impianti</h1>
+
+<p>Accesso sicuro al gestionale</p>
+
+<input
+type="email"
+id="loginEmail"
+placeholder="Email"
+autocomplete="username">
+
+<input
+type="password"
+id="loginPassword"
+placeholder="Password"
+autocomplete="current-password">
+
+<button
+class="primary"
+onclick="loginUser()">
+
+Accedi
+
+</button>
+
+<div
+id="loginStatus"
+class="save-status">
+</div>
+
+</div>
+
+</div>
+
 
 <div class="app">
 
@@ -686,11 +784,6 @@ aria-label="Impostazioni">
 
 <main>
 
-
-<!-- =========================
-     DASHBOARD
-========================= -->
-
 <section id="dashboard">
 
 <div class="card">
@@ -716,10 +809,7 @@ aria-label="Impostazioni">
 
 <label>Dal</label>
 
-<input
-type="date"
-id="dateFrom"
-onchange="updateDashboard()">
+<input type="date" id="dateFrom" onchange="updateDashboard">
 
 </div>
 
@@ -727,52 +817,32 @@ onchange="updateDashboard()">
 
 <label>Al</label>
 
-<input
-type="date"
-id="dateTo"
-onchange="updateDashboard()">
+<input type="date" id="dateTo" onchange="updateDashboard">
 
 </div>
 
 </div>
 
 </div>
-
 
 <div class="stats">
 
 <div class="stat">
-
 <small>💰 Incassato</small>
-
-<strong id="dashIncome" class="green">
-€0,00
-</strong>
-
+<strong id="dashIncome" class="green">€0,00</strong>
 </div>
 
 <div class="stat">
-
 <small>💸 Spese</small>
-
-<strong id="dashExpenses" class="red">
-€0,00
-</strong>
-
+<strong id="dashExpenses" class="red">€0,00</strong>
 </div>
 
 <div class="stat">
-
 <small>🟢 Netto</small>
-
-<strong id="dashNet" class="blue">
-€0,00
-</strong>
-
+<strong id="dashNet" class="blue">€0,00</strong>
 </div>
 
 </div>
-
 
 <div class="card" style="margin-top:14px">
 
@@ -781,49 +851,28 @@ onchange="updateDashboard()">
 <div class="year-box">
 
 <div class="year-stat">
-
 <small>💰 Incassato</small>
-
-<strong id="yearIncome" class="green">
-€0,00
-</strong>
-
+<strong id="yearIncome" class="green">€0,00</strong>
 </div>
 
 <div class="year-stat">
-
 <small>💸 Spese</small>
-
-<strong id="yearExpenses" class="red">
-€0,00
-</strong>
-
+<strong id="yearExpenses" class="red">€0,00</strong>
 </div>
 
 <div class="year-stat">
-
 <small>🟢 Netto</small>
-
-<strong id="yearNet" class="blue">
-€0,00
-</strong>
-
+<strong id="yearNet" class="blue">€0,00</strong>
 </div>
 
 <div class="year-stat">
-
 <small>📅 Lavori completati</small>
-
-<strong id="yearAppointments">
-0
-</strong>
-
+<strong id="yearAppointments">0</strong>
 </div>
 
 </div>
 
 </div>
-
 
 <div class="card">
 
@@ -832,7 +881,6 @@ onchange="updateDashboard()">
 <div id="futureAppointments"></div>
 
 </div>
-
 
 <div class="card">
 
@@ -845,44 +893,25 @@ onchange="updateDashboard()">
 </section>
 
 
-<!-- =========================
-     CLIENTI
-========================= -->
-
 <section id="clients" class="hidden">
 
 <div class="card">
 
 <h2>👥 Nuovo cliente</h2>
 
-<input
-id="clientName"
-placeholder="Nome e cognome">
+<input id="clientName" placeholder="Nome e cognome">
 
-<input
-id="clientPhone"
-type="tel"
-placeholder="Telefono">
+<input id="clientPhone" type="tel" placeholder="Telefono">
 
-<input
-id="clientEmail"
-type="email"
-placeholder="Email">
+<input id="clientEmail" type="email" placeholder="Email">
 
-<textarea
-id="clientNotes"
-placeholder="Note"></textarea>
+<textarea id="clientNotes" placeholder="Note"></textarea>
 
-<button
-class="primary"
-onclick="saveClient()">
-
+<button class="primary" onclick="saveClient()">
 Salva cliente
-
 </button>
 
 </div>
-
 
 <div class="card">
 
@@ -900,10 +929,6 @@ oninput="renderClients()">
 
 </section>
 
-
-<!-- =========================
-     APPUNTAMENTI
-========================= -->
 
 <section id="appointments" class="hidden">
 
@@ -930,15 +955,11 @@ Se il nome non esiste, verrà salvato automaticamente tra i clienti.
 
 <label>Data</label>
 
-<input
-type="date"
-id="appointmentDate">
+<input type="date" id="appointmentDate">
 
 <label>Ora</label>
 
-<input
-type="time"
-id="appointmentTime">
+<input type="time" id="appointmentTime">
 
 <label>Tipo di intervento / Note</label>
 
@@ -946,18 +967,13 @@ id="appointmentTime">
 id="appointmentNotes"
 placeholder="Es. Installazione impianto, sopralluogo, manutenzione..."></textarea>
 
-<button
-class="primary"
-onclick="saveAppointment()">
-
+<button class="primary" onclick="saveAppointment()">
 Salva appuntamento
-
 </button>
 
 <div id="appointmentEditStatus" class="save-status"></div>
 
 </div>
-
 
 <div class="card">
 
@@ -967,7 +983,7 @@ Salva appuntamento
 class="search"
 id="appointmentSearch"
 placeholder="🔎 Cerca cliente..."
-oninput="renderAppointments()">
+oninput="renderAppointments">
 
 <div id="appointmentsList"></div>
 
@@ -975,10 +991,6 @@ oninput="renderAppointments()">
 
 </section>
 
-
-<!-- =========================
-     PAGAMENTI
-========================= -->
 
 <section id="payments" class="hidden">
 
@@ -989,43 +1001,23 @@ oninput="renderAppointments()">
 <div class="stats">
 
 <div class="stat">
-
 <small>💰 Incassato</small>
-
-<strong
-id="paymentsReceived"
-class="green">
-€0,00
-</strong>
-
+<strong id="paymentsReceived" class="green">€0,00</strong>
 </div>
 
 <div class="stat">
-
 <small>⏳ Da incassare</small>
-
-<strong
-id="paymentsRemaining"
-class="orange">
-€0,00
-</strong>
-
+<strong id="paymentsRemaining" class="orange">€0,00</strong>
 </div>
 
 <div class="stat">
-
 <small>👥 Clienti</small>
-
-<strong id="paymentsClients">
-0
-</strong>
-
+<strong id="paymentsClients">0</strong>
 </div>
 
 </div>
 
 </div>
-
 
 <div class="card">
 
@@ -1042,10 +1034,6 @@ oninput="renderPayments()">
 </section>
 
 
-<!-- =========================
-     MOVIMENTI
-========================= -->
-
 <section id="movements" class="hidden">
 
 <div class="card">
@@ -1056,13 +1044,8 @@ oninput="renderPayments()">
 
 <select id="movementType">
 
-<option value="income">
-🟢 Guadagno
-</option>
-
-<option value="expense">
-🔴 Spesa
-</option>
+<option value="income">🟢 Guadagno</option>
+<option value="expense">🔴 Spesa</option>
 
 </select>
 
@@ -1083,20 +1066,13 @@ placeholder="Es. materiale, lavoro, pagamento...">
 
 <label>Data</label>
 
-<input
-type="date"
-id="movementDate">
+<input type="date" id="movementDate">
 
-<button
-class="primary"
-onclick="saveMovement()">
-
+<button class="primary" onclick="saveMovement()">
 Salva movimento
-
 </button>
 
 </div>
-
 
 <div class="card">
 
@@ -1109,10 +1085,6 @@ Salva movimento
 </section>
 
 
-<!-- =========================
-     IMPOSTAZIONI
-========================= -->
-
 <section id="settings" class="hidden">
 
 <div class="card">
@@ -1121,26 +1093,41 @@ Salva movimento
 
 <div class="notice">
 
-I dati principali di Igea Impianti vengono salvati
-direttamente sul dispositivo dopo ogni operazione.
-
-La V11 mantiene anche copie di sicurezza locali per
-proteggere i dati durante gli aggiornamenti dell'app.
+I dati vengono salvati nel database cloud di Igea Impianti.
+Una copia locale viene mantenuta come ulteriore protezione.
 
 </div>
 
 <div style="height:10px"></div>
 
-<div class="warning-box">
+<div id="cloudStatusBox" class="warning-box">
 
-<strong>🔐 Protezione dati V11</strong><br><br>
+<strong>☁️ Stato database</strong><br><br>
 
-La sostituzione di <strong>index.html</strong> su GitHub
-non deve cancellare clienti, appuntamenti, pagamenti
-o movimenti perché questi dati sono separati dal codice
-dell'app e vengono conservati nel dispositivo.
+<span id="cloudStatus">
+Connessione in preparazione...
+</span>
 
 </div>
+
+<hr>
+
+<h2>👤 Account</h2>
+
+<div class="notice">
+
+<span id="accountEmail">Nessun account</span>
+
+</div>
+
+<button
+class="secondary"
+style="width:100%;margin-top:10px"
+onclick="logoutUser()">
+
+🚪 Esci dall'account
+
+</button>
 
 <hr>
 
@@ -1156,8 +1143,7 @@ onclick="exportBackup()">
 
 <p style="color:#777;font-size:12px">
 
-Il backup contiene clienti, appuntamenti, pagamenti
-e movimenti.
+Il backup contiene clienti, appuntamenti, pagamenti e movimenti.
 
 </p>
 
@@ -1199,13 +1185,6 @@ onclick="restorePreviousBackup()">
 
 </button>
 
-<p style="color:#777;font-size:12px">
-
-Usa questa funzione solo se i dati attuali risultano
-errati dopo un aggiornamento.
-
-</p>
-
 <hr>
 
 <h2>🗑️ Zona pericolosa</h2>
@@ -1225,10 +1204,6 @@ Elimina tutti i dati
 
 </main>
 
-
-<!-- =========================
-     NAV
-========================= -->
 
 <nav class="nav">
 
@@ -1283,13 +1258,7 @@ onclick="showPage('movements',this)">
 </div>
 
 
-<!-- =========================
-     POPUP COMPLETAMENTO
-========================= -->
-
-<div
-id="completionModal"
-class="modal hidden">
+<div id="completionModal" class="modal hidden">
 
 <div class="modal-box">
 
@@ -1297,11 +1266,7 @@ class="modal hidden">
 ✅ Completa appuntamento
 </div>
 
-<div
-id="completionClient"
-class="modal-subtitle">
-</div>
-
+<div id="completionClient" class="modal-subtitle"></div>
 
 <label>Guadagno totale (€)</label>
 
@@ -1313,7 +1278,6 @@ step="0.01"
 placeholder="Può essere anche 0"
 oninput="updateCompletion()">
 
-
 <label>Spese (€)</label>
 
 <input
@@ -1324,27 +1288,18 @@ step="0.01"
 placeholder="0,00"
 oninput="updateCompletion()">
 
-
 <label>Tipo di pagamento</label>
 
 <select
 id="completionPaymentMode"
 onchange="toggleCompletionInstallments()">
 
-<option value="single">
-Pagamento unico
-</option>
-
-<option value="installments">
-Pagamento dilazionato
-</option>
+<option value="single">Pagamento unico</option>
+<option value="installments">Pagamento dilazionato</option>
 
 </select>
 
-
-<div
-id="completionInstallments"
-class="hidden">
+<div id="completionInstallments" class="hidden">
 
 <label>Acconto (€)</label>
 
@@ -1355,7 +1310,6 @@ min="0"
 step="0.01"
 placeholder="0,00"
 oninput="updateCompletion()">
-
 
 <label>Numero di rate</label>
 
@@ -1375,87 +1329,43 @@ onchange="buildInstallmentInputs()">
 
 </select>
 
-
-<div
-id="installmentInputs"
-class="rate-list">
-</div>
+<div id="installmentInputs" class="rate-list"></div>
 
 </div>
-
 
 <div class="calculated-box">
 
 <div class="calculated-row">
-
 <span>Totale</span>
-
-<strong id="completionTotal">
-€0,00
-</strong>
-
+<strong id="completionTotal">€0,00</strong>
 </div>
 
 <div class="calculated-row">
-
 <span>Acconto</span>
-
-<strong
-id="completionDepositView"
-class="green">
-€0,00
-</strong>
-
+<strong id="completionDepositView" class="green">€0,00</strong>
 </div>
 
 <div class="calculated-row">
-
 <span>Totale rate</span>
-
-<strong id="completionInstallmentsView">
-€0,00
-</strong>
-
+<strong id="completionInstallmentsView">€0,00</strong>
 </div>
 
 <div class="calculated-row">
-
 <span>Incassato</span>
-
-<strong
-id="completionReceived"
-class="green">
-€0,00
-</strong>
-
+<strong id="completionReceived" class="green">€0,00</strong>
 </div>
 
 <div class="calculated-row">
-
 <span>Residuo</span>
-
-<strong
-id="completionRemaining"
-class="orange">
-€0,00
-</strong>
-
+<strong id="completionRemaining" class="orange">€0,00</strong>
 </div>
 
 <div class="calculated-row">
-
 <span>Netto</span>
-
-<strong
-id="completionNet"
-class="blue">
-€0,00
-</strong>
-
+<strong id="completionNet" class="blue">€0,00</strong>
 </div>
 
 </div>
-
 
 <div class="actions">
 
@@ -1482,27 +1392,61 @@ Completa
 </div>
 
 
+<!-- SUPABASE -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 
 "use strict";
 
-
 /* =========================================================
-   IGEA IMPIANTI V11
-   SISTEMA DATI PROTETTO
+   CONFIGURAZIONE SUPABASE
 ========================================================= */
 
-const DATA_KEY = "igea_impianti_data_v11";
-const BACKUP_1_KEY = "igea_impianti_backup_1";
-const BACKUP_2_KEY = "igea_impianti_backup_2";
-const VERSION = 11;
+const SUPABASE_URL =
+"https://wcvocgdsgzovaaxrvyau.supabase.co";
 
-let clients = [];
-let appointments = [];
-let movements = [];
+/*
+ * INCOLLA QUI LA TUA PUBLISHABLE KEY.
+ *
+ * Esempio:
+ * const SUPABASE_KEY = "sb_publishable_...";
+ */
 
-let completionAppointmentId = null;
-let editingAppointmentId = null;
+const SUPABASE_KEY =
+"sb_publishable_UmT3uKWb57H_3ni9wpG5EA_32hgtLX-";
+
+const supabaseClient =
+window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+
+/* =========================================================
+   CONFIGURAZIONE APP
+========================================================= */
+
+const DATA_KEY =
+"igea_impianti_data_v12";
+
+const BACKUP_1_KEY =
+"igea_impianti_backup_1";
+
+const BACKUP_2_KEY =
+"igea_impianti_backup_2";
+
+const VERSION = 12;
+
+let clients=[];
+let appointments=[];
+let movements=[];
+
+let completionAppointmentId=null;
+let editingAppointmentId=null;
+
+let currentUser=null;
 
 
 /* =========================================================
@@ -1510,37 +1454,32 @@ let editingAppointmentId = null;
 ========================================================= */
 
 function nowISO(){
-
     return new Date().toISOString();
-
 }
-
 
 function todayString(){
 
-    const d = new Date();
+    const d=new Date();
 
     return dateToString(d);
 
 }
 
-
 function dateToString(date){
 
-    const y = date.getFullYear();
+    const y=date.getFullYear();
 
-    const m = String(
+    const m=String(
         date.getMonth()+1
     ).padStart(2,"0");
 
-    const d = String(
+    const d=String(
         date.getDate()
     ).padStart(2,"0");
 
     return `${y}-${m}-${d}`;
 
 }
-
 
 function formatDate(date){
 
@@ -1559,23 +1498,22 @@ function formatDate(date){
 
 }
 
-
 function euro(value){
 
-    return Number(value || 0).toLocaleString(
-        "it-IT",
-        {
-            style:"currency",
-            currency:"EUR"
-        }
-    );
+    return Number(value||0)
+        .toLocaleString(
+            "it-IT",
+            {
+                style:"currency",
+                currency:"EUR"
+            }
+        );
 
 }
 
-
 function escapeHTML(value){
 
-    return String(value ?? "")
+    return String(value??"")
         .replaceAll("&","&amp;")
         .replaceAll("<","&lt;")
         .replaceAll(">","&gt;")
@@ -1584,19 +1522,19 @@ function escapeHTML(value){
 
 }
 
-
 function safeNumber(value){
 
-    const n = Number(value);
+    const n=Number(value);
 
-    return Number.isFinite(n) ? n : 0;
+    return Number.isFinite(n)
+        ? n
+        : 0;
 
 }
 
-
 function generateId(){
 
-    return Date.now().toString(36) +
+    return Date.now().toString(36)+
         Math.random().toString(36).slice(2);
 
 }
@@ -1624,144 +1562,127 @@ function emptyData(){
 
 }
 
-
 function normalizeData(data){
 
-    if(!data || typeof data !== "object"){
+    if(!data || typeof data!=="object"){
         return emptyData();
     }
 
-    const result = {
+    const result={
 
         version:VERSION,
 
-        updatedAt:data.updatedAt || nowISO(),
+        updatedAt:data.updatedAt||nowISO(),
 
         clients:Array.isArray(data.clients)
-            ? data.clients
-            : [],
+            ?data.clients
+            :[],
 
         appointments:Array.isArray(data.appointments)
-            ? data.appointments
-            : [],
+            ?data.appointments
+            :[],
 
         movements:Array.isArray(data.movements)
-            ? data.movements
-            : []
+            ?data.movements
+            :[]
 
     };
 
 
-    result.clients =
-        result.clients.map(c => {
+    result.clients=result.clients.map(c=>({
 
-            return {
+        ...c,
 
-                ...c,
+        id:c.id??generateId(),
 
-                id:c.id ?? generateId(),
+        name:String(c.name||"").trim(),
 
-                name:String(c.name || "").trim(),
+        phone:String(c.phone||""),
 
-                phone:String(c.phone || ""),
+        email:String(c.email||""),
 
-                email:String(c.email || ""),
+        notes:String(c.notes||"")
 
-                notes:String(c.notes || "")
-
-            };
-
-        });
+    }));
 
 
-    result.appointments =
-        result.appointments.map(a => {
+    result.appointments=result.appointments.map(a=>({
 
-            return {
+        ...a,
 
-                ...a,
+        id:a.id??generateId(),
 
-                id:a.id ?? generateId(),
+        clientId:a.clientId??"",
 
-                clientId:a.clientId ?? "",
+        clientName:String(a.clientName||""),
 
-                clientName:String(a.clientName || ""),
+        date:a.date||"",
 
-                date:a.date || "",
+        time:a.time||"",
 
-                time:a.time || "",
+        notes:String(a.notes||""),
 
-                notes:String(a.notes || ""),
+        completed:Boolean(a.completed),
 
-                completed:Boolean(a.completed),
+        income:safeNumber(a.income),
 
-                income:safeNumber(a.income),
+        expense:safeNumber(a.expense),
 
-                expense:safeNumber(a.expense),
+        paymentMode:a.paymentMode||"",
 
-                paymentMode:a.paymentMode || "",
+        deposit:safeNumber(a.deposit),
 
-                deposit:safeNumber(a.deposit),
-
-                installmentCount:
-                    Math.min(
-                        10,
-                        Math.max(
-                            0,
-                            parseInt(a.installmentCount || 0)
-                        )
-                    ),
-
-                installments:
-                    Array.isArray(a.installments)
-                    ? a.installments
-                    : [],
-
-                payments:
-                    Array.isArray(a.payments)
-                    ? a.payments
-                    : [],
-
-                showBalance:
-                    a.showBalance !== false,
-
-                net:safeNumber(a.net)
-
-            };
-
-        });
-
-
-    result.movements =
-        result.movements.map(m => {
-
-            return {
-
-                ...m,
-
-                id:m.id ?? generateId(),
-
-                type:
-                    m.type === "expense"
-                    ? "expense"
-                    : "income",
-
-                amount:Math.max(
+        installmentCount:
+            Math.min(
+                10,
+                Math.max(
                     0,
-                    safeNumber(m.amount)
-                ),
+                    parseInt(a.installmentCount||0)
+                )
+            ),
 
-                description:
-                    String(m.description || ""),
+        installments:
+            Array.isArray(a.installments)
+            ?a.installments
+            :[],
 
-                date:m.date || todayString(),
+        payments:
+            Array.isArray(a.payments)
+            ?a.payments
+            :[],
 
-                createdAt:
-                    m.createdAt || nowISO()
+        showBalance:
+            a.showBalance!==false,
 
-            };
+        net:safeNumber(a.net)
 
-        });
+    }));
+
+
+    result.movements=result.movements.map(m=>({
+
+        ...m,
+
+        id:m.id??generateId(),
+
+        type:
+            m.type==="expense"
+            ?"expense"
+            :"income",
+
+        amount:Math.max(
+            0,
+            safeNumber(m.amount)
+        ),
+
+        description:
+            String(m.description||""),
+
+        date:m.date||todayString(),
+
+        createdAt:m.createdAt||nowISO()
+
+    }));
 
 
     return result;
@@ -1770,19 +1691,17 @@ function normalizeData(data){
 
 
 /* =========================================================
-   CARICAMENTO SICURO
+   LOCAL STORAGE
 ========================================================= */
 
 function readJSON(key){
 
     try{
 
-        const raw =
+        const raw=
             localStorage.getItem(key);
 
-        if(!raw){
-            return null;
-        }
+        if(!raw) return null;
 
         return JSON.parse(raw);
 
@@ -1794,151 +1713,149 @@ function readJSON(key){
 
 }
 
-
 function isUsefulData(data){
 
-    if(!data){
-        return false;
-    }
-
-    return (
-        Array.isArray(data.clients) ||
-        Array.isArray(data.appointments) ||
-        Array.isArray(data.movements)
+    return !!(
+        data &&
+        (
+            Array.isArray(data.clients) ||
+            Array.isArray(data.appointments) ||
+            Array.isArray(data.movements)
+        )
     );
 
 }
 
 
-function loadData(){
+/* =========================================================
+   DATABASE CLOUD
+========================================================= */
 
-    let current =
-        readJSON(DATA_KEY);
+async function cloudLoad(){
 
+    if(!currentUser){
+        return null;
+    }
 
-    /*
-     * 1. Prima scelta:
-     * archivio V11.
-     */
+    try{
 
-    if(isUsefulData(current)){
+        const {data,error}=
+            await supabaseClient
+                .from("igea_data")
+                .select("id,data,updated_at")
+                .eq("user_id",currentUser.id)
+                .maybeSingle();
 
-        const normalized =
-            normalizeData(current);
+        if(error){
+            throw error;
+        }
 
-        clients =
-            normalized.clients;
+        if(!data){
+            return null;
+        }
 
-        appointments =
-            normalized.appointments;
+        return normalizeData(
+            data.data
+        );
 
-        movements =
-            normalized.movements;
+    }catch(error){
 
-        return;
+        console.error(
+            "Errore caricamento cloud:",
+            error
+        );
+
+        return null;
 
     }
 
-
-    /*
-     * 2. Recupero dai vecchi dati
-     * delle versioni precedenti.
-     */
-
-    const oldClients =
-        readJSON("gestionePro_clients");
-
-    const oldAppointments =
-        readJSON("gestionePro_appointments");
+}
 
 
-    if(
-        Array.isArray(oldClients) ||
-        Array.isArray(oldAppointments)
-    ){
+async function cloudSave(){
 
-        const migrated =
-            normalizeData({
+    if(!currentUser){
+        return false;
+    }
 
-                version:10,
-
-                clients:
-                    Array.isArray(oldClients)
-                    ? oldClients
-                    : [],
-
-                appointments:
-                    Array.isArray(oldAppointments)
-                    ? oldAppointments
-                    : [],
-
-                movements:[]
-
-            });
+    const data=
+        normalizeData({
+            version:VERSION,
+            updatedAt:nowISO(),
+            clients,
+            appointments,
+            movements
+        });
 
 
-        clients =
-            migrated.clients;
+    try{
 
-        appointments =
-            migrated.appointments;
+        const {error}=
+            await supabaseClient
+                .from("igea_data")
+                .upsert(
+                    {
+                        user_id:currentUser.id,
+                        data:data,
+                        updated_at:data.updatedAt
+                    },
+                    {
+                        onConflict:"user_id"
+                    }
+                );
 
-        movements = [];
+        if(error){
+            throw error;
+        }
 
-        /*
-         * Salvataggio della migrazione.
-         * I vecchi dati NON vengono cancellati.
-         */
 
-        safeSave(true);
+        setCloudStatus(
+            "☁️ Dati sincronizzati correttamente",
+            true
+        );
 
-        return;
+        return true;
+
+    }catch(error){
+
+        console.error(
+            "Errore salvataggio cloud:",
+            error
+        );
+
+        setCloudStatus(
+            "⚠️ Salvataggio cloud non riuscito. Copia locale mantenuta.",
+            false
+        );
+
+        return false;
 
     }
 
-
-    /*
-     * 3. Tentativo di recupero
-     * dal backup più recente.
-     */
-
-    const backup1 =
-        readJSON(BACKUP_1_KEY);
-
-    if(isUsefulData(backup1)){
-
-        const restored =
-            normalizeData(backup1);
-
-        clients =
-            restored.clients;
-
-        appointments =
-            restored.appointments;
-
-        movements =
-            restored.movements;
-
-        safeSave(true);
-
-        return;
-
-    }
+}
 
 
-    /*
-     * 4. Nessun dato esistente.
-     */
+function setCloudStatus(text,online){
 
-    clients=[];
-    appointments=[];
-    movements=[];
+    const element=
+        document.getElementById(
+            "cloudStatus"
+        );
+
+    if(!element) return;
+
+    element.textContent=text;
+
+    element.className=
+        online
+        ?"status-online"
+        :"status-offline";
 
 }
 
 
 /* =========================================================
-   SALVATAGGIO PROTETTO
+   SALVATAGGIO LOCALE
 ========================================================= */
 
 function createDataObject(){
@@ -1949,46 +1866,42 @@ function createDataObject(){
 
         updatedAt:nowISO(),
 
-        clients:clients,
+        clients,
 
-        appointments:appointments,
+        appointments,
 
-        movements:movements
+        movements
 
     };
 
 }
 
 
-function safeSave(skipBackup){
+function localSave(skipBackup=false){
 
-    const data =
+    const data=
         normalizeData(
             createDataObject()
         );
 
-    /*
-     * Prima di sostituire il database principale,
-     * conserviamo quello attuale.
-     */
 
     if(!skipBackup){
 
         try{
 
-            const current =
+            const current=
                 readJSON(DATA_KEY);
 
             if(isUsefulData(current)){
 
-                const oldBackup1 =
+                const backup1=
                     readJSON(BACKUP_1_KEY);
 
-                if(oldBackup1){
+                if(backup1){
 
                     localStorage.setItem(
                         BACKUP_2_KEY,
-                        JSON.stringify(oldBackup1)
+                        JSON.stringify(backup1)
                     );
 
                 }
@@ -2002,10 +1915,7 @@ function safeSave(skipBackup){
 
         }catch(error){
 
-            console.warn(
-                "Backup locale non disponibile:",
-                error
-            );
+            console.warn(error);
 
         }
 
@@ -2019,31 +1929,15 @@ function safeSave(skipBackup){
             JSON.stringify(data)
         );
 
-        /*
-         * Verifica immediata.
-         */
-
-        const verification =
-            readJSON(DATA_KEY);
-
-        if(!verification){
-
-            throw new Error(
-                "Verifica salvataggio fallita."
-            );
-
-        }
-
         return true;
 
     }catch(error){
 
-        alert(
-            "ATTENZIONE: impossibile salvare i dati sul dispositivo. " +
-            "Non chiudere l'app e libera spazio sul dispositivo."
-        );
-
         console.error(error);
+
+        alert(
+            "Impossibile salvare la copia locale."
+        );
 
         return false;
 
@@ -2052,275 +1946,344 @@ function safeSave(skipBackup){
 }
 
 
-/*
- * Ogni modifica passa da questa funzione.
- */
+/* =========================================================
+   SALVATAGGIO COMPLETO
+========================================================= */
 
-function saveData(){
+async function saveData(){
 
-    return safeSave(false);
+    /*
+     * Prima salviamo sempre localmente.
+     * Questo evita di perdere dati se la connessione
+     * viene momentaneamente interrotta.
+     */
+
+    const localOK=
+        localSave(false);
+
+
+    if(!localOK){
+        return false;
+    }
+
+
+    /*
+     * Poi sincronizziamo con Supabase.
+     */
+
+    if(currentUser){
+
+        await cloudSave();
+
+    }
+
+
+    return true;
 
 }
 
 
 /* =========================================================
-   BACKUP
+   CARICAMENTO
 ========================================================= */
 
-function exportBackup(){
+function loadLocalData(){
 
-    const data =
-        createDataObject();
-
-    const backup = {
-
-        app:"Igea Impianti",
-
-        version:VERSION,
-
-        exportedAt:nowISO(),
-
-        clients:data.clients,
-
-        appointments:data.appointments,
-
-        movements:data.movements
-
-    };
+    const current=
+        readJSON(DATA_KEY);
 
 
-    const blob =
-        new Blob(
-            [
-                JSON.stringify(
-                    backup,
-                    null,
-                    2
-                )
-            ],
-            {
-                type:"application/json"
-            }
-        );
+    if(isUsefulData(current)){
 
+        const normalized=
+            normalizeData(current);
 
-    const url =
-        URL.createObjectURL(blob);
+        clients=normalized.clients;
 
-    const link =
-        document.createElement("a");
+        appointments=normalized.appointments;
 
-    link.href=url;
+        movements=normalized.movements;
 
-    link.download =
-        `igea-impianti-backup-${todayString()}.json`;
+        return true;
 
-    document.body.appendChild(link);
-
-    link.click();
-
-    link.remove();
-
-    URL.revokeObjectURL(url);
-
-    alert(
-        "Backup completo creato correttamente."
-    );
-
-}
-
-
-function importBackup(event){
-
-    const file =
-        event.target.files?.[0];
-
-    if(!file){
-        return;
     }
 
 
-    const reader =
-        new FileReader();
+    const oldClients=
+        readJSON("gestionePro_clients");
 
-
-    reader.onload =
-        function(){
-
-            try{
-
-                const backup =
-                    JSON.parse(
-                        reader.result
-                    );
-
-
-                if(
-                    !backup ||
-                    !Array.isArray(
-                        backup.clients
-                    ) ||
-                    !Array.isArray(
-                        backup.appointments
-                    )
-                ){
-
-                    throw new Error(
-                        "Backup non valido."
-                    );
-
-                }
-
-
-                if(
-                    !confirm(
-                        "L'importazione sostituirà i dati attuali. " +
-                        "Prima verrà conservata una copia di sicurezza. Continuare?"
-                    )
-                ){
-
-                    event.target.value="";
-
-                    return;
-
-                }
-
-
-                /*
-                 * Salva lo stato attuale
-                 * prima dell'importazione.
-                 */
-
-                safeSave(false);
-
-
-                const imported =
-                    normalizeData({
-
-                        version:
-                            backup.version || 1,
-
-                        clients:
-                            backup.clients,
-
-                        appointments:
-                            backup.appointments,
-
-                        movements:
-                            Array.isArray(
-                                backup.movements
-                            )
-                            ? backup.movements
-                            : []
-
-                    });
-
-
-                clients =
-                    imported.clients;
-
-                appointments =
-                    imported.appointments;
-
-                movements =
-                    imported.movements;
-
-
-                safeSave(true);
-
-                refreshEverything();
-
-
-                alert(
-                    "Backup importato correttamente."
-                );
-
-            }catch(error){
-
-                alert(
-                    "Errore: il file non è un backup valido di Igea Impianti."
-                );
-
-                console.error(error);
-
-            }
-
-
-            event.target.value="";
-
-        };
-
-
-    reader.readAsText(file);
-
-}
-
-
-function restorePreviousBackup(){
-
-    const backup =
-        readJSON(BACKUP_1_KEY);
-
-    if(!isUsefulData(backup)){
-
-        alert(
-            "Non è disponibile una copia di sicurezza."
-        );
-
-        return;
-
-    }
+    const oldAppointments=
+        readJSON("gestionePro_appointments");
 
 
     if(
-        !confirm(
-            "Ripristinare l'ultima copia di sicurezza? " +
-            "I dati attuali verranno prima conservati nella seconda copia."
-        )
+        Array.isArray(oldClients) ||
+        Array.isArray(oldAppointments)
     ){
 
+        const migrated=
+            normalizeData({
+
+                version:10,
+
+                clients:
+                    Array.isArray(oldClients)
+                    ?oldClients
+                    :[],
+
+                appointments:
+                    Array.isArray(oldAppointments)
+                    ?oldAppointments
+                    :[],
+
+                movements:[]
+
+            });
+
+
+        clients=migrated.clients;
+
+        appointments=migrated.appointments;
+
+        movements=[];
+
+        localSave(true);
+
+        return true;
+
+    }
+
+
+    const backup=
+        readJSON(BACKUP_1_KEY);
+
+
+    if(isUsefulData(backup)){
+
+        const restored=
+            normalizeData(backup);
+
+        clients=restored.clients;
+
+        appointments=restored.appointments;
+
+        movements=restored.movements;
+
+        localSave(true);
+
+        return true;
+
+    }
+
+
+    clients=[];
+
+    appointments=[];
+
+    movements=[];
+
+    return false;
+
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+async function loginUser(){
+
+    const email=
+        document.getElementById(
+            "loginEmail"
+        ).value.trim();
+
+    const password=
+        document.getElementById(
+            "loginPassword"
+        ).value;
+
+
+    const status=
+        document.getElementById(
+            "loginStatus"
+        );
+
+
+    if(!email || !password){
+
+        status.textContent=
+            "Inserisci email e password.";
+
         return;
+
+    }
+
+
+    status.textContent=
+        "Accesso in corso...";
+
+
+    try{
+
+        const {data,error}=
+            await supabaseClient.auth
+                .signInWithPassword({
+                    email,
+                    password
+                });
+
+
+        if(error){
+            throw error;
+        }
+
+
+        currentUser=data.user;
+
+
+        document.getElementById(
+            "loginScreen"
+        ).classList.add("hidden");
+
+
+        document.getElementById(
+            "accountEmail"
+        ).textContent=
+            currentUser.email;
+
+
+        await loadCloudAndSync();
+
+
+    }catch(error){
+
+        console.error(error);
+
+        status.textContent=
+            "Email o password non corrette.";
+
+    }
+
+}
+
+
+async function logoutUser(){
+
+    if(
+        !confirm(
+            "Vuoi uscire dall'account?"
+        )
+    ){
+        return;
+    }
+
+
+    await supabaseClient.auth.signOut();
+
+    currentUser=null;
+
+    document.getElementById(
+        "loginScreen"
+    ).classList.remove("hidden");
+
+}
+
+
+/* =========================================================
+   CLOUD + MIGRAZIONE DATI LOCALI
+========================================================= */
+
+async function loadCloudAndSync(){
+
+    setCloudStatus(
+        "☁️ Connessione al database...",
+        true
+    );
+
+
+    const cloudData=
+        await cloudLoad();
+
+
+    const localData=
+        readJSON(DATA_KEY);
+
+
+    /*
+     * Se il database è vuoto ma sul dispositivo
+     * ci sono già dati V11, li carichiamo nel cloud.
+     */
+
+    if(
+        !cloudData &&
+        isUsefulData(localData)
+    ){
+
+        const normalized=
+            normalizeData(localData);
+
+        clients=normalized.clients;
+
+        appointments=normalized.appointments;
+
+        movements=normalized.movements;
+
+
+        const uploaded=
+            await cloudSave();
+
+
+        if(uploaded){
+
+            alert(
+                "I dati presenti sul dispositivo sono stati trasferiti nel database cloud."
+            );
+
+        }
 
     }
 
 
     /*
-     * Salviamo lo stato attuale nella seconda copia.
+     * Se il cloud contiene già dati,
+     * quelli cloud diventano la fonte principale.
      */
 
-    const current =
-        readJSON(DATA_KEY);
+    else if(cloudData){
 
-    if(current){
+        clients=cloudData.clients;
 
-        localStorage.setItem(
-            BACKUP_2_KEY,
-            JSON.stringify(current)
+        appointments=cloudData.appointments;
+
+        movements=cloudData.movements;
+
+
+        localSave(true);
+
+
+        setCloudStatus(
+            "☁️ Dati cloud caricati correttamente",
+            true
         );
 
     }
 
 
-    const restored =
-        normalizeData(backup);
+    else{
 
-    clients =
-        restored.clients;
+        clients=[];
 
-    appointments =
-        restored.appointments;
+        appointments=[];
 
-    movements =
-        restored.movements;
+        movements=[];
 
+        await cloudSave();
 
-    safeSave(true);
+    }
+
 
     refreshEverything();
-
-    alert(
-        "Ultima copia di sicurezza ripristinata."
-    );
 
 }
 
@@ -2341,20 +2304,17 @@ function showPage(page,button){
         );
 
 
-    const target =
+    const target=
         document.getElementById(page);
 
+
     if(target){
-
         target.classList.remove("hidden");
-
     }
 
 
     document
-        .querySelectorAll(
-            ".nav button"
-        )
+        .querySelectorAll(".nav button")
         .forEach(
             btn =>
                 btn.classList.remove("active")
@@ -2362,24 +2322,17 @@ function showPage(page,button){
 
 
     if(button){
-
         button.classList.add("active");
-
     }
 
 
-    const titles = {
+    const titles={
 
         dashboard:"Dashboard",
-
         clients:"Clienti",
-
         appointments:"Appuntamenti",
-
         payments:"Pagamenti",
-
         movements:"Movimenti",
-
         settings:"Impostazioni"
 
     };
@@ -2387,8 +2340,8 @@ function showPage(page,button){
 
     document.getElementById(
         "pageSubtitle"
-    ).textContent =
-        titles[page] || "";
+    ).textContent=
+        titles[page]||"";
 
 
     if(page==="dashboard"){
@@ -2400,11 +2353,8 @@ function showPage(page,button){
     }
 
     if(page==="appointments"){
-
         populateClientDatalist();
-
         renderAppointments();
-
     }
 
     if(page==="payments"){
@@ -2424,16 +2374,16 @@ function showPage(page,button){
 
 function findClientByName(name){
 
-    const normalized =
-        String(name || "")
+    const normalized=
+        String(name||"")
             .trim()
             .toLowerCase();
 
     return clients.find(
         c =>
-            String(c.name || "")
+            String(c.name||"")
                 .trim()
-                .toLowerCase() === normalized
+                .toLowerCase()===normalized
     );
 
 }
@@ -2441,55 +2391,52 @@ function findClientByName(name){
 
 function getClientName(clientId){
 
-    const client =
+    const client=
         clients.find(
             c =>
-                String(c.id) ===
+                String(c.id)===
                 String(clientId)
         );
+
 
     if(client){
         return client.name;
     }
 
 
-    /*
-     * Manteniamo anche il nome
-     * direttamente nell'appuntamento
-     * per evitare perdita di riferimenti.
-     */
-
-    const appointment =
+    const appointment=
         appointments.find(
             a =>
-                String(a.clientId) ===
+                String(a.clientId)===
                 String(clientId)
         );
 
-    return appointment?.clientName || "Cliente";
+
+    return appointment?.clientName||"Cliente";
 
 }
 
 
 function ensureClient(name){
 
-    const clean =
-        String(name || "").trim();
+    const clean=
+        String(name||"").trim();
 
     if(!clean){
         return null;
     }
 
 
-    const existing =
+    const existing=
         findClientByName(clean);
+
 
     if(existing){
         return existing;
     }
 
 
-    const client = {
+    const client={
 
         id:generateId(),
 
@@ -2511,9 +2458,9 @@ function ensureClient(name){
 }
 
 
-function saveClient(){
+async function saveClient(){
 
-    const name =
+    const name=
         document.getElementById(
             "clientName"
         ).value.trim();
@@ -2545,7 +2492,7 @@ function saveClient(){
 
         id:generateId(),
 
-        name:name,
+        name,
 
         phone:
             document.getElementById(
@@ -2565,35 +2512,23 @@ function saveClient(){
     });
 
 
-    if(!saveData()){
+    if(!await saveData()){
         return;
     }
 
 
-    document.getElementById(
-        "clientName"
-    ).value="";
-
-    document.getElementById(
-        "clientPhone"
-    ).value="";
-
-    document.getElementById(
-        "clientEmail"
-    ).value="";
-
-    document.getElementById(
-        "clientNotes"
-    ).value="";
+    document.getElementById("clientName").value="";
+    document.getElementById("clientPhone").value="";
+    document.getElementById("clientEmail").value="";
+    document.getElementById("clientNotes").value="";
 
 
     populateClientDatalist();
-
     renderClients();
 
 
     alert(
-        "Cliente salvato."
+        "Cliente salvato nel database."
     );
 
 }
@@ -2601,24 +2536,24 @@ function saveClient(){
 
 function renderClients(){
 
-    const container =
+    const container=
         document.getElementById(
             "clientsList"
         );
 
 
-    const search =
+    const search=
         (
             document.getElementById(
                 "clientSearch"
-            )?.value || ""
+            )?.value||""
         ).toLowerCase();
 
 
-    const filtered =
+    const filtered=
         clients.filter(
             c =>
-                String(c.name || "")
+                String(c.name||"")
                     .toLowerCase()
                     .includes(search)
         );
@@ -2626,7 +2561,7 @@ function renderClients(){
 
     if(!filtered.length){
 
-        container.innerHTML =
+        container.innerHTML=
             '<div class="empty">Nessun cliente trovato.</div>';
 
         return;
@@ -2634,40 +2569,39 @@ function renderClients(){
     }
 
 
-    const sorted =
-        [...filtered].sort(
-            (a,b) =>
-                String(a.name)
-                    .localeCompare(
-                        String(b.name),
-                        "it"
-                    )
-        );
+    const sorted=[...filtered].sort(
+        (a,b)=>
+            String(a.name)
+                .localeCompare(
+                    String(b.name),
+                    "it"
+                )
+    );
 
 
-    container.innerHTML =
-        sorted.map(client => {
+    container.innerHTML=
+        sorted.map(client=>{
 
-            const linked =
+            const linked=
                 appointments.filter(
                     a =>
-                        String(a.clientId) ===
+                        String(a.clientId)===
                         String(client.id)
                 );
 
 
-            const received =
+            const received=
                 linked.reduce(
-                    (sum,a) =>
-                        sum + getReceived(a),
+                    (sum,a)=>
+                        sum+getReceived(a),
                     0
                 );
 
 
-            const expenses =
+            const expenses=
                 linked.reduce(
-                    (sum,a) =>
-                        sum + safeNumber(a.expense),
+                    (sum,a)=>
+                        sum+safeNumber(a.expense),
                     0
                 );
 
@@ -2677,66 +2611,47 @@ function renderClients(){
 <div class="item">
 
 <div class="item-title">
-
 ${escapeHTML(client.name)}
-
 </div>
 
 ${
-    client.phone
-    ?
-    `<div class="item-sub">
-    📞 ${escapeHTML(client.phone)}
-    </div>`
-    :
-    ""
+client.phone
+?
+`<div class="item-sub">
+📞 ${escapeHTML(client.phone)}
+</div>`
+:""
 }
 
 ${
-    client.email
-    ?
-    `<div class="item-sub">
-    ✉️ ${escapeHTML(client.email)}
-    </div>`
-    :
-    ""
+client.email
+?
+`<div class="item-sub">
+✉️ ${escapeHTML(client.email)}
+</div>`
+:""
 }
 
 <span class="badge">
 ${linked.length}
-${linked.length===1 ? "appuntamento" : "appuntamenti"}
+${linked.length===1?"appuntamento":"appuntamenti"}
 </span>
 
 <div class="item-money">
 
 <div class="money-box">
-
 <small>Incassato</small>
-
-<strong class="green">
-${euro(received)}
-</strong>
-
+<strong class="green">${euro(received)}</strong>
 </div>
 
 <div class="money-box">
-
 <small>Spese</small>
-
-<strong class="red">
-${euro(expenses)}
-</strong>
-
+<strong class="red">${euro(expenses)}</strong>
 </div>
 
 <div class="money-box">
-
 <small>Netto</small>
-
-<strong class="blue">
-${euro(received-expenses)}
-</strong>
-
+<strong class="blue">${euro(received-expenses)}</strong>
 </div>
 
 </div>
@@ -2762,12 +2677,12 @@ Elimina
 }
 
 
-function deleteClient(id){
+async function deleteClient(id){
 
-    const linked =
+    const linked=
         appointments.some(
             a =>
-                String(a.clientId) ===
+                String(a.clientId)===
                 String(id)
         );
 
@@ -2775,8 +2690,7 @@ function deleteClient(id){
     if(linked){
 
         alert(
-            "Questo cliente ha appuntamenti collegati. " +
-            "Elimina prima gli appuntamenti."
+            "Questo cliente ha appuntamenti collegati. Elimina prima gli appuntamenti."
         );
 
         return;
@@ -2789,39 +2703,36 @@ function deleteClient(id){
             "Eliminare definitivamente questo cliente?"
         )
     ){
-
         return;
-
     }
 
 
-    clients =
+    clients=
         clients.filter(
             c =>
-                String(c.id) !==
+                String(c.id)!==
                 String(id)
         );
 
 
-    if(!saveData()){
+    if(!await saveData()){
         return;
     }
 
 
     renderClients();
-
     populateClientDatalist();
 
 }
 
 
 /* =========================================================
-   CLIENTE APPUNTAMENTO
+   APPUNTAMENTI
 ========================================================= */
 
 function populateClientDatalist(){
 
-    const list =
+    const list=
         document.getElementById(
             "existingClients"
         );
@@ -2832,18 +2743,17 @@ function populateClientDatalist(){
     }
 
 
-    const sorted =
-        [...clients].sort(
-            (a,b) =>
-                String(a.name)
-                    .localeCompare(
-                        String(b.name),
-                        "it"
-                    )
-        );
+    const sorted=[...clients].sort(
+        (a,b)=>
+            String(a.name)
+                .localeCompare(
+                    String(b.name),
+                    "it"
+                )
+    );
 
 
-    list.innerHTML =
+    list.innerHTML=
         sorted.map(
             c =>
                 `<option value="${escapeHTML(c.name)}"></option>`
@@ -2852,35 +2762,27 @@ function populateClientDatalist(){
 }
 
 
-/* =========================================================
-   APPUNTAMENTI
-========================================================= */
+async function saveAppointment(){
 
-function saveAppointment(){
-
-    const nameInput =
+    const clientName=
         document.getElementById(
             "appointmentClientName"
-        );
+        ).value.trim();
 
 
-    const clientName =
-        nameInput.value.trim();
-
-
-    const date =
+    const date=
         document.getElementById(
             "appointmentDate"
         ).value;
 
 
-    const time =
+    const time=
         document.getElementById(
             "appointmentTime"
         ).value;
 
 
-    const notes =
+    const notes=
         document.getElementById(
             "appointmentNotes"
         ).value.trim();
@@ -2908,36 +2810,21 @@ function saveAppointment(){
     }
 
 
-    /*
-     * Se il cliente non esiste,
-     * viene creato automaticamente.
-     */
-
-    const client =
+    const client=
         ensureClient(clientName);
 
 
     if(!client){
-
-        alert(
-            "Impossibile creare il cliente."
-        );
-
         return;
-
     }
 
 
-    /*
-     * MODIFICA
-     */
-
     if(editingAppointmentId){
 
-        const appointment =
+        const appointment=
             appointments.find(
                 a =>
-                    String(a.id) ===
+                    String(a.id)===
                     String(editingAppointmentId)
             );
 
@@ -2955,51 +2842,29 @@ function saveAppointment(){
         }
 
 
-        appointment.clientId =
-            client.id;
-
-        appointment.clientName =
-            client.name;
-
-        appointment.date =
-            date;
-
-        appointment.time =
-            time;
-
-        appointment.notes =
-            notes;
+        appointment.clientId=client.id;
+        appointment.clientName=client.name;
+        appointment.date=date;
+        appointment.time=time;
+        appointment.notes=notes;
 
 
-        if(!saveData()){
+        if(!await saveData()){
             return;
         }
 
 
         editingAppointmentId=null;
 
-
         document.getElementById(
             "appointmentEditStatus"
-        ).textContent =
-            "Modifica salvata automaticamente.";
+        ).textContent=
+            "Modifica salvata nel cloud.";
 
 
         resetAppointmentForm();
 
         refreshEverything();
-
-
-        setTimeout(
-            () => {
-
-                document.getElementById(
-                    "appointmentEditStatus"
-                ).textContent="";
-
-            },
-            2500
-        );
 
 
         alert(
@@ -3011,10 +2876,6 @@ function saveAppointment(){
     }
 
 
-    /*
-     * NUOVO APPUNTAMENTO
-     */
-
     appointments.push({
 
         id:generateId(),
@@ -3023,11 +2884,11 @@ function saveAppointment(){
 
         clientName:client.name,
 
-        date:date,
+        date,
 
-        time:time,
+        time,
 
-        notes:notes,
+        notes,
 
         completed:false,
 
@@ -3052,7 +2913,7 @@ function saveAppointment(){
     });
 
 
-    if(!saveData()){
+    if(!await saveData()){
         return;
     }
 
@@ -3063,7 +2924,7 @@ function saveAppointment(){
 
 
     alert(
-        "Appuntamento salvato immediatamente."
+        "Appuntamento salvato nel database."
     );
 
 }
@@ -3094,43 +2955,39 @@ function resetAppointmentForm(){
 
 function renderAppointments(){
 
-    const container =
+    const container=
         document.getElementById(
             "appointmentsList"
         );
 
 
-    const search =
+    const search=
         (
             document.getElementById(
                 "appointmentSearch"
-            )?.value || ""
+            )?.value||""
         ).toLowerCase();
 
 
     const map={};
 
 
-    appointments.forEach(a => {
+    appointments.forEach(a=>{
 
-        const clientId =
-            String(a.clientId || a.clientName);
+        const clientId=
+            String(a.clientId||a.clientName);
 
 
-        const name =
-            getClientName(a.clientId) ||
-            a.clientName ||
+        const name=
+            getClientName(a.clientId)||
+            a.clientName||
             "Cliente";
 
 
         if(
-            !name
-                .toLowerCase()
-                .includes(search)
+            !name.toLowerCase().includes(search)
         ){
-
             return;
-
         }
 
 
@@ -3138,9 +2995,9 @@ function renderAppointments(){
 
             map[clientId]={
 
-                clientId:clientId,
+                clientId,
 
-                name:name,
+                name,
 
                 appointments:[]
 
@@ -3156,24 +3013,23 @@ function renderAppointments(){
     });
 
 
-    const groups =
-        Object.values(map);
+    const groups=Object.values(map);
 
 
     groups.forEach(
         group =>
             group.appointments.sort(
-                (a,b) =>
-                    `${b.date}${b.time || ""}`
+                (a,b)=>
+                    `${b.date}${b.time||""}`
                         .localeCompare(
-                            `${a.date}${a.time || ""}`
+                            `${a.date}${a.time||""}`
                         )
             )
     );
 
 
     groups.sort(
-        (a,b) =>
+        (a,b)=>
             a.name.localeCompare(
                 b.name,
                 "it"
@@ -3183,7 +3039,7 @@ function renderAppointments(){
 
     if(!groups.length){
 
-        container.innerHTML =
+        container.innerHTML=
             '<div class="empty">Nessun appuntamento trovato.</div>';
 
         return;
@@ -3191,8 +3047,8 @@ function renderAppointments(){
     }
 
 
-    container.innerHTML =
-        groups.map(group => `
+    container.innerHTML=
+        groups.map(group=>`
 
 <div
 class="item client-history"
@@ -3205,14 +3061,10 @@ justify-content:space-between;
 gap:10px">
 
 <div class="item-title">
-
 👤 ${escapeHTML(group.name)}
-
 </div>
 
-<div class="chevron">
-›
-</div>
+<div class="chevron">›</div>
 
 </div>
 
@@ -3220,25 +3072,20 @@ gap:10px">
 
 ${group.appointments.length}
 ${group.appointments.length===1
-    ? "appuntamento"
-    : "appuntamenti"
-}
-
+?"appuntamento"
+:"appuntamenti"}
 registrati
 
 </div>
 
 </div>
 
-
 <div
 id="history-${escapeHTML(group.clientId)}"
 class="hidden">
 
 ${group.appointments
-    .map(a =>
-        historyAppointmentHTML(a)
-    )
+    .map(a=>historyAppointmentHTML(a))
     .join("")}
 
 </div>
@@ -3250,7 +3097,7 @@ ${group.appointments
 
 function toggleClientHistory(clientId){
 
-    const element =
+    const element=
         document.getElementById(
             "history-"+clientId
         );
@@ -3269,7 +3116,7 @@ function toggleClientHistory(clientId){
 
 function historyAppointmentHTML(a){
 
-    const balance =
+    const balance=
         getBalanceHTML(a);
 
 
@@ -3280,44 +3127,28 @@ function historyAppointmentHTML(a){
 <div class="item-title">
 
 📅 ${formatDate(a.date)}
-
-${
-    a.time
-    ?
-    ` · ${escapeHTML(a.time)}`
-    :
-    ""
-}
+${a.time?` · ${escapeHTML(a.time)}`:""}
 
 </div>
 
-
 ${
-    a.notes
-    ?
-    `<div class="item-sub">
-    📝 ${escapeHTML(a.notes)}
-    </div>`
-    :
-    ""
+a.notes
+?
+`<div class="item-sub">
+📝 ${escapeHTML(a.notes)}
+</div>`
+:""
 }
 
-
 ${
-    a.completed
-    ?
-    `<span class="badge green-badge">
-    ✅ Completato
-    </span>`
-    :
-    `<span class="badge orange-badge">
-    ⏳ Non completato
-    </span>`
+a.completed
+?
+`<span class="badge green-badge">✅ Completato</span>`
+:
+`<span class="badge orange-badge">⏳ Non completato</span>`
 }
-
 
 ${balance}
-
 
 <div class="actions">
 
@@ -3338,28 +3169,26 @@ onclick="deleteAppointment('${a.id}');event.stopPropagation()">
 }
 
 
-function deleteAppointment(id){
+async function deleteAppointment(id){
 
     if(
         !confirm(
             "Eliminare definitivamente questo appuntamento?"
         )
     ){
-
         return;
-
     }
 
 
-    appointments =
+    appointments=
         appointments.filter(
             a =>
-                String(a.id) !==
+                String(a.id)!==
                 String(id)
         );
 
 
-    if(!saveData()){
+    if(!await saveData()){
         return;
     }
 
@@ -3369,12 +3198,12 @@ function deleteAppointment(id){
 }
 
 
-function editAppointment(id){
+async function editAppointment(id){
 
-    const a =
+    const a=
         appointments.find(
             x =>
-                String(x.id) ===
+                String(x.id)===
                 String(id)
         );
 
@@ -3394,28 +3223,25 @@ function editAppointment(id){
 
     document.getElementById(
         "appointmentClientName"
-    ).value =
-        getClientName(a.clientId) ||
-        a.clientName ||
+    ).value=
+        getClientName(a.clientId)||
+        a.clientName||
         "";
 
 
     document.getElementById(
         "appointmentDate"
-    ).value =
-        a.date || "";
+    ).value=a.date||"";
 
 
     document.getElementById(
         "appointmentTime"
-    ).value =
-        a.time || "";
+    ).value=a.time||"";
 
 
     document.getElementById(
         "appointmentNotes"
-    ).value =
-        a.notes || "";
+    ).value=a.notes||"";
 
 
     editingAppointmentId=id;
@@ -3423,7 +3249,7 @@ function editAppointment(id){
 
     document.getElementById(
         "appointmentEditStatus"
-    ).textContent =
+    ).textContent=
         "✏️ Stai modificando questo appuntamento.";
 
 
@@ -3436,15 +3262,15 @@ function editAppointment(id){
 
 
 /* =========================================================
-   SALDO VISIBILE / NASCOSTO
+   SALDO
 ========================================================= */
 
-function toggleBalance(id){
+async function toggleBalance(id){
 
-    const a =
+    const a=
         appointments.find(
             x =>
-                String(x.id) ===
+                String(x.id)===
                 String(id)
         );
 
@@ -3454,11 +3280,11 @@ function toggleBalance(id){
     }
 
 
-    a.showBalance =
-        a.showBalance === false;
+    a.showBalance=
+        a.showBalance===false;
 
 
-    if(!saveData()){
+    if(!await saveData()){
         return;
     }
 
@@ -3470,19 +3296,12 @@ function toggleBalance(id){
 
 function getBalanceHTML(a){
 
-    /*
-     * Se il saldo è nascosto,
-     * non viene mostrato.
-     */
-
-    if(a.showBalance === false){
+    if(a.showBalance===false){
 
         return `
 
 <div class="balance-hidden">
-
 🔒 Saldo nascosto
-
 </div>
 
 <button
@@ -3498,14 +3317,11 @@ onclick="toggleBalance('${a.id}');event.stopPropagation()">
     }
 
 
-    const received =
-        getReceived(a);
+    const received=getReceived(a);
 
-    const expense =
-        safeNumber(a.expense);
+    const expense=safeNumber(a.expense);
 
-    const net =
-        received - expense;
+    const net=received-expense;
 
 
     return `
@@ -3513,33 +3329,18 @@ onclick="toggleBalance('${a.id}');event.stopPropagation()">
 <div class="item-money">
 
 <div class="money-box">
-
 <small>Guadagno</small>
-
-<strong class="green">
-${euro(a.income)}
-</strong>
-
+<strong class="green">${euro(a.income)}</strong>
 </div>
 
 <div class="money-box">
-
 <small>Spese</small>
-
-<strong class="red">
-${euro(expense)}
-</strong>
-
+<strong class="red">${euro(expense)}</strong>
 </div>
 
 <div class="money-box">
-
 <small>Netto</small>
-
-<strong class="blue">
-${euro(net)}
-</strong>
-
+<strong class="blue">${euro(net)}</strong>
 </div>
 
 </div>
@@ -3566,13 +3367,8 @@ function getReceived(a){
     let total=0;
 
 
-    /*
-     * Pagamento unico:
-     * l'intero guadagno è incassato.
-     */
-
     if(
-        a.paymentMode === "single" &&
+        a.paymentMode==="single" &&
         a.completed
     ){
 
@@ -3584,38 +3380,26 @@ function getReceived(a){
     }
 
 
-    /*
-     * Acconto.
-     */
-
-    total += Math.max(
+    total+=Math.max(
         0,
         safeNumber(a.deposit)
     );
 
 
-    /*
-     * Rate pagate.
-     */
+    if(Array.isArray(a.installments)){
 
-    if(
-        Array.isArray(a.installments)
-    ){
+        a.installments.forEach(rate=>{
 
-        a.installments.forEach(
-            rate => {
+            if(rate.paid){
 
-                if(rate.paid){
-
-                    total += Math.max(
-                        0,
-                        safeNumber(rate.amount)
-                    );
-
-                }
+                total+=Math.max(
+                    0,
+                    safeNumber(rate.amount)
+                );
 
             }
-        );
+
+        });
 
     }
 
@@ -3629,8 +3413,7 @@ function getRemaining(a){
 
     return Math.max(
         0,
-        safeNumber(a.income) -
-        getReceived(a)
+        safeNumber(a.income)-getReceived(a)
     );
 
 }
@@ -3642,21 +3425,17 @@ function getRemaining(a){
 
 function getPeriodDates(){
 
-    const filter =
+    const filter=
         document.getElementById(
             "periodFilter"
         ).value;
 
 
-    const now =
-        new Date();
+    const now=new Date();
 
+    let from=new Date(now);
 
-    let from =
-        new Date(now);
-
-    let to =
-        new Date(now);
+    let to=new Date(now);
 
 
     if(filter==="yesterday"){
@@ -3671,11 +3450,10 @@ function getPeriodDates(){
 
     }
 
-
     else if(filter==="week"){
 
-        const day =
-            now.getDay() || 7;
+        const day=
+            now.getDay()||7;
 
         from.setDate(
             now.getDate()-day+1
@@ -3683,10 +3461,9 @@ function getPeriodDates(){
 
     }
 
-
     else if(filter==="month"){
 
-        from =
+        from=
             new Date(
                 now.getFullYear(),
                 now.getMonth(),
@@ -3695,17 +3472,16 @@ function getPeriodDates(){
 
     }
 
-
     else if(filter==="lastMonth"){
 
-        from =
+        from=
             new Date(
                 now.getFullYear(),
                 now.getMonth()-1,
                 1
             );
 
-        to =
+        to=
             new Date(
                 now.getFullYear(),
                 now.getMonth(),
@@ -3714,32 +3490,27 @@ function getPeriodDates(){
 
     }
 
-
     else if(filter==="custom"){
 
-        const f =
+        const f=
             document.getElementById(
                 "dateFrom"
             ).value;
 
-
-        const t =
+        const t=
             document.getElementById(
                 "dateTo"
             ).value;
 
 
-        if(!f || !t){
+        if(!f||!t){
             return null;
         }
 
 
         return {
-
             from:f,
-
             to:t
-
         };
 
     }
@@ -3758,7 +3529,7 @@ function getPeriodDates(){
 
 function updateDashboard(){
 
-    const filter =
+    const filter=
         document.getElementById(
             "periodFilter"
         ).value;
@@ -3772,8 +3543,7 @@ function updateDashboard(){
     );
 
 
-    const range =
-        getPeriodDates();
+    const range=getPeriodDates();
 
 
     if(!range){
@@ -3781,123 +3551,32 @@ function updateDashboard(){
     }
 
 
-    const filtered =
+    const filtered=
         appointments.filter(
             a =>
-                a.date >= range.from &&
-                a.date <= range.to
+                a.date>=range.from &&
+                a.date<=range.to
         );
 
 
-    const completed =
+    const completed=
         filtered.filter(
-            a => a.completed
+            a=>a.completed
         );
 
 
-    /*
-     * Incassi reali.
-     */
-
-    let income =
+    let income=
         completed.reduce(
-            (sum,a) =>
-                sum + getReceived(a),
+            (sum,a)=>
+                sum+getReceived(a),
             0
         );
 
 
-    /*
-     * Spese appuntamenti.
-     */
-
-    let expenses =
+    let expenses=
         completed.reduce(
-            (sum,a) =>
-                sum + safeNumber(a.expense),
-            0
-        );
-
-
-    /*
-     * Movimenti manuali.
-     */
-
-    const manual =
-        movements.filter(
-            m =>
-                m.date >= range.from &&
-                m.date <= range.to
-        );
-
-
-    manual.forEach(m => {
-
-        if(m.type==="income"){
-
-            income +=
-                safeNumber(m.amount);
-
-        }else{
-
-            expenses +=
-                safeNumber(m.amount);
-
-        }
-
-    });
-
-
-    document.getElementById(
-        "dashIncome"
-    ).textContent =
-        euro(income);
-
-
-    document.getElementById(
-        "dashExpenses"
-    ).textContent =
-        euro(expenses);
-
-
-    document.getElementById(
-        "dashNet"
-    ).textContent =
-        euro(
-            income-expenses
-        );
-
-
-    /*
-     * ANNO CORRENTE
-     */
-
-    const year =
-        String(
-            new Date().getFullYear()
-        );
-
-
-    const yearlyAppointments =
-        appointments.filter(
-            a =>
-                (a.date || "").startsWith(year) &&
-                a.completed
-        );
-
-
-    let yearIncome =
-        yearlyAppointments.reduce(
-            (sum,a) =>
-                sum + getReceived(a),
-            0
-        );
-
-
-    let yearExpenses =
-        yearlyAppointments.reduce(
-            (sum,a) =>
-                sum + safeNumber(a.expense),
+            (sum,a)=>
+                sum+safeNumber(a.expense),
             0
         );
 
@@ -3905,21 +3584,77 @@ function updateDashboard(){
     movements
         .filter(
             m =>
-                (m.date || "")
-                    .startsWith(year)
+                m.date>=range.from &&
+                m.date<=range.to
         )
-        .forEach(m => {
+        .forEach(m=>{
 
             if(m.type==="income"){
-
-                yearIncome +=
-                    safeNumber(m.amount);
-
+                income+=safeNumber(m.amount);
             }else{
+                expenses+=safeNumber(m.amount);
+            }
 
-                yearExpenses +=
-                    safeNumber(m.amount);
+        });
 
+
+    document.getElementById(
+        "dashIncome"
+    ).textContent=euro(income);
+
+
+    document.getElementById(
+        "dashExpenses"
+    ).textContent=euro(expenses);
+
+
+    document.getElementById(
+        "dashNet"
+    ).textContent=
+        euro(income-expenses);
+
+
+    const year=
+        String(
+            new Date().getFullYear()
+        );
+
+
+    const yearlyAppointments=
+        appointments.filter(
+            a =>
+                (a.date||"").startsWith(year)&&
+                a.completed
+        );
+
+
+    let yearIncome=
+        yearlyAppointments.reduce(
+            (sum,a)=>
+                sum+getReceived(a),
+            0
+        );
+
+
+    let yearExpenses=
+        yearlyAppointments.reduce(
+            (sum,a)=>
+                sum+safeNumber(a.expense),
+            0
+        );
+
+
+    movements
+        .filter(
+            m =>
+                (m.date||"").startsWith(year)
+        )
+        .forEach(m=>{
+
+            if(m.type==="income"){
+                yearIncome+=safeNumber(m.amount);
+            }else{
+                yearExpenses+=safeNumber(m.amount);
             }
 
         });
@@ -3927,19 +3662,17 @@ function updateDashboard(){
 
     document.getElementById(
         "yearIncome"
-    ).textContent =
-        euro(yearIncome);
+    ).textContent=euro(yearIncome);
 
 
     document.getElementById(
         "yearExpenses"
-    ).textContent =
-        euro(yearExpenses);
+    ).textContent=euro(yearExpenses);
 
 
     document.getElementById(
         "yearNet"
-    ).textContent =
+    ).textContent=
         euro(
             yearIncome-yearExpenses
         );
@@ -3947,32 +3680,28 @@ function updateDashboard(){
 
     document.getElementById(
         "yearAppointments"
-    ).textContent =
+    ).textContent=
         yearlyAppointments.length;
 
 
     renderFutureAppointments();
 
 
-    /*
-     * DETTAGLIO PERIODO
-     */
-
-    const container =
+    const container=
         document.getElementById(
             "dashboardAppointments"
         );
 
 
-    const pending =
+    const pending=
         filtered.filter(
-            a => !a.completed
+            a=>!a.completed
         );
 
 
     if(!pending.length){
 
-        container.innerHTML =
+        container.innerHTML=
             '<div class="empty">Nessun appuntamento da completare nel periodo.</div>';
 
         return;
@@ -3981,62 +3710,48 @@ function updateDashboard(){
 
 
     pending.sort(
-        (a,b) =>
-            `${a.date}${a.time || ""}`
+        (a,b)=>
+            `${a.date}${a.time||""}`
                 .localeCompare(
-                    `${b.date}${b.time || ""}`
+                    `${b.date}${b.time||""}`
                 )
     );
 
 
-    container.innerHTML =
+    container.innerHTML=
         pending
-            .map(
-                a =>
-                    dashboardAppointmentHTML(a)
-            )
+            .map(a=>dashboardAppointmentHTML(a))
             .join("");
 
 }
 
 
-/* =========================================================
-   APPUNTAMENTI NON COMPLETATI
-========================================================= */
-
 function renderFutureAppointments(){
 
-    const container =
+    const container=
         document.getElementById(
             "futureAppointments"
         );
 
 
-    /*
-     * IMPORTANTE:
-     * non mostriamo più solo gli appuntamenti futuri.
-     * Mostriamo TUTTI quelli non completati.
-     */
-
-    let list =
+    let list=
         appointments.filter(
-            a =>
-                !a.completed
+            a=>!a.completed
         );
 
 
     list.sort(
-        (a,b) =>
-            `${a.date}${a.time || ""}`
+        (a,b)=>
+            `${a.date}${a.time||""}`
                 .localeCompare(
-                    `${b.date}${b.time || ""}`
+                    `${b.date}${b.time||""}`
                 )
     );
 
 
     if(!list.length){
 
-        container.innerHTML =
+        container.innerHTML=
             '<div class="empty">🎉 Tutti gli appuntamenti sono completati.</div>';
 
         return;
@@ -4044,12 +3759,9 @@ function renderFutureAppointments(){
     }
 
 
-    container.innerHTML =
+    container.innerHTML=
         list
-            .map(
-                a =>
-                    dashboardAppointmentHTML(a)
-            )
+            .map(a=>dashboardAppointmentHTML(a))
             .join("");
 
 }
@@ -4064,46 +3776,32 @@ function dashboardAppointmentHTML(a){
 <div class="item-title">
 
 ${escapeHTML(
-    getClientName(a.clientId) ||
-    a.clientName ||
+    getClientName(a.clientId)||
+    a.clientName||
     "Cliente"
 )}
 
 </div>
 
-
 <div class="item-sub">
 
 📅 ${formatDate(a.date)}
-
-${
-    a.time
-    ?
-    ` · 🕐 ${escapeHTML(a.time)}`
-    :
-    ""
-}
+${a.time?` · 🕐 ${escapeHTML(a.time)}`:""}
 
 </div>
 
-
 ${
-    a.notes
-    ?
-    `<div class="item-sub">
-    📝 ${escapeHTML(a.notes)}
-    </div>`
-    :
-    ""
+a.notes
+?
+`<div class="item-sub">
+📝 ${escapeHTML(a.notes)}
+</div>`
+:""
 }
 
-
 <span class="badge orange-badge">
-
 ⏳ Da completare
-
 </span>
-
 
 <div class="actions">
 
@@ -4133,15 +3831,15 @@ onclick="openCompletionModal('${a.id}')">
 
 
 /* =========================================================
-   POPUP COMPLETAMENTO
+   COMPLETAMENTO
 ========================================================= */
 
 function openCompletionModal(id){
 
-    const a =
+    const a=
         appointments.find(
             x =>
-                String(x.id) ===
+                String(x.id)===
                 String(id)
         );
 
@@ -4156,54 +3854,51 @@ function openCompletionModal(id){
 
     document.getElementById(
         "completionClient"
-    ).textContent =
-        getClientName(a.clientId) ||
-        a.clientName ||
+    ).textContent=
+        getClientName(a.clientId)||
+        a.clientName||
         "Cliente";
 
 
     document.getElementById(
         "completionIncome"
-    ).value =
-        a.income !== undefined
-        ? a.income
-        : "";
+    ).value=
+        a.income!==undefined
+        ?a.income
+        :"";
 
 
     document.getElementById(
         "completionExpense"
-    ).value =
-        a.expense || "";
+    ).value=
+        a.expense||"";
 
 
     document.getElementById(
         "completionPaymentMode"
-    ).value =
-        a.paymentMode || "single";
+    ).value=
+        a.paymentMode||"single";
 
 
     document.getElementById(
         "completionDeposit"
-    ).value =
-        a.deposit || "";
+    ).value=
+        a.deposit||"";
 
 
-    const count =
+    const count=
         Math.min(
             10,
             Math.max(
                 2,
-                Number(
-                    a.installmentCount || 2
-                )
+                Number(a.installmentCount||2)
             )
         );
 
 
     document.getElementById(
         "completionInstallmentCount"
-    ).value =
-        count;
+    ).value=count;
 
 
     toggleCompletionInstallments();
@@ -4225,7 +3920,6 @@ function closeCompletionModal(){
 
     completionAppointmentId=null;
 
-
     document.getElementById(
         "completionModal"
     ).classList.add(
@@ -4237,13 +3931,13 @@ function closeCompletionModal(){
 
 function toggleCompletionInstallments(){
 
-    const mode =
+    const mode=
         document.getElementById(
             "completionPaymentMode"
         ).value;
 
 
-    const section =
+    const section=
         document.getElementById(
             "completionInstallments"
         );
@@ -4256,9 +3950,7 @@ function toggleCompletionInstallments(){
 
 
     if(mode==="installments"){
-
         buildInstallmentInputs();
-
     }
 
 
@@ -4267,13 +3959,9 @@ function toggleCompletionInstallments(){
 }
 
 
-/* =========================================================
-   RATE
-========================================================= */
-
 function buildInstallmentInputs(){
 
-    const count =
+    const count=
         Math.min(
             10,
             Math.max(
@@ -4282,60 +3970,53 @@ function buildInstallmentInputs(){
                     document.getElementById(
                         "completionInstallmentCount"
                     ).value
-                ) || 2
+                )||2
             )
         );
 
 
-    const container =
+    const container=
         document.getElementById(
             "installmentInputs"
         );
 
 
-    const appointment =
+    const appointment=
         appointments.find(
             a =>
-                String(a.id) ===
+                String(a.id)===
                 String(completionAppointmentId)
         );
 
 
-    const oldRates =
+    const oldRates=
         appointment &&
         Array.isArray(
             appointment.installments
         )
         ?
         appointment.installments
-        :
-        [];
+        :[];
 
 
     let html="";
 
 
-    for(
-        let i=1;
-        i<=count;
-        i++
-    ){
+    for(let i=1;i<=count;i++){
 
-        const old =
+        const old=
             oldRates.find(
                 r =>
                     Number(r.number)===i
             );
 
 
-        html += `
+        html+=`
 
 <div class="rate-row">
 
 <div class="rate-label">
-
 Rata ${i}
-
 </div>
 
 <input
@@ -4344,13 +4025,7 @@ min="0"
 step="0.01"
 placeholder="€ 0,00"
 id="rate-${i}"
-value="${
-    old
-    ?
-    safeNumber(old.amount)
-    :
-    ""
-}"
+value="${old?safeNumber(old.amount):""}"
 oninput="updateCompletion()">
 
 </div>
@@ -4362,19 +4037,14 @@ oninput="updateCompletion()">
 
     container.innerHTML=html;
 
-
     updateCompletion();
 
 }
 
 
-/* =========================================================
-   CALCOLO POPUP
-========================================================= */
-
 function updateCompletion(){
 
-    const income =
+    const income=
         Math.max(
             0,
             safeNumber(
@@ -4385,7 +4055,7 @@ function updateCompletion(){
         );
 
 
-    const expense =
+    const expense=
         Math.max(
             0,
             safeNumber(
@@ -4396,7 +4066,7 @@ function updateCompletion(){
         );
 
 
-    const mode =
+    const mode=
         document.getElementById(
             "completionPaymentMode"
         ).value;
@@ -4409,7 +4079,7 @@ function updateCompletion(){
 
     if(mode==="installments"){
 
-        deposit =
+        deposit=
             Math.max(
                 0,
                 safeNumber(
@@ -4420,21 +4090,17 @@ function updateCompletion(){
             );
 
 
-        const count =
+        const count=
             Number(
                 document.getElementById(
                     "completionInstallmentCount"
                 ).value
-            ) || 2;
+            )||2;
 
 
-        for(
-            let i=1;
-            i<=count;
-            i++
-        ){
+        for(let i=1;i<=count;i++){
 
-            const input =
+            const input=
                 document.getElementById(
                     "rate-"+i
                 );
@@ -4442,12 +4108,10 @@ function updateCompletion(){
 
             if(input){
 
-                installmentsTotal +=
+                installmentsTotal+=
                     Math.max(
                         0,
-                        safeNumber(
-                            input.value
-                        )
+                        safeNumber(input.value)
                     );
 
             }
@@ -4457,75 +4121,59 @@ function updateCompletion(){
     }
 
 
-    const received =
+    const received=
         mode==="single"
-        ?
-        income
-        :
-        deposit + installmentsTotal;
+        ?income
+        :deposit+installmentsTotal;
 
 
-    const remaining =
+    const remaining=
         Math.max(
             0,
             income-received
         );
 
 
-    /*
-     * Il netto economico dell'intervento
-     * è guadagno - spese.
-     *
-     * L'incasso non modifica il valore
-     * del guadagno totale.
-     */
-
-    const net =
+    const net=
         income-expense;
 
 
     document.getElementById(
         "completionTotal"
-    ).textContent =
-        euro(income);
+    ).textContent=euro(income);
 
 
     document.getElementById(
         "completionDepositView"
-    ).textContent =
+    ).textContent=
         euro(
             mode==="installments"
-            ? deposit
-            : income
+            ?deposit
+            :income
         );
 
 
     document.getElementById(
         "completionInstallmentsView"
-    ).textContent =
+    ).textContent=
         mode==="installments"
-        ?
-        euro(installmentsTotal)
-        :
-        euro(0);
+        ?euro(installmentsTotal)
+        :euro(0);
 
 
     document.getElementById(
         "completionReceived"
-    ).textContent =
-        euro(received);
+    ).textContent=euro(received);
 
 
     document.getElementById(
         "completionRemaining"
-    ).textContent =
-        euro(remaining);
+    ).textContent=euro(remaining);
 
 
     document.getElementById(
         "completionNet"
-    ).textContent =
-        euro(net);
+    ).textContent=euro(net);
 
 }
 
@@ -4534,33 +4182,27 @@ function updateCompletion(){
    COMPLETA APPUNTAMENTO
 ========================================================= */
 
-function completeAppointment(){
+async function completeAppointment(){
 
     if(completionAppointmentId===null){
         return;
     }
 
 
-    const appointment =
+    const appointment=
         appointments.find(
             a =>
-                String(a.id) ===
+                String(a.id)===
                 String(completionAppointmentId)
         );
 
 
     if(!appointment){
-
-        alert(
-            "Appuntamento non trovato."
-        );
-
         return;
-
     }
 
 
-    const income =
+    const income=
         Math.max(
             0,
             safeNumber(
@@ -4571,7 +4213,7 @@ function completeAppointment(){
         );
 
 
-    const expense =
+    const expense=
         Math.max(
             0,
             safeNumber(
@@ -4582,41 +4224,19 @@ function completeAppointment(){
         );
 
 
-    const mode =
+    const mode=
         document.getElementById(
             "completionPaymentMode"
         ).value;
 
 
-    /*
-     * GUADAGNO = 0 È CONSENTITO.
-     */
-
-    if(income<0){
-
-        alert(
-            "Il guadagno non può essere negativo."
-        );
-
-        return;
-
-    }
-
-
-    /*
-     * PAGAMENTO UNICO
-     */
-
     if(mode==="single"){
 
-        appointment.income =
-            income;
+        appointment.income=income;
 
-        appointment.expense =
-            expense;
+        appointment.expense=expense;
 
-        appointment.paymentMode =
-            "single";
+        appointment.paymentMode="single";
 
         appointment.deposit=0;
 
@@ -4640,14 +4260,9 @@ function completeAppointment(){
 
     }
 
-
-    /*
-     * PAGAMENTO DILAZIONATO
-     */
-
     else{
 
-        const deposit =
+        const deposit=
             Math.max(
                 0,
                 safeNumber(
@@ -4658,7 +4273,7 @@ function completeAppointment(){
             );
 
 
-        const count =
+        const count=
             Math.min(
                 10,
                 Math.max(
@@ -4667,7 +4282,7 @@ function completeAppointment(){
                         document.getElementById(
                             "completionInstallmentCount"
                         ).value
-                    ) || 2
+                    )||2
                 )
             );
 
@@ -4688,31 +4303,20 @@ function completeAppointment(){
         let ratesTotal=0;
 
 
-        for(
-            let i=1;
-            i<=count;
-            i++
-        ){
+        for(let i=1;i<=count;i++){
 
-            const input =
+            const input=
                 document.getElementById(
                     "rate-"+i
                 );
 
 
-            const amount =
+            const amount=
                 Math.max(
                     0,
-                    safeNumber(
-                        input?.value
-                    )
+                    safeNumber(input?.value)
                 );
 
-
-            /*
-             * Anche una rata da 0 non ha senso
-             * per un pagamento rateizzato.
-             */
 
             if(amount<=0){
 
@@ -4729,7 +4333,7 @@ function completeAppointment(){
 
                 number:i,
 
-                amount:amount,
+                amount,
 
                 paid:false,
 
@@ -4738,19 +4342,19 @@ function completeAppointment(){
             });
 
 
-            ratesTotal += amount;
+            ratesTotal+=amount;
 
         }
 
 
-        const expected =
+        const expected=
             income-deposit;
 
 
         if(
             Math.abs(
                 ratesTotal-expected
-            ) > 0.009
+            )>0.009
         ){
 
             alert(
@@ -4763,31 +4367,20 @@ function completeAppointment(){
         }
 
 
-        appointment.income =
-            income;
+        appointment.income=income;
 
-        appointment.expense =
-            expense;
+        appointment.expense=expense;
 
-        appointment.paymentMode =
-            "installments";
+        appointment.paymentMode="installments";
 
-        appointment.deposit =
-            deposit;
+        appointment.deposit=deposit;
 
-        appointment.installmentCount =
-            count;
+        appointment.installmentCount=count;
 
-        appointment.installments =
-            rates;
+        appointment.installments=rates;
 
         appointment.payments=[];
 
-
-        /*
-         * L'acconto viene considerato
-         * già incassato.
-         */
 
         if(deposit>0){
 
@@ -4814,22 +4407,16 @@ function completeAppointment(){
 
     appointment.completed=true;
 
-    appointment.net =
+    appointment.net=
         income-expense;
 
 
     if(appointment.showBalance===undefined){
-
         appointment.showBalance=true;
-
     }
 
 
-    /*
-     * SALVATAGGIO IMMEDIATO.
-     */
-
-    if(!saveData()){
+    if(!await saveData()){
         return;
     }
 
@@ -4840,7 +4427,7 @@ function completeAppointment(){
 
 
     alert(
-        "Appuntamento completato e salvato."
+        "Appuntamento completato e salvato nel database."
     );
 
 }
@@ -4855,19 +4442,14 @@ function getPaymentClients(){
     const map={};
 
 
-    appointments.forEach(a => {
+    appointments.forEach(a=>{
 
-        if(
-            a.paymentMode!=="installments"
-        ){
-
+        if(a.paymentMode!=="installments"){
             return;
-
         }
 
 
-        const remaining =
-            getRemaining(a);
+        const remaining=getRemaining(a);
 
 
         if(remaining<=0){
@@ -4875,7 +4457,7 @@ function getPaymentClients(){
         }
 
 
-        const clientId =
+        const clientId=
             String(a.clientId);
 
 
@@ -4883,7 +4465,7 @@ function getPaymentClients(){
 
             map[clientId]={
 
-                clientId:clientId,
+                clientId,
 
                 appointments:[],
 
@@ -4903,15 +4485,15 @@ function getPaymentClients(){
             .push(a);
 
 
-        map[clientId].total +=
+        map[clientId].total+=
             safeNumber(a.income);
 
 
-        map[clientId].received +=
+        map[clientId].received+=
             getReceived(a);
 
 
-        map[clientId].remaining +=
+        map[clientId].remaining+=
             remaining;
 
     });
@@ -4924,25 +4506,25 @@ function getPaymentClients(){
 
 function renderPayments(){
 
-    const container =
+    const container=
         document.getElementById(
             "paymentsList"
         );
 
 
-    const search =
+    const search=
         (
             document.getElementById(
                 "paymentSearch"
-            )?.value || ""
+            )?.value||""
         ).toLowerCase();
 
 
-    let groups =
+    let groups=
         getPaymentClients();
 
 
-    groups =
+    groups=
         groups.filter(
             g =>
                 getClientName(g.clientId)
@@ -4951,17 +4533,17 @@ function renderPayments(){
         );
 
 
-    const totalReceived =
+    const totalReceived=
         groups.reduce(
-            (sum,g) =>
+            (sum,g)=>
                 sum+g.received,
             0
         );
 
 
-    const totalRemaining =
+    const totalRemaining=
         groups.reduce(
-            (sum,g) =>
+            (sum,g)=>
                 sum+g.remaining,
             0
         );
@@ -4969,25 +4551,22 @@ function renderPayments(){
 
     document.getElementById(
         "paymentsReceived"
-    ).textContent =
-        euro(totalReceived);
+    ).textContent=euro(totalReceived);
 
 
     document.getElementById(
         "paymentsRemaining"
-    ).textContent =
-        euro(totalRemaining);
+    ).textContent=euro(totalRemaining);
 
 
     document.getElementById(
         "paymentsClients"
-    ).textContent =
-        groups.length;
+    ).textContent=groups.length;
 
 
     if(!groups.length){
 
-        container.innerHTML =
+        container.innerHTML=
             '<div class="empty">Nessun pagamento dilazionato in corso.</div>';
 
         return;
@@ -4995,8 +4574,8 @@ function renderPayments(){
     }
 
 
-    container.innerHTML =
-        groups.map(group => `
+    container.innerHTML=
+        groups.map(group=>`
 
 <div
 class="item client-history"
@@ -5008,21 +4587,16 @@ align-items:center;
 justify-content:space-between">
 
 <div class="item-title">
-
 👤 ${escapeHTML(
     getClientName(group.clientId)
 )}
-
 </div>
 
-<div class="chevron">
-›
-</div>
+<div class="chevron">›</div>
 
 </div>
 
 </div>
-
 
 <div
 id="payment-client-${escapeHTML(group.clientId)}"
@@ -5039,18 +4613,14 @@ ${paymentClientDetailsHTML(group)}
 
 function togglePaymentClient(clientId){
 
-    const element =
+    const element=
         document.getElementById(
             "payment-client-"+clientId
         );
 
 
     if(element){
-
-        element.classList.toggle(
-            "hidden"
-        );
-
+        element.classList.toggle("hidden");
     }
 
 }
@@ -5058,15 +4628,14 @@ function togglePaymentClient(clientId){
 
 function paymentClientDetailsHTML(group){
 
-    const percentage =
+    const percentage=
         group.total>0
         ?
         Math.min(
             100,
             (group.received/group.total)*100
         )
-        :
-        0;
+        :0;
 
 
     return `
@@ -5076,33 +4645,18 @@ function paymentClientDetailsHTML(group){
 <div class="payment-summary">
 
 <div class="payment-summary-row">
-
 <span>Totale</span>
-
-<strong>
-${euro(group.total)}
-</strong>
-
+<strong>${euro(group.total)}</strong>
 </div>
 
 <div class="payment-summary-row">
-
 <span>Incassato</span>
-
-<strong class="green">
-${euro(group.received)}
-</strong>
-
+<strong class="green">${euro(group.received)}</strong>
 </div>
 
 <div class="payment-summary-row">
-
 <span>Residuo</span>
-
-<strong class="orange">
-${euro(group.remaining)}
-</strong>
-
+<strong class="orange">${euro(group.remaining)}</strong>
 </div>
 
 <div class="payment-progress">
@@ -5115,19 +4669,13 @@ style="width:${percentage}%">
 </div>
 
 <small style="color:#777">
-
 ${percentage.toFixed(0)}% pagato
-
 </small>
 
 </div>
 
-
 ${group.appointments
-    .map(
-        a =>
-            appointmentPaymentsHTML(a)
-    )
+    .map(a=>appointmentPaymentsHTML(a))
     .join("")}
 
 </div>
@@ -5139,36 +4687,26 @@ ${group.appointments
 
 function appointmentPaymentsHTML(a){
 
-    const count =
-        Number(
-            a.installmentCount || 1
-        );
+    const count=
+        Number(a.installmentCount||1);
 
 
-    const rates =
+    const rates=
         Array.isArray(a.installments)
-        ?
-        a.installments
-        :
-        [];
+        ?a.installments
+        :[];
 
 
-    const paid =
-        getReceived(a);
+    const paid=getReceived(a);
 
-
-    const remaining =
-        getRemaining(a);
-
+    const remaining=getRemaining(a);
 
     let html="";
 
 
-    if(
-        Number(a.deposit || 0)>0
-    ){
+    if(Number(a.deposit||0)>0){
 
-        html += `
+        html+=`
 
 <div class="installment paid">
 
@@ -5187,9 +4725,7 @@ Acconto
 <div class="installment-info">
 
 Importo:
-<strong>
-${euro(a.deposit)}
-</strong>
+<strong>${euro(a.deposit)}</strong>
 
 </div>
 
@@ -5200,13 +4736,9 @@ ${euro(a.deposit)}
     }
 
 
-    for(
-        let i=1;
-        i<=count;
-        i++
-    ){
+    for(let i=1;i<=count;i++){
 
-        const rate =
+        const rate=
             rates.find(
                 r =>
                     Number(r.number)===i
@@ -5218,40 +4750,30 @@ ${euro(a.deposit)}
         }
 
 
-        const amount =
+        const amount=
             safeNumber(rate.amount);
 
 
-        const isPaid =
+        const isPaid=
             Boolean(rate.paid);
 
 
-        html += `
+        html+=`
 
-<div class="installment ${
-    isPaid
-    ? "paid"
-    : ""
-}">
+<div class="installment ${isPaid?"paid":""}">
 
 <div class="installment-head">
 
 <div class="installment-title">
-
 Rata ${i}/${count}
-
 </div>
 
 ${
-    isPaid
-    ?
-    `<span class="badge green-badge">
-    ✅ Pagata
-    </span>`
-    :
-    `<span class="badge orange-badge">
-    ⏳ Residua
-    </span>`
+isPaid
+?
+`<span class="badge green-badge">✅ Pagata</span>`
+:
+`<span class="badge orange-badge">⏳ Residua</span>`
 }
 
 </div>
@@ -5259,35 +4781,27 @@ ${
 <div class="installment-info">
 
 Importo:
-<strong>
-${euro(amount)}
-</strong>
+<strong>${euro(amount)}</strong>
 
 ${
-    isPaid
-    ?
-    `<br>
-    Pagata il:
-    ${formatDate(rate.date)}`
-    :
-    ""
+isPaid
+?
+`<br>Pagata il: ${formatDate(rate.date)}`
+:""
+}
+
+${
+!isPaid
+?
+`<button
+class="success payment-button"
+onclick="registerPayment('${a.id}',${i})">
+💶 Registra pagamento
+</button>`
+:""
 }
 
 </div>
-
-${
-    !isPaid
-    ?
-    `<button
-    class="success payment-button"
-    onclick="registerPayment('${a.id}',${i})">
-
-    💶 Registra pagamento
-
-    </button>`
-    :
-    ""
-}
 
 </div>
 
@@ -5301,22 +4815,16 @@ ${
 <div style="margin-top:14px">
 
 <div class="item-sub">
-
 📅 ${formatDate(a.date)}
-
 </div>
 
 <div class="item-sub">
 
 Incassato:
-<span class="green">
-${euro(paid)}
-</span>
+<span class="green">${euro(paid)}</span>
 
 · Residuo:
-<span class="orange">
-${euro(remaining)}
-</span>
+<span class="orange">${euro(remaining)}</span>
 
 </div>
 
@@ -5329,15 +4837,15 @@ ${html}
 }
 
 
-function registerPayment(
+async function registerPayment(
     appointmentId,
     number
 ){
 
-    const appointment =
+    const appointment=
         appointments.find(
             a =>
-                String(a.id) ===
+                String(a.id)===
                 String(appointmentId)
         );
 
@@ -5347,10 +4855,10 @@ function registerPayment(
     }
 
 
-    const rate =
+    const rate=
         appointment.installments.find(
             r =>
-                Number(r.number) ===
+                Number(r.number)===
                 Number(number)
         );
 
@@ -5382,9 +4890,7 @@ function registerPayment(
             `Confermi il pagamento della rata ${number} di ${euro(rate.amount)}?`
         )
     ){
-
         return;
-
     }
 
 
@@ -5398,9 +4904,7 @@ function registerPayment(
             appointment.payments
         )
     ){
-
         appointment.payments=[];
-
     }
 
 
@@ -5408,7 +4912,7 @@ function registerPayment(
 
         id:generateId(),
 
-        number:number,
+        number,
 
         amount:safeNumber(rate.amount),
 
@@ -5419,11 +4923,7 @@ function registerPayment(
     });
 
 
-    /*
-     * SALVATAGGIO IMMEDIATO.
-     */
-
-    if(!saveData()){
+    if(!await saveData()){
         return;
     }
 
@@ -5432,25 +4932,25 @@ function registerPayment(
 
 
     alert(
-        "Pagamento registrato e salvato."
+        "Pagamento registrato e sincronizzato."
     );
 
 }
 
 
 /* =========================================================
-   MOVIMENTI MANUALI
+   MOVIMENTI
 ========================================================= */
 
-function saveMovement(){
+async function saveMovement(){
 
-    const type =
+    const type=
         document.getElementById(
             "movementType"
         ).value;
 
 
-    const amount =
+    const amount=
         safeNumber(
             document.getElementById(
                 "movementAmount"
@@ -5458,16 +4958,16 @@ function saveMovement(){
         );
 
 
-    const description =
+    const description=
         document.getElementById(
             "movementDescription"
         ).value.trim();
 
 
-    const date =
+    const date=
         document.getElementById(
             "movementDate"
-        ).value ||
+        ).value||
         todayString();
 
 
@@ -5488,31 +4988,27 @@ function saveMovement(){
 
         type:
             type==="expense"
-            ? "expense"
-            : "income",
+            ?"expense"
+            :"income",
 
-        amount:amount,
+        amount,
 
         description:
-            description ||
+            description||
             (
                 type==="expense"
-                ? "Spesa"
-                : "Guadagno"
+                ?"Spesa"
+                :"Guadagno"
             ),
 
-        date:date,
+        date,
 
         createdAt:nowISO()
 
     });
 
 
-    /*
-     * SALVATAGGIO IMMEDIATO.
-     */
-
-    if(!saveData()){
+    if(!await saveData()){
         return;
     }
 
@@ -5537,10 +5033,8 @@ function saveMovement(){
 
     alert(
         type==="expense"
-        ?
-        "Spesa salvata."
-        :
-        "Guadagno salvato."
+        ?"Spesa salvata nel database."
+        :"Guadagno salvato nel database."
     );
 
 }
@@ -5548,7 +5042,7 @@ function saveMovement(){
 
 function renderMovements(){
 
-    const container =
+    const container=
         document.getElementById(
             "movementsList"
         );
@@ -5556,7 +5050,7 @@ function renderMovements(){
 
     if(!movements.length){
 
-        container.innerHTML =
+        container.innerHTML=
             '<div class="empty">Nessun movimento manuale registrato.</div>';
 
         return;
@@ -5564,25 +5058,27 @@ function renderMovements(){
     }
 
 
-    const sorted =
+    const sorted=
         [...movements].sort(
-            (a,b) => {
+            (a,b)=>{
 
-                const dateCompare =
+                const dateCompare=
                     String(b.date)
                         .localeCompare(
                             String(a.date)
                         );
 
+
                 if(dateCompare!==0){
                     return dateCompare;
                 }
 
+
                 return String(
-                    b.createdAt || ""
+                    b.createdAt||""
                 ).localeCompare(
                     String(
-                        a.createdAt || ""
+                        a.createdAt||""
                     )
                 );
 
@@ -5590,10 +5086,10 @@ function renderMovements(){
         );
 
 
-    container.innerHTML =
-        sorted.map(m => {
+    container.innerHTML=
+        sorted.map(m=>{
 
-            const isIncome =
+            const isIncome=
                 m.type==="income";
 
 
@@ -5607,7 +5103,7 @@ function renderMovements(){
 
 <div class="item-title">
 
-${isIncome ? "🟢" : "🔴"}
+${isIncome?"🟢":"🔴"}
 ${escapeHTML(m.description)}
 
 </div>
@@ -5621,19 +5117,14 @@ ${escapeHTML(m.description)}
 </div>
 
 <div
-class="movement-amount ${
-    isIncome
-    ? "green"
-    : "red"
-}">
+class="movement-amount ${isIncome?"green":"red"}">
 
-${isIncome ? "+" : "-"}
+${isIncome?"+":"-"}
 ${euro(m.amount)}
 
 </div>
 
 </div>
-
 
 <div class="actions">
 
@@ -5656,28 +5147,26 @@ onclick="deleteMovement('${m.id}')">
 }
 
 
-function deleteMovement(id){
+async function deleteMovement(id){
 
     if(
         !confirm(
             "Eliminare questo movimento?"
         )
     ){
-
         return;
-
     }
 
 
-    movements =
+    movements=
         movements.filter(
             m =>
-                String(m.id) !==
+                String(m.id)!==
                 String(id)
         );
 
 
-    if(!saveData()){
+    if(!await saveData()){
         return;
     }
 
@@ -5688,20 +5177,263 @@ function deleteMovement(id){
 
 
 /* =========================================================
+   BACKUP
+========================================================= */
+
+function exportBackup(){
+
+    const backup={
+
+        app:"Igea Impianti",
+
+        version:VERSION,
+
+        exportedAt:nowISO(),
+
+        clients,
+
+        appointments,
+
+        movements
+
+    };
+
+
+    const blob=
+        new Blob(
+            [
+                JSON.stringify(
+                    backup,
+                    null,
+                    2
+                )
+            ],
+            {
+                type:"application/json"
+            }
+        );
+
+
+    const url=
+        URL.createObjectURL(blob);
+
+
+    const link=
+        document.createElement("a");
+
+
+    link.href=url;
+
+    link.download=
+        `igea-impianti-backup-${todayString()}.json`;
+
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    URL.revokeObjectURL(url);
+
+
+    alert(
+        "Backup completo creato."
+    );
+
+}
+
+
+function importBackup(event){
+
+    const file=
+        event.target.files?.[0];
+
+
+    if(!file){
+        return;
+    }
+
+
+    const reader=
+        new FileReader();
+
+
+    reader.onload=
+        async function(){
+
+            try{
+
+                const backup=
+                    JSON.parse(
+                        reader.result
+                    );
+
+
+                if(
+                    !backup||
+                    !Array.isArray(backup.clients)||
+                    !Array.isArray(backup.appointments)
+                ){
+
+                    throw new Error(
+                        "Backup non valido."
+                    );
+
+                }
+
+
+                if(
+                    !confirm(
+                        "L'importazione sostituirà i dati attuali. Continuare?"
+                    )
+                ){
+
+                    event.target.value="";
+
+                    return;
+
+                }
+
+
+                localSave(false);
+
+
+                const imported=
+                    normalizeData({
+
+                        version:
+                            backup.version||1,
+
+                        clients:
+                            backup.clients,
+
+                        appointments:
+                            backup.appointments,
+
+                        movements:
+                            Array.isArray(
+                                backup.movements
+                            )
+                            ?backup.movements
+                            :[]
+
+                    });
+
+
+                clients=imported.clients;
+
+                appointments=imported.appointments;
+
+                movements=imported.movements;
+
+
+                await saveData();
+
+                refreshEverything();
+
+
+                alert(
+                    "Backup importato e sincronizzato."
+                );
+
+            }catch(error){
+
+                console.error(error);
+
+                alert(
+                    "Il file non è un backup valido."
+                );
+
+            }
+
+
+            event.target.value="";
+
+        };
+
+
+    reader.readAsText(file);
+
+}
+
+
+async function restorePreviousBackup(){
+
+    const backup=
+        readJSON(BACKUP_1_KEY);
+
+
+    if(!isUsefulData(backup)){
+
+        alert(
+            "Non è disponibile una copia di sicurezza."
+        );
+
+        return;
+
+    }
+
+
+    if(
+        !confirm(
+            "Ripristinare l'ultima copia di sicurezza?"
+        )
+    ){
+        return;
+    }
+
+
+    const current=
+        readJSON(DATA_KEY);
+
+
+    if(current){
+
+        localStorage.setItem(
+            BACKUP_2_KEY,
+            JSON.stringify(current)
+        );
+
+    }
+
+
+    const restored=
+        normalizeData(backup);
+
+
+    clients=restored.clients;
+
+    appointments=restored.appointments;
+
+    movements=restored.movements;
+
+
+    await saveData();
+
+    refreshEverything();
+
+
+    alert(
+        "Copia di sicurezza ripristinata e sincronizzata."
+    );
+
+}
+
+
+/* =========================================================
    ELIMINA TUTTO
 ========================================================= */
 
-function deleteAllData(){
+async function deleteAllData(){
 
-    const confirmation =
+    const confirmation=
         prompt(
             "Per confermare scrivi esattamente: ELIMINA"
         );
 
 
-    if(
-        confirmation !== "ELIMINA"
-    ){
+    if(confirmation!=="ELIMINA"){
 
         alert(
             "Operazione annullata."
@@ -5712,58 +5444,23 @@ function deleteAllData(){
     }
 
 
-    /*
-     * Prima di eliminare,
-     * conserviamo i dati attuali.
-     */
-
-    const current =
-        readJSON(DATA_KEY);
-
-
-    if(current){
-
-        try{
-
-            const oldBackup1 =
-                readJSON(BACKUP_1_KEY);
-
-            if(oldBackup1){
-
-                localStorage.setItem(
-                    BACKUP_2_KEY,
-                    JSON.stringify(oldBackup1)
-                );
-
-            }
-
-            localStorage.setItem(
-                BACKUP_1_KEY,
-                JSON.stringify(current)
-            );
-
-        }catch(error){
-
-            console.warn(error);
-
-        }
-
-    }
+    localSave(false);
 
 
     clients=[];
+
     appointments=[];
+
     movements=[];
 
 
-    safeSave(true);
+    await saveData();
 
     refreshEverything();
 
 
     alert(
-        "Tutti i dati sono stati eliminati. " +
-        "La precedente copia di sicurezza è ancora disponibile."
+        "Tutti i dati sono stati eliminati dal database."
     );
 
 }
@@ -5794,79 +5491,143 @@ function refreshEverything(){
    AVVIO
 ========================================================= */
 
-function initializeApp(){
-
-    loadData();
-
+async function initializeApp(){
 
     /*
-     * Impostazioni iniziali.
+     * Carichiamo prima la copia locale.
+     * In questo modo l'app può mostrare i dati
+     * anche mentre aspetta il database.
      */
 
-    const appointmentDate =
+    loadLocalData();
+
+
+    const appointmentDate=
         document.getElementById(
             "appointmentDate"
         );
 
 
     if(appointmentDate){
-
-        appointmentDate.value =
-            todayString();
-
+        appointmentDate.value=todayString();
     }
 
 
-    const movementDate =
+    const movementDate=
         document.getElementById(
             "movementDate"
         );
 
 
     if(movementDate){
-
-        movementDate.value =
-            todayString();
-
+        movementDate.value=todayString();
     }
 
 
-    /*
-     * Imposta data personalizzata
-     * di default.
-     */
-
-    const dateFrom =
+    const dateFrom=
         document.getElementById(
             "dateFrom"
         );
 
 
-    const dateTo =
+    const dateTo=
         document.getElementById(
             "dateTo"
         );
 
 
     if(dateFrom){
-
-        dateFrom.value =
-            todayString();
-
+        dateFrom.value=todayString();
     }
 
 
     if(dateTo){
-
-        dateTo.value =
-            todayString();
-
+        dateTo.value=todayString();
     }
 
 
     refreshEverything();
 
+
+    /*
+     * Controlliamo la sessione Supabase.
+     */
+
+    try{
+
+        const {data}=
+            await supabaseClient.auth.getSession();
+
+
+        if(data.session){
+
+            currentUser=
+                data.session.user;
+
+
+            document.getElementById(
+                "accountEmail"
+            ).textContent=
+                currentUser.email;
+
+
+            document.getElementById(
+                "loginScreen"
+            ).classList.add(
+                "hidden"
+            );
+
+
+            await loadCloudAndSync();
+
+        }else{
+
+            document.getElementById(
+                "loginScreen"
+            ).classList.remove(
+                "hidden"
+            );
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "Errore inizializzazione:",
+            error
+        );
+
+
+        document.getElementById(
+            "loginScreen"
+        ).classList.remove(
+            "hidden"
+        );
+
+    }
+
 }
+
+
+/*
+ * Manteniamo la sessione aggiornata.
+ */
+
+supabaseClient.auth.onAuthStateChange(
+    async(event,session)=>{
+
+        if(session){
+
+            currentUser=session.user;
+
+        }else{
+
+            currentUser=null;
+
+        }
+
+    }
+);
 
 
 initializeApp();
