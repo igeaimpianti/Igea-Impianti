@@ -519,10 +519,26 @@ textarea:focus{
     margin:16px 0;
 }
 
-.rate-row{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:9px;
+.rate-summary{
+    background:#f7f7f8;
+    border:1px solid #e3e3e5;
+    border-radius:14px;
+    padding:12px;
+    margin:8px 0 12px;
+}
+
+.rate-summary div{
+    display:flex;
+    justify-content:space-between;
+    padding:4px 0;
+}
+
+.deposit-box{
+    background:#e9f8ef;
+    border:1px solid #c8ead6;
+    border-radius:14px;
+    padding:12px;
+    margin-bottom:10px;
 }
 
 @media(max-width:410px){
@@ -541,8 +557,6 @@ textarea:focus{
 </head>
 
 <body>
-
-<!-- LOGIN -->
 
 <div id="loginScreen" class="login hidden">
 
@@ -611,10 +625,6 @@ textarea:focus{
 
 
 <main>
-
-<!-- =====================================================
-     DASHBOARD
-===================================================== -->
 
 <section id="dashboard">
 
@@ -755,10 +765,6 @@ textarea:focus{
 </section>
 
 
-<!-- =====================================================
-     CLIENTI
-===================================================== -->
-
 <section id="clients" class="hidden">
 
     <div class="card">
@@ -816,10 +822,6 @@ textarea:focus{
 </section>
 
 
-<!-- =====================================================
-     APPUNTAMENTI
-===================================================== -->
-
 <section id="appointments" class="hidden">
 
     <div class="card">
@@ -848,13 +850,11 @@ textarea:focus{
 
         </div>
 
-
         <label>Data</label>
 
         <input
             id="appointmentDate"
             type="date">
-
 
         <label>Ora</label>
 
@@ -862,14 +862,11 @@ textarea:focus{
             id="appointmentTime"
             type="time">
 
-
         <label>Note</label>
 
         <textarea
             id="appointmentNotes"
-            placeholder="Note appuntamento">
-        </textarea>
-
+            placeholder="Note appuntamento"></textarea>
 
         <button
             class="primary"
@@ -897,9 +894,11 @@ textarea:focus{
     <div class="card">
 
         <div class="history-title">
+
             <h2 style="margin:0">
                 📚 Storico appuntamenti
             </h2>
+
         </div>
 
         <div id="appointmentHistory"></div>
@@ -908,10 +907,6 @@ textarea:focus{
 
 </section>
 
-
-<!-- =====================================================
-     PAGAMENTI
-===================================================== -->
 
 <section id="payments" class="hidden">
 
@@ -973,10 +968,6 @@ textarea:focus{
 
 </section>
 
-
-<!-- =====================================================
-     MOVIMENTI
-===================================================== -->
 
 <section id="expenses" class="hidden">
 
@@ -1055,10 +1046,6 @@ textarea:focus{
 </section>
 
 
-<!-- =====================================================
-     IMPOSTAZIONI
-===================================================== -->
-
 <section id="settings" class="hidden">
 
     <div class="card">
@@ -1093,10 +1080,6 @@ textarea:focus{
 
 </div>
 
-
-<!-- =====================================================
-     NAV
-===================================================== -->
 
 <nav class="nav">
 
@@ -1153,8 +1136,6 @@ textarea:focus{
 </nav>
 
 
-<!-- MODALE -->
-
 <div
     id="modal"
     class="modal hidden">
@@ -1207,6 +1188,8 @@ let payments = [];
 let expenses = [];
 
 let movementType = "income";
+
+let completionPaymentType = "single";
 
 
 /* =====================================================
@@ -1281,6 +1264,67 @@ function setCloudStatus(message,success=true){
 
     $("cloudStatus").style.color =
         success ? "#16834b" : "#c62845";
+
+}
+
+
+/* =====================================================
+   STATO PAGAMENTO
+===================================================== */
+
+function getPaymentStatus(payment){
+
+    if(!payment) return "da_pagare";
+
+    if(payment.status === "pagato")
+        return "pagato";
+
+    if(payment.status === "scaduto")
+        return "scaduto";
+
+    if(
+        payment.status === "da_pagare" &&
+        payment.due_date &&
+        payment.due_date < today()
+    ){
+
+        return "scaduto";
+
+    }
+
+    return "da_pagare";
+
+}
+
+
+function paymentStatusLabel(payment){
+
+    const status =
+        getPaymentStatus(payment);
+
+    if(status === "pagato")
+        return "Pagato";
+
+    if(status === "scaduto")
+        return "Scaduto";
+
+    return "Da pagare";
+
+}
+
+
+function paymentStatusClass(payment){
+
+    const status =
+        getPaymentStatus(payment);
+
+    if(status === "pagato")
+        return "green";
+
+    if(status === "scaduto")
+        return "red";
+
+    return "orange";
 
 }
 
@@ -2218,18 +2262,8 @@ function clientHistory(id){
                             ${money(payment.amount)}
                         </b>
 
-                        <span class="badge ${
-                            payment.status === "paid"
-                            ? "green"
-                            : "orange"
-                        }">
-                            ${
-                                payment.status === "paid"
-                                ?
-                                "Pagato"
-                                :
-                                "Da pagare"
-                            }
+                        <span class="badge ${paymentStatusClass(payment)}">
+                            ${paymentStatusLabel(payment)}
                         </span>
 
                     </div>
@@ -2890,6 +2924,10 @@ function completeAppointment(id){
         );
 
 
+    completionPaymentType =
+        "single";
+
+
     $("modalContent").innerHTML = `
 
         <h2>💳 Completa appuntamento</h2>
@@ -2929,7 +2967,8 @@ function completeAppointment(id){
             type="number"
             min="0"
             step="0.01"
-            placeholder="0,00">
+            placeholder="0,00"
+            oninput="updateInstallmentSummary()">
 
 
         <label>
@@ -2964,25 +3003,80 @@ function completeAppointment(id){
             id="installmentFields"
             class="hidden">
 
+            <div class="deposit-box">
+
+                <label style="margin-top:0;color:#16834b;font-weight:700">
+                    💶 Acconto
+                </label>
+
+                <input
+                    id="depositAmount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                    placeholder="Acconto ricevuto"
+                    oninput="updateInstallmentSummary()">
+
+                <div
+                    id="depositInfo"
+                    class="sub"
+                    style="color:#16834b">
+                    Inserisci l'eventuale acconto ricevuto oggi.
+                </div>
+
+            </div>
+
+
             <label>
-                Numero rate
+                Numero rate residue
             </label>
 
             <input
                 id="installmentCount"
                 type="number"
-                min="2"
+                min="1"
                 max="60"
-                value="2">
+                value="2"
+                oninput="updateInstallmentSummary()">
+
 
             <label>
-                Prima scadenza
+                Prima scadenza delle rate
             </label>
 
             <input
                 id="firstDueDate"
                 type="date"
-                value="${today()}">
+                value="${today()}"
+                onchange="updateInstallmentSummary()">
+
+
+            <div
+                id="installmentSummary"
+                class="rate-summary">
+
+                <div>
+                    <span>Totale lavoro</span>
+                    <b>€0,00</b>
+                </div>
+
+                <div>
+                    <span>Acconto</span>
+                    <b>€0,00</b>
+                </div>
+
+                <div>
+                    <span>Residuo</span>
+                    <b>€0,00</b>
+                </div>
+
+                <div>
+                    <span>Importo rata</span>
+                    <b>€0,00</b>
+                </div>
+
+            </div>
 
         </div>
 
@@ -2991,7 +3085,9 @@ function completeAppointment(id){
             Pagamento ricevuto oggi?
         </label>
 
-        <select id="paymentReceived">
+        <select
+            id="paymentReceived"
+            onchange="updateInstallmentSummary()">
 
             <option value="yes">
                 Sì, già pagato
@@ -3069,11 +3165,10 @@ function completeAppointment(id){
         .classList
         .remove("hidden");
 
+
+    updateInstallmentSummary();
+
 }
-
-
-let completionPaymentType =
-    "single";
 
 
 function selectCompletionPaymentType(type){
@@ -3105,8 +3200,169 @@ function selectCompletionPaymentType(type){
             type !== "installments"
         );
 
+
+    if(type === "installments"){
+
+        updateInstallmentSummary();
+
+    }
+
 }
 
+
+function updateInstallmentSummary(){
+
+    if(
+        completionPaymentType !==
+        "installments"
+    ) return;
+
+
+    const total =
+        Number(
+            $("completionAmount")
+            ?.value || 0
+        );
+
+
+    let deposit =
+        Number(
+            $("depositAmount")
+            ?.value || 0
+        );
+
+
+    let count =
+        Number(
+            $("installmentCount")
+            ?.value || 1
+        );
+
+
+    if(count < 1)
+        count = 1;
+
+
+    if(deposit < 0)
+        deposit = 0;
+
+
+    if(deposit > total)
+        deposit = total;
+
+
+    const remaining =
+        Math.max(
+            0,
+            Math.round(
+                (
+                    total-
+                    deposit
+                )*100
+            )/100
+        );
+
+
+    const base =
+        count > 0
+        ?
+        Math.floor(
+            (
+                remaining/
+                count
+            )*100
+        )/100
+        :
+        0;
+
+
+    const last =
+        count > 0
+        ?
+        Math.round(
+            (
+                remaining-
+                base*(count-1)
+            )*100
+        )/100
+        :
+        0;
+
+
+    const summary =
+        $("installmentSummary");
+
+
+    if(!summary) return;
+
+
+    summary.innerHTML = `
+
+        <div>
+            <span>Totale lavoro</span>
+            <b>${money(total)}</b>
+        </div>
+
+        <div>
+            <span>Acconto</span>
+            <b class="green">${money(deposit)}</b>
+        </div>
+
+        <div>
+            <span>Residuo</span>
+            <b class="orange">${money(remaining)}</b>
+        </div>
+
+        <div>
+            <span>${count} rate</span>
+            <b>${money(base)}</b>
+        </div>
+
+        ${
+            count > 1 && last !== base
+            ?
+            `
+            <div>
+                <span>Ultima rata</span>
+                <b>${money(last)}</b>
+            </div>
+            `
+            :
+            ""
+        }
+
+    `;
+
+
+    const info =
+        $("depositInfo");
+
+
+    if(info){
+
+        if(deposit > 0){
+
+            info.textContent =
+                "Acconto di "+
+                money(deposit)+
+                " — residuo da rateizzare: "+
+                money(remaining);
+
+        }else{
+
+            info.textContent =
+                "Nessun acconto — verrà rateizzato tutto l'importo.";
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   CONFERMA PAGAMENTO
+===================================================== */
 
 async function confirmCompletion(id){
 
@@ -3125,11 +3381,24 @@ async function confirmCompletion(id){
         );
 
 
-    const amount =
-        Number(
-            $("completionAmount")
-            .value || 0
+    if(!client){
+
+        alert(
+            "Cliente non trovato."
         );
+
+        return;
+
+    }
+
+
+    const amount =
+        Math.round(
+            Number(
+                $("completionAmount")
+                .value || 0
+            )*100
+        )/100;
 
 
     if(amount <= 0){
@@ -3156,7 +3425,14 @@ async function confirmCompletion(id){
     let paymentRows = [];
 
 
-    if(completionPaymentType === "single"){
+    /* =================================================
+       PAGAMENTO UNICO
+    ================================================= */
+
+    if(
+        completionPaymentType ===
+        "single"
+    ){
 
         paymentRows = [
 
@@ -3180,7 +3456,7 @@ async function confirmCompletion(id){
                 status:
                     received
                     ?
-                    "paid"
+                    "pagato"
                     :
                     "da_pagare",
 
@@ -3190,14 +3466,29 @@ async function confirmCompletion(id){
 
         ];
 
-    }else{
+    }
 
-        const count =
-            Math.max(
-                2,
+
+    /* =================================================
+       PAGAMENTO A RATE
+    ================================================= */
+
+    else{
+
+        let deposit =
+            Math.round(
+                Number(
+                    $("depositAmount")
+                    .value || 0
+                )*100
+            )/100;
+
+
+        let count =
+            Math.floor(
                 Number(
                     $("installmentCount")
-                    .value || 2
+                    .value || 1
                 )
             );
 
@@ -3208,59 +3499,43 @@ async function confirmCompletion(id){
             today();
 
 
-        const base =
-            Math.floor(
-                (amount / count) * 100
-            ) / 100;
+        if(deposit < 0)
+            deposit = 0;
 
 
-        let remainder =
-            Math.round(
-                (
-                    amount -
-                    base * count
-                ) * 100
-            ) / 100;
+        if(deposit > amount){
 
-
-        for(
-            let i=0;
-            i<count;
-            i++
-        ){
-
-            let installmentAmount =
-                base;
-
-
-            if(i === count-1){
-
-                installmentAmount =
-                    Math.round(
-                        (
-                            base+
-                            remainder
-                        )*100
-                    )/100;
-
-            }
-
-
-            const due =
-                new Date(
-                    firstDate+"T00:00:00"
-                );
-
-
-            due.setMonth(
-                due.getMonth()+i
+            alert(
+                "L'acconto non può essere superiore al totale del lavoro."
             );
 
+            return;
 
-            const dueDate =
-                due.toISOString()
-                .slice(0,10);
+        }
 
+
+        if(count < 1)
+            count = 1;
+
+
+        if(count > 60)
+            count = 60;
+
+
+        const remaining =
+            Math.round(
+                (
+                    amount-
+                    deposit
+                )*100
+            )/100;
+
+
+        /* =============================================
+           ACCONTO
+        ============================================= */
+
+        if(deposit > 0){
 
             paymentRows.push({
 
@@ -3268,37 +3543,183 @@ async function confirmCompletion(id){
 
                 appointment_id:appointment.id,
 
-                amount:installmentAmount,
+                amount:deposit,
 
-                due_date:dueDate,
+                due_date:today(),
 
                 payment_date:
-                    received && i === 0
-                    ?
-                    today()
-                    :
-                    null,
+                    today(),
 
                 status:
-                    received && i === 0
-                    ?
-                    "paid"
-                    :
-                    "da_pagare",
+                    "pagato",
 
-                method:
-                    received && i === 0
-                    ?
-                    method
-                    :
-                    null
+                method:method
 
             });
 
         }
 
+
+        /* =============================================
+           RATE
+        ============================================= */
+
+        if(remaining > 0){
+
+            const base =
+                Math.floor(
+                    (
+                        remaining/
+                        count
+                    )*100
+                )/100;
+
+
+            for(
+                let i=0;
+                i<count;
+                i++
+            ){
+
+                let installmentAmount =
+                    base;
+
+
+                if(i === count-1){
+
+                    installmentAmount =
+                        Math.round(
+                            (
+                                remaining-
+                                base*(count-1)
+                            )*100
+                        )/100;
+
+                }
+
+
+                const due =
+                    new Date(
+                        firstDate+
+                        "T00:00:00"
+                    );
+
+
+                due.setMonth(
+                    due.getMonth()+i
+                );
+
+
+                const dueDate =
+                    due.toISOString()
+                    .slice(0,10);
+
+
+                /*
+                   Se non c'è acconto e l'utente
+                   ha scelto "già pagato", la prima
+                   rata viene considerata pagata.
+                   
+                   Se c'è acconto, invece, l'acconto
+                   è il pagamento ricevuto oggi e
+                   le rate restano da pagare.
+                */
+
+                const firstInstallmentPaid =
+                    deposit === 0 &&
+                    received &&
+                    i === 0;
+
+
+                paymentRows.push({
+
+                    client_id:client.id,
+
+                    appointment_id:appointment.id,
+
+                    amount:installmentAmount,
+
+                    due_date:dueDate,
+
+                    payment_date:
+                        firstInstallmentPaid
+                        ?
+                        today()
+                        :
+                        null,
+
+                    status:
+                        firstInstallmentPaid
+                        ?
+                        "pagato"
+                        :
+                        "da_pagare",
+
+                    method:
+                        firstInstallmentPaid
+                        ?
+                        method
+                        :
+                        null
+
+                });
+
+            }
+
+        }
+
+
+        /*
+           Se l'acconto copre tutto il lavoro,
+           non devono essere create rate.
+        */
+
+        if(
+            deposit === amount &&
+            deposit > 0
+        ){
+
+            paymentRows = [
+
+                {
+
+                    client_id:client.id,
+
+                    appointment_id:appointment.id,
+
+                    amount:deposit,
+
+                    due_date:today(),
+
+                    payment_date:today(),
+
+                    status:"pagato",
+
+                    method:method
+
+                }
+
+            ];
+
+        }
+
     }
 
+
+    if(!paymentRows.length){
+
+        alert(
+            "Impossibile creare il pagamento."
+        );
+
+        return;
+
+    }
+
+
+    /* =================================================
+       SALVATAGGIO PAGAMENTI
+    ================================================= */
 
     const {
         data:createdPayments,
@@ -3312,6 +3733,10 @@ async function confirmCompletion(id){
 
     if(paymentError){
 
+        console.error(
+            paymentError
+        );
+
         alert(
             "Errore salvataggio pagamento:\n"+
             paymentError.message
@@ -3321,6 +3746,10 @@ async function confirmCompletion(id){
 
     }
 
+
+    /* =================================================
+       COMPLETA APPUNTAMENTO
+    ================================================= */
 
     const {
         data:updatedAppointment,
@@ -3374,20 +3803,59 @@ async function confirmCompletion(id){
     closeModal();
 
 
-    $("modal")
-        .classList
-        .remove("modal-center");
-
-
     renderAll();
 
-    toast(
-        completionPaymentType === "single"
-        ?
-        "Appuntamento completato e pagamento registrato"
-        :
-        "Appuntamento completato e rate registrate"
-    );
+
+    if(
+        completionPaymentType ===
+        "single"
+    ){
+
+        toast(
+            "Appuntamento completato e pagamento registrato"
+        );
+
+    }else{
+
+        const deposit =
+            Number(
+                paymentRows
+                .find(
+                    p =>
+                        p.status ===
+                        "pagato"
+                )
+                ?.amount || 0
+            );
+
+
+        const rateCount =
+            paymentRows.filter(
+                p =>
+                    p.status ===
+                    "da_pagare"
+            ).length;
+
+
+        if(deposit > 0){
+
+            toast(
+                rateCount > 0
+                ?
+                "Acconto registrato e rate salvate"
+                :
+                "Pagamento completo registrato"
+            );
+
+        }else{
+
+            toast(
+                "Rate registrate correttamente"
+            );
+
+        }
+
+    }
 
 }
 
@@ -3538,7 +4006,9 @@ function renderPayments(){
         payments
         .filter(
             payment =>
-                payment.status === "paid"
+                getPaymentStatus(payment)
+                ===
+                "pagato"
         )
         .reduce(
             (sum,payment)=>
@@ -3554,7 +4024,9 @@ function renderPayments(){
         payments
         .filter(
             payment =>
-                payment.status !== "paid"
+                getPaymentStatus(payment)
+                !==
+                "pagato"
         )
         .reduce(
             (sum,payment)=>
@@ -3618,12 +4090,20 @@ function renderPayments(){
             client=>{
 
                 const clientPayments =
-                    payments.filter(
+                    payments
+                    .filter(
                         payment =>
                             String(
                                 payment.client_id
                             ) ===
                             String(client.id)
+                    )
+                    .sort(
+                        (a,b)=>
+                            String(a.due_date)
+                            .localeCompare(
+                                String(b.due_date)
+                            )
                     );
 
 
@@ -3642,7 +4122,9 @@ function renderPayments(){
                     clientPayments
                     .filter(
                         payment =>
-                            payment.status === "paid"
+                            getPaymentStatus(payment)
+                            ===
+                            "pagato"
                     )
                     .reduce(
                         (sum,payment)=>
@@ -3651,6 +4133,13 @@ function renderPayments(){
                                 payment.amount || 0
                             ),
                         0
+                    );
+
+
+                const remainingClient =
+                    Math.max(
+                        0,
+                        total-paid
                     );
 
 
@@ -3680,7 +4169,7 @@ function renderPayments(){
                             <div class="sub">
                                 ${money(paid)}
                                 incassati ·
-                                ${money(total-paid)}
+                                ${money(remainingClient)}
                                 residui
                             </div>
 
@@ -3699,91 +4188,91 @@ function renderPayments(){
 
 
                     ${clientPayments.map(
-                        payment=>`
+                        payment=>{
 
-                        <div
-                            class="item"
-                            style="margin-top:8px;background:#fff">
+                            const status =
+                                getPaymentStatus(
+                                    payment
+                                );
 
-                            <div class="between">
 
-                                <b>
-                                    ${money(payment.amount)}
-                                </b>
+                            return `
 
-                                <span class="badge ${
-                                    payment.status === "paid"
-                                    ? "green"
-                                    : "orange"
-                                }">
+                            <div
+                                class="item"
+                                style="margin-top:8px;background:#fff">
+
+                                <div class="between">
+
+                                    <b>
+                                        ${money(payment.amount)}
+                                    </b>
+
+                                    <span class="badge ${paymentStatusClass(payment)}">
+
+                                        ${paymentStatusLabel(payment)}
+
+                                    </span>
+
+                                </div>
+
+
+                                <div class="sub">
+
+                                    Scadenza:
+                                    ${formatDate(payment.due_date)}
 
                                     ${
-                                        payment.status === "paid"
+                                        payment.payment_date
                                         ?
-                                        "Pagato"
+                                        " · Pagato: "+
+                                        formatDate(payment.payment_date)
                                         :
-                                        "Da pagare"
+                                        ""
                                     }
 
-                                </span>
+                                    ${
+                                        payment.method
+                                        ?
+                                        " · "+
+                                        escapeHTML(payment.method)
+                                        :
+                                        ""
+                                    }
 
-                            </div>
-
-
-                            <div class="sub">
-
-                                Scadenza:
-                                ${formatDate(payment.due_date)}
-
-                                ${
-                                    payment.payment_date
-                                    ?
-                                    " · Pagato: "+
-                                    formatDate(payment.payment_date)
-                                    :
-                                    ""
-                                }
-
-                                ${
-                                    payment.method
-                                    ?
-                                    " · "+
-                                    escapeHTML(payment.method)
-                                    :
-                                    ""
-                                }
-
-                            </div>
+                                </div>
 
 
-                            <div class="actions">
+                                <div class="actions">
 
-                                ${
-                                    payment.status !== "paid"
-                                    ?
-                                    `
+                                    ${
+                                        status !== "pagato"
+                                        ?
+                                        `
+                                        <button
+                                            class="success"
+                                            onclick="markPaymentPaid('${payment.id}')">
+                                            Segna pagato
+                                        </button>
+                                        `
+                                        :
+                                        ""
+                                    }
+
+
                                     <button
-                                        class="success"
-                                        onclick="markPaymentPaid('${payment.id}')">
-                                        Segna pagato
+                                        class="danger"
+                                        onclick="deletePayment('${payment.id}')">
+                                        Elimina
                                     </button>
-                                    `
-                                    :
-                                    ""
-                                }
 
-
-                                <button
-                                    class="danger"
-                                    onclick="deletePayment('${payment.id}')">
-                                    Elimina
-                                </button>
+                                </div>
 
                             </div>
 
-                        </div>
+                            `;
 
-                        `
+                        }
                     ).join("")}
 
                 </div>
@@ -3807,7 +4296,7 @@ async function markPaymentPaid(id){
         .from("payments")
         .update({
 
-            status:"paid",
+            status:"pagato",
 
             payment_date:today()
 
@@ -3819,7 +4308,10 @@ async function markPaymentPaid(id){
 
     if(error){
 
-        alert(error.message);
+        alert(
+            "Errore aggiornamento pagamento:\n"+
+            error.message
+        );
 
         return;
 
@@ -4359,7 +4851,9 @@ function getIncomeForPeriod(period){
         payments
         .filter(
             payment =>
-                payment.status === "paid"
+                getPaymentStatus(payment)
+                ===
+                "pagato"
                 &&
                 isInPeriod(
                     payment.payment_date ||
