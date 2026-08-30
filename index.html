@@ -2787,9 +2787,7 @@ function renderDashboardAppointments(){
         .filter(
             appointment =>
                 appointment.status === "programmato"
-                &&
-                appointment.date >= today()
-        )
+                        )
         .sort(
             (a,b)=>
                 (
@@ -2958,22 +2956,56 @@ function completeAppointment(id){
         </div>
 
 
-        <label>
-            Importo totale del lavoro
-        </label>
+       <label>
+    Importo totale del lavoro
+</label>
 
-        <input
-            id="completionAmount"
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder="0,00"
-            oninput="updateInstallmentSummary()">
+<input
+    id="completionAmount"
+    type="number"
+    min="0"
+    step="0.01"
+    placeholder="0,00"
+    oninput="updateInstallmentSummary(); updateCompletionNet()">
 
 
-        <label>
-            Modalità pagamento
-        </label>
+<label>
+    Spesa del lavoro
+</label>
+
+<input
+    id="completionExpense"
+    type="number"
+    min="0"
+    step="0.01"
+    value="0"
+    placeholder="0,00"
+    oninput="updateCompletionNet()">
+
+
+<div class="rate-summary" style="margin-top:12px;">
+
+    <div>
+        <span>Guadagno</span>
+        <b id="completionGain">€0,00</b>
+    </div>
+
+    <div>
+        <span>Spesa</span>
+        <b id="completionExpenseDisplay">€0,00</b>
+    </div>
+
+    <div>
+        <span>Netto</span>
+        <b id="completionNet">€0,00</b>
+    </div>
+
+</div>
+
+
+<label>
+    Modalità pagamento
+</label>
 
 
         <div class="payment-type">
@@ -3357,6 +3389,69 @@ function updateInstallmentSummary(){
 
     }
 
+} function updateCompletionNet(){
+
+    const amount =
+        Number(
+            $("completionAmount")
+            ?.value || 0
+        );
+
+    const expense =
+        Number(
+            $("completionExpense")
+            ?.value || 0
+        );
+
+    const safeAmount =
+        Number.isFinite(amount)
+        ?
+        amount
+        :
+        0;
+
+    const safeExpense =
+        Number.isFinite(expense)
+        ?
+        expense
+        :
+        0;
+
+    const net =
+        Math.round(
+            (
+                safeAmount -
+                safeExpense
+            ) * 100
+        ) / 100;
+
+
+    if($("completionGain")){
+
+        $("completionGain")
+        .textContent =
+            money(safeAmount);
+
+    }
+
+
+    if($("completionExpenseDisplay")){
+
+        $("completionExpenseDisplay")
+        .textContent =
+            money(safeExpense);
+
+    }
+
+
+    if($("completionNet")){
+
+        $("completionNet")
+        .textContent =
+            money(net);
+
+    }
+
 }
 
 
@@ -3401,15 +3496,64 @@ async function confirmCompletion(id){
         )/100;
 
 
-    if(amount <= 0){
+    /*
+       0 € è un importo valido.
+       Viene rifiutato solamente un valore
+       non numerico o negativo.
+    */
+
+    if(
+        !Number.isFinite(amount) ||
+        amount < 0
+    ){
 
         alert(
-            "Inserisci l'importo del lavoro."
+            "Inserisci un importo valido."
         );
 
         return;
 
     }
+
+
+    /*
+       SPESA DEL LAVORO
+    */
+
+    const expense =
+        Math.round(
+            Number(
+                $("completionExpense")
+                ?.value || 0
+            )*100
+        )/100;
+
+
+    if(
+        !Number.isFinite(expense) ||
+        expense < 0
+    ){
+
+        alert(
+            "Inserisci una spesa valida."
+        );
+
+        return;
+
+    }
+
+
+    /*
+       NETTO AUTOMATICO
+    */
+
+    const net =
+        Math.round(
+            (
+                amount -
+                expense
+            )*100
+        )/100;
 
 
     const received =
@@ -3619,10 +3763,10 @@ async function confirmCompletion(id){
                    Se non c'è acconto e l'utente
                    ha scelto "già pagato", la prima
                    rata viene considerata pagata.
-                   
-                   Se c'è acconto, invece, l'acconto
-                   è il pagamento ricevuto oggi e
-                   le rate restano da pagare.
+
+                   Se c'è acconto, l'acconto viene
+                   considerato il pagamento ricevuto
+                   oggi e le rate restano da pagare.
                 */
 
                 const firstInstallmentPaid =
@@ -3761,7 +3905,11 @@ async function confirmCompletion(id){
 
             status:"completato",
 
-            amount:amount
+            amount:amount,
+
+            expense:expense,
+
+            net:net
 
         })
         .eq("id",id)
@@ -3858,7 +4006,6 @@ async function confirmCompletion(id){
     }
 
 }
-
 
 /* =====================================================
    ELIMINA APPUNTAMENTO COMPLETATO
