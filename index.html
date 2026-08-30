@@ -2166,19 +2166,18 @@ async function saveAppointment(){
             .trim(),
 
         status:
-            editingAppointmentId
-            ?
-            (
-                appointments.find(
-                    a =>
-                        a.id ===
-                        editingAppointmentId
-                )?.status ||
-                "scheduled"
-            )
-            :
-            "scheduled",
-
+    editingAppointmentId
+    ?
+    (
+        appointments.find(
+            a =>
+                a.id ===
+                editingAppointmentId
+        )?.status ||
+        "programmato"
+    )
+    :
+    "programmato",
         amount:
             Number(
                 $("appointmentAmount")
