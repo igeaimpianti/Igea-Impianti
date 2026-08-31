@@ -1191,6 +1191,9 @@ let movementType = "income";
 
 let completionPaymentType = "single";
 
+// Protezione contro doppi/tripli tap durante il completamento
+let completionSaving = false;
+
 
 /* =====================================================
    UTILITY
@@ -3177,6 +3180,7 @@ function completeAppointment(id){
             </button>
 
             <button
+                id="completionSaveButton"
                 class="success"
                 onclick="confirmCompletion('${id}')">
                 Completa e salva
@@ -3460,6 +3464,21 @@ function updateInstallmentSummary(){
 
 async function confirmCompletion(id){
 
+    // Protezione immediata contro doppio/triplo tap.
+    if(completionSaving) return;
+
+    completionSaving = true;
+
+    const saveButton = $("completionSaveButton");
+
+    if(saveButton){
+        saveButton.disabled = true;
+        saveButton.textContent = "Salvataggio...";
+    }
+
+    try{
+
+
     const appointment =
         appointments.find(
             a => a.id === id
@@ -3480,6 +3499,49 @@ async function confirmCompletion(id){
         alert(
             "Cliente non trovato."
         );
+
+        return;
+
+    }
+
+
+    // Controllo anche il database: per lo stesso appuntamento non deve
+    // esistere già un gruppo di pagamenti. Questa protezione evita
+    // duplicati anche se l'app viene toccata più volte o la rete risponde lentamente.
+    const {
+        data:existingPayments,
+        error:existingPaymentsError
+    } =
+    await supabaseClient
+        .from("payments")
+        .select("id")
+        .eq("appointment_id",id)
+        .limit(1);
+
+
+    if(existingPaymentsError){
+
+        console.error(existingPaymentsError);
+
+        alert(
+            "Errore nel controllo dei pagamenti esistenti:\n"+
+            existingPaymentsError.message
+        );
+
+        return;
+
+    }
+
+
+    if(existingPayments && existingPayments.length){
+
+        alert(
+            "Questo appuntamento ha già un pagamento registrato. "+
+            "Non verranno creati duplicati."
+        );
+
+        await loadDatabase();
+        closeModal();
 
         return;
 
@@ -4069,6 +4131,18 @@ if(expense > 0){
                 "Rate registrate correttamente"
             );
 
+        }
+
+    }
+
+
+    }finally{
+
+        completionSaving = false;
+
+        if(saveButton && document.body.contains(saveButton)){
+            saveButton.disabled = false;
+            saveButton.textContent = "Completa e salva";
         }
 
     }
