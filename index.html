@@ -3897,7 +3897,8 @@ async function confirmCompletion(id){
 if(expense > 0){
 
     const {
-        error: expenseError
+        data:createdExpense,
+        error:expenseError
     } =
     await supabaseClient
         .from("expenses")
@@ -3922,10 +3923,12 @@ if(expense > 0){
             type:
                 "expense",
 
-appointment_id:
-    appointment.id
+            appointment_id:
+                appointment.id
 
-        });
+        })
+        .select()
+        .single();
 
 
     if(expenseError){
@@ -3940,6 +3943,19 @@ appointment_id:
         );
 
         return;
+
+    }
+
+
+    /* =============================================
+       AGGIORNA ARRAY LOCALE
+    ============================================= */
+
+    if(createdExpense){
+
+        expenses.push(
+            createdExpense
+        );
 
     }
 
