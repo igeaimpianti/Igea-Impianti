@@ -194,10 +194,16 @@ function updateQuoteTotals(){
     return total;
 }
 
-function nextQuoteNumber(){
+async function nextQuoteNumber(){
     const year=new Date().getFullYear();
     const prefix=`PREV-${year}-`;
-    const max=quotes.filter(item=>String(item.quote_number||"").startsWith(prefix)).reduce((value,item)=>Math.max(value,Number(String(item.quote_number).slice(prefix.length))||0),0);
+    const {data,error}=await supabaseClient
+        .from("quotes")
+        .select("quote_number")
+        .like("quote_number",`${prefix}%`);
+    if(error) console.error("Errore lettura numerazione preventivi",error);
+    const source=error?quotes:(data||[]);
+    const max=source.filter(item=>String(item.quote_number||"").startsWith(prefix)).reduce((value,item)=>Math.max(value,Number(String(item.quote_number).slice(prefix.length))||0),0);
     return prefix+String(max+1).padStart(3,"0");
 }
 
@@ -293,7 +299,7 @@ window.emitQuote = async function(){
     button.disabled=true; button.textContent="Emissione in corso...";
     try{
         const currentQuote=editingQuoteId?quotes.find(item=>String(item.id)===String(editingQuoteId)):null;
-        const payload={quote_number:currentQuote?.quote_number||nextQuoteNumber(),client_id:client.id,quote_date:q("quoteDate").value||today(),subject:q("quoteSubject").value.trim(),notes:q("quoteNotes").value.trim(),validity_days:Number(q("quoteValidity").value)||30,items:cleanItems,total:updateQuoteTotals(),status:"emesso",updated_at:new Date().toISOString()};
+        const payload={quote_number:currentQuote?.quote_number||await nextQuoteNumber(),client_id:client.id,quote_date:q("quoteDate").value||today(),subject:q("quoteSubject").value.trim(),notes:q("quoteNotes").value.trim(),validity_days:Number(q("quoteValidity").value)||30,items:cleanItems,total:updateQuoteTotals(),status:"emesso",updated_at:new Date().toISOString()};
         const request=editingQuoteId
             ? supabaseClient.from("quotes").update(payload).eq("id",editingQuoteId)
             : supabaseClient.from("quotes").insert(payload);
@@ -557,11 +563,10 @@ installQuotePage();
 refreshQuoteClients();
 q("quoteDate").value=today();
 addQuoteItem();
-supabaseClient.auth.onAuthStateChange((event,session)=>{
-    if(event === "SIGNED_IN" && session){
-        loadQuotes();
-        loadArticles();
-    }
+supabaseClient.auth.getSession().then(({data})=>{
+    if(data?.session){ loadQuotes(); loadArticles(); }
 });
-
+supabaseClient.auth.onAuthStateChange((event,session)=>{
+    if(event === "SIGNED_IN" && session){ loadQuotes(); loadArticles(); }
+});
 })();
