@@ -3899,7 +3899,7 @@ async function confirmCompletion(id){
 if(expense > 0){
 
     const {
-        error:expenseError
+        error: expenseError
     } =
     await supabaseClient
         .from("expenses")
@@ -3924,24 +3924,10 @@ if(expense > 0){
             type:
                 "expense",
 
-            appointment_id:
-                id
+appointment_id:
+    appointment.id
 
         });
-
-
-    if(expenseError){
-
-        alert(
-            "Errore salvataggio spesa:\n" +
-            expenseError.message
-        );
-
-        return;
-
-    }
-
-}
 
 
     if(expenseError){
@@ -3951,7 +3937,7 @@ if(expense > 0){
         );
 
         alert(
-            "Pagamento salvato, ma errore nel salvataggio della spesa:\n"+
+            "Pagamento salvato, ma errore nel salvataggio della spesa:\n" +
             expenseError.message
         );
 
