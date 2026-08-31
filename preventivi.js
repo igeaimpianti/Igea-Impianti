@@ -5,6 +5,7 @@ let quotes = [];
 let articles = [];
 let quoteItems = [];
 let quoteSaving = false;
+let editingQuoteId = null;
 
 const q = id => document.getElementById(id);
 const round2 = value => Math.round((Number(value) || 0) * 100) / 100;
@@ -60,6 +61,7 @@ function installQuotePage(){
             <label>Note e condizioni</label>
             <textarea id="quoteNotes" placeholder="Condizioni di pagamento, esclusioni, altre note..."></textarea>
             <button id="emitQuoteButton" class="primary" onclick="emitQuote()">Emetti e crea PDF</button>
+            <button id="cancelQuoteEditButton" class="secondary hidden" style="width:100%;margin-top:8px" onclick="resetQuoteForm()">Annulla modifica</button>
         </div>
         <div class="card">
             <h2>📚 Preventivi emessi</h2>
@@ -232,6 +234,37 @@ window.saveArticle = async function(){
     }finally{ button.disabled=false; button.textContent="Salva articolo"; }
 };
 
+window.editArticle = function(id){
+    const article=articles.find(item=>String(item.id)===String(id));
+    if(!article) return;
+    q("modalContent").innerHTML=`
+        <h2>✏️ Modifica articolo</h2>
+        <label>Articolo</label>
+        <input id="editArticleName" value="${escapeHTML(article.name)}">
+        <label>Descrizione</label>
+        <textarea id="editArticleDescription">${escapeHTML(article.description||"")}</textarea>
+        <label>Prezzo unitario</label>
+        <input id="editArticlePrice" type="number" min="0" step="0.01" value="${escapeHTML(article.unit_price)}">
+        <div class="actions"><button class="secondary" onclick="closeModal()">Annulla</button><button id="updateArticleButton" class="primary" onclick="updateArticle('${article.id}')">Salva modifiche</button></div>`;
+    q("modal").classList.add("modal-center");
+    q("modal").classList.remove("hidden");
+};
+
+window.updateArticle = async function(id){
+    const name=q("editArticleName").value.trim();
+    const description=q("editArticleDescription").value.trim();
+    const unit_price=round2(q("editArticlePrice").value);
+    if(!name){ alert("Inserisci il nome dell'articolo."); return; }
+    if(unit_price<0){ alert("Inserisci un prezzo valido."); return; }
+    const duplicate=articles.some(item=>String(item.id)!==String(id) && item.name.trim().toLowerCase()===name.toLowerCase());
+    if(duplicate){ alert("Esiste già un articolo con questo nome."); return; }
+    const button=q("updateArticleButton"); button.disabled=true; button.textContent="Salvataggio...";
+    const {data,error}=await supabaseClient.from("articles").update({name,description,unit_price,updated_at:new Date().toISOString()}).eq("id",id).select().single();
+    if(error){ button.disabled=false; button.textContent="Salva modifiche"; alert(error.message); return; }
+    articles=articles.map(item=>String(item.id)===String(id)?data:item).sort((a,b)=>a.name.localeCompare(b.name,"it"));
+    closeModal(); renderArticles(); renderQuoteItems(); toast("Articolo aggiornato");
+};
+
 window.deleteArticle = async function(id){
     if(!confirm("Eliminare questo articolo dall'archivio?")) return;
     const {error}=await supabaseClient.from("articles").delete().eq("id",id);
@@ -245,7 +278,7 @@ function renderArticles(){
     const query=(q("articleSearch")?.value||"").toLowerCase();
     const list=articles.filter(item=>(item.name+" "+(item.description||"")).toLowerCase().includes(query));
     box.innerHTML=list.length?list.map(item=>`
-        <div class="item"><div class="between"><div><div class="item-title">${escapeHTML(item.name)}</div><div class="sub">${escapeHTML(item.description||"")}</div></div><b>${money(item.unit_price)}</b></div><button class="danger" style="width:100%;margin-top:9px" onclick="deleteArticle('${item.id}')">Elimina articolo</button></div>`).join(""):'<div class="empty">Nessun articolo salvato.</div>';
+        <div class="item"><div class="between"><div><div class="item-title">${escapeHTML(item.name)}</div><div class="sub">${escapeHTML(item.description||"")}</div></div><b>${money(item.unit_price)}</b></div><div class="actions"><button class="secondary" onclick="editArticle('${item.id}')">Modifica</button><button class="danger" onclick="deleteArticle('${item.id}')">Elimina</button></div></div>`).join(""):'<div class="empty">Nessun articolo salvato.</div>';
 }
 
 window.emitQuote = async function(){
@@ -259,13 +292,37 @@ window.emitQuote = async function(){
     const button=q("emitQuoteButton");
     button.disabled=true; button.textContent="Emissione in corso...";
     try{
-        const payload={quote_number:nextQuoteNumber(),client_id:client.id,quote_date:q("quoteDate").value||today(),subject:q("quoteSubject").value.trim(),notes:q("quoteNotes").value.trim(),validity_days:Number(q("quoteValidity").value)||30,items:cleanItems,total:updateQuoteTotals(),status:"emesso"};
-        const {data,error}=await supabaseClient.from("quotes").insert(payload).select().single();
+        const currentQuote=editingQuoteId?quotes.find(item=>String(item.id)===String(editingQuoteId)):null;
+        const payload={quote_number:currentQuote?.quote_number||nextQuoteNumber(),client_id:client.id,quote_date:q("quoteDate").value||today(),subject:q("quoteSubject").value.trim(),notes:q("quoteNotes").value.trim(),validity_days:Number(q("quoteValidity").value)||30,items:cleanItems,total:updateQuoteTotals(),status:"emesso",updated_at:new Date().toISOString()};
+        const request=editingQuoteId
+            ? supabaseClient.from("quotes").update(payload).eq("id",editingQuoteId)
+            : supabaseClient.from("quotes").insert(payload);
+        const {data,error}=await request.select().single();
         if(error){ alert("Errore salvataggio preventivo:\n"+error.message); return; }
-        quotes.unshift(data);
+        if(editingQuoteId){ quotes=quotes.map(item=>String(item.id)===String(editingQuoteId)?data:item); }
+        else{ quotes.unshift(data); }
         await createQuotePDF(data,client);
-        resetQuoteForm(); renderQuotes(); toast("Preventivo emesso e PDF creato");
+        const wasEditing=Boolean(editingQuoteId);
+        resetQuoteForm(); renderQuotes(); toast(wasEditing?"Preventivo aggiornato e PDF creato":"Preventivo emesso e PDF creato");
     }finally{ quoteSaving=false; button.disabled=false; button.textContent="Emetti e crea PDF"; }
+};
+
+window.editQuote = function(id){
+    const quote=quotes.find(item=>String(item.id)===String(id));
+    if(!quote) return;
+    editingQuoteId=quote.id;
+    showQuoteArea("create");
+    refreshQuoteClients();
+    q("quoteClient").value=quote.client_id;
+    q("quoteDate").value=quote.quote_date||today();
+    q("quoteValidity").value=quote.validity_days||30;
+    q("quoteSubject").value=quote.subject||"";
+    q("quoteNotes").value=quote.notes||"";
+    quoteItems=(quote.items||[]).map(item=>({...item,article_id:item.article_id||""}));
+    if(!quoteItems.length) addQuoteItem(); else renderQuoteItems();
+    q("emitQuoteButton").textContent="Salva modifiche e crea PDF";
+    q("cancelQuoteEditButton").classList.remove("hidden");
+    window.scrollTo({top:0,behavior:"smooth"});
 };
 
 window.downloadQuotePDF = async function(id){
@@ -286,7 +343,7 @@ function renderQuotes(){
     const query=(q("quoteSearch")?.value||"").toLowerCase();
     const list=quotes.filter(item=>(`${item.quote_number} ${clientName(item.client_id)} ${item.subject||""}`).toLowerCase().includes(query));
     box.innerHTML=list.length?list.map(item=>`
-        <div class="item"><div class="between"><div><div class="item-title">${escapeHTML(item.quote_number)}</div><div class="sub">${escapeHTML(clientName(item.client_id))} · ${formatDate(item.quote_date)}</div>${item.subject?`<div class="sub">${escapeHTML(item.subject)}</div>`:""}</div><b class="green">${money(item.total)}</b></div><div class="actions"><button class="blue" onclick="downloadQuotePDF('${item.id}')">PDF</button><button class="danger" onclick="deleteQuote('${item.id}')">Elimina</button></div></div>`).join(""):'<div class="empty">Nessun preventivo emesso.</div>';
+        <div class="item"><div class="between"><div><div class="item-title">${escapeHTML(item.quote_number)}</div><div class="sub">${escapeHTML(clientName(item.client_id))} · ${formatDate(item.quote_date)}</div>${item.subject?`<div class="sub">${escapeHTML(item.subject)}</div>`:""}</div><b class="green">${money(item.total)}</b></div><div class="actions"><button class="secondary" onclick="editQuote('${item.id}')">Modifica</button><button class="blue" onclick="downloadQuotePDF('${item.id}')">PDF</button><button class="danger" onclick="deleteQuote('${item.id}')">Elimina</button></div></div>`).join(""):'<div class="empty">Nessun preventivo emesso.</div>';
 }
 
 async function createQuotePDF(quote,client){
@@ -315,7 +372,10 @@ async function createQuotePDF(quote,client){
 }
 
 function resetQuoteForm(){
+    editingQuoteId=null;
     q("quoteClient").value=""; q("quoteDate").value=today(); q("quoteValidity").value="30"; q("quoteSubject").value=""; q("quoteNotes").value="";
+    q("emitQuoteButton").textContent="Emetti e crea PDF";
+    q("cancelQuoteEditButton").classList.add("hidden");
     quoteItems=[]; addQuoteItem();
 }
 
