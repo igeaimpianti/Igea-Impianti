@@ -4073,13 +4073,6 @@ async function deleteCompletedAppointment(id){
                     payment.appointment_id
                 ) === String(id)
         );
-expenses =
-    expenses.filter(
-        expense =>
-            String(
-                expense.appointment_id
-            ) !== String(id)
-    );
 
     if(
         linkedPayments.length
@@ -4159,6 +4152,13 @@ expenses =
                     payment.appointment_id
                 ) !== String(id)
         );
+expenses =
+    expenses.filter(
+        expense =>
+            String(
+                expense.appointment_id
+            ) !== String(id)
+    );
 
 
     renderAll();
