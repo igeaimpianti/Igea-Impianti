@@ -1933,166 +1933,61 @@ async function createQuotePDF(
         pageWidth - 15;
 
 
-    /* =========================================
-       INTESTAZIONE AZIENDALE
-    ========================================= */
+ // Intestazione aziendale
+doc.setFillColor(255,255,255);
+doc.rect(0,0,pageWidth,39,"F");
 
-    doc.setFillColor(
-        255,
-        255,
-        255
-    );
+doc.setFillColor(...gold);
+doc.rect(0,39,pageWidth,1.7,"F");
 
-    doc.rect(
-        0,
-        0,
-        pageWidth,
-        39,
-        "F"
-    );
+if(logo){
 
-    doc.setFillColor(
-        ...gold
-    );
+    try{
 
-    doc.rect(
-        0,
-        39,
-        pageWidth,
-        1.7,
-        "F"
-    );
-
-    if(logo){
-
-        try{
-
-            doc.addImage(
-
-                logo,
-                "PNG",
-
-                15,
-                5,
-
-                114,
-                30,
-
-                undefined,
-                "FAST"
-
-            );
-
-        }
-        catch(error){
-
-            console.warn(
-                "Logo non inserito nel PDF",
-                error
-            );
-
-        }
-
-    }
-    else{
-
-        doc.setTextColor(
-            ...navy
-        );
-
-        doc.setFont(
-            "helvetica",
-            "bold"
-        );
-
-        doc.setFontSize(
-            19
-        );
-
-        doc.text(
-            "IGEA IMPIANTI",
+        doc.addImage(
+            logo,
+            "PNG",
             15,
-            18
+            5,
+            180,
+            30,
+            undefined,
+            "FAST"
         );
 
-        doc.setFont(
-            "helvetica",
-            "normal"
-        );
+    }catch(error){
 
-        doc.setFontSize(
-            9
-        );
-
-        doc.text(
-            "IMPIANTI ELETTRICI E TECNOLOGICI",
-            15,
-            25
+        console.warn(
+            "Logo non inserito nel PDF",
+            error
         );
 
     }
 
-    doc.setTextColor(
-        ...navy
-    );
+}else{
 
-    doc.setFont(
-        "helvetica",
-        "bold"
-    );
-
-    doc.setFontSize(
-        8
-    );
+    doc.setTextColor(...navy);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(19);
 
     doc.text(
-
-        "PROFESSIONALITÀ E SICUREZZA",
-
-        195,
-        14,
-
-        {
-            align:"right"
-        }
-
+        "IGEA IMPIANTI",
+        pageWidth / 2,
+        18,
+        {align:"center"}
     );
 
-    doc.setFont(
-        "helvetica",
-        "normal"
-    );
-
-    doc.setFontSize(
-        7.5
-    );
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(9);
 
     doc.text(
-
-        "Napoli e provincia",
-
-        195,
-        20,
-
-        {
-            align:"right"
-        }
-
-    );
-
-    doc.text(
-
-        "C.F. GIECRI93S14F839O",
-
-        195,
+        "IMPIANTI ELETTRICI · ALLARME · VIDEOSORVEGLIANZA · AUTOMAZIONE",
+        pageWidth / 2,
         25,
-
-        {
-            align:"right"
-        }
-
+        {align:"center"}
     );
 
+}
 
     /* =========================================
        NUMERO E DATA PREVENTIVO
