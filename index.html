@@ -3922,9 +3922,26 @@ if(expense > 0){
                 "Spesa associata all'appuntamento",
 
             type:
-                "expense"
+                "expense",
+
+            appointment_id:
+                id
 
         });
+
+
+    if(expenseError){
+
+        alert(
+            "Errore salvataggio spesa:\n" +
+            expenseError.message
+        );
+
+        return;
+
+    }
+
+}
 
 
     if(expenseError){
