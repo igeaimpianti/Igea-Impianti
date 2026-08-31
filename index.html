@@ -2491,32 +2491,34 @@ async function saveAppointment(){
     }
 
 
-    const payload = {
+```javascript
+const payload = {
 
-        client_id:client.id,
+    client_id: client.id,
 
-        date:date,
+    date: date,
 
-        time:
-            $("appointmentTime")
-            .value || null,
+    time:
+        $("appointmentTime")?.value || null,
 
-        title:
-            "Intervento",
+    title:
+        "Intervento",
 
-        description:null,
+    description:
+        null,
 
-        status:
-            "programmato",
+    status:
+        "programmato",
 
-        amount:0,
+    amount:
+        0,
 
-        notes:
-            $("appointmentNotes")
-            .value
-            .trim()
+    notes:
+        $("appointmentNotes")?.value?.trim() || null
 
-    };
+};
+```
+
 
 
     const {
