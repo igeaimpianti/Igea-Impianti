@@ -2,6 +2,7 @@
 "use strict";
 
 let quotes = [];
+let articles = [];
 let quoteItems = [];
 let quoteSaving = false;
 
@@ -16,6 +17,9 @@ function installQuoteStyles(){
         .quote-row .grid-quote{display:grid;grid-template-columns:1fr 88px;gap:8px}
         .quote-total{font-size:26px;font-weight:900;text-align:right;color:#16834b}
         .quote-count{font-size:12px;color:#777;margin-bottom:10px}
+        .quote-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+        .quote-tabs button{background:#eee;border:1px solid #ddd}
+        .quote-tabs button.active{background:#111;color:#fff;border-color:#111}
         @media(max-width:410px){.nav button{font-size:9px}.nav span{font-size:19px}}
     `;
     document.head.appendChild(style);
@@ -29,6 +33,11 @@ function installQuotePage(){
     section.id = "quotes";
     section.className = "hidden";
     section.innerHTML = `
+        <div class="quote-tabs">
+            <button id="quoteCreateTab" class="active" onclick="showQuoteArea('create')">🧾 Crea preventivo</button>
+            <button id="quoteArticlesTab" onclick="showQuoteArea('articles')">📦 Articoli</button>
+        </div>
+        <div id="quoteCreateArea">
         <div class="card">
             <h2>🧾 Crea preventivo</h2>
             <label>Cliente</label>
@@ -56,6 +65,24 @@ function installQuotePage(){
             <h2>📚 Preventivi emessi</h2>
             <input id="quoteSearch" placeholder="🔎 Cerca cliente o numero..." oninput="renderQuotes()">
             <div id="quotesList"></div>
+        </div>
+        </div>
+        <div id="quoteArticlesArea" class="hidden">
+            <div class="card">
+                <h2>📦 Nuovo articolo</h2>
+                <label>Articolo</label>
+                <input id="articleName" placeholder="Es. Presa Schuko">
+                <label>Descrizione</label>
+                <textarea id="articleDescription" placeholder="Marca, modello, caratteristiche o lavorazione"></textarea>
+                <label>Prezzo unitario</label>
+                <input id="articlePrice" type="number" min="0" step="0.01" placeholder="0,00">
+                <button id="saveArticleButton" class="primary" onclick="saveArticle()">Salva articolo</button>
+            </div>
+            <div class="card">
+                <h2>📚 Articoli salvati</h2>
+                <input id="articleSearch" placeholder="🔎 Cerca articolo..." oninput="renderArticles()">
+                <div id="articlesList"></div>
+            </div>
         </div>`;
     main.insertBefore(section, q("settings"));
 
@@ -82,6 +109,15 @@ window.showPage = function(page){
     q("pageTitle").textContent = "Preventivi";
     refreshQuoteClients();
     renderQuotes();
+    renderArticles();
+};
+
+window.showQuoteArea = function(area){
+    q("quoteCreateArea").classList.toggle("hidden",area!=="create");
+    q("quoteArticlesArea").classList.toggle("hidden",area!=="articles");
+    q("quoteCreateTab").classList.toggle("active",area==="create");
+    q("quoteArticlesTab").classList.toggle("active",area==="articles");
+    if(area==="articles") renderArticles();
 };
 
 function refreshQuoteClients(){
@@ -94,9 +130,9 @@ function refreshQuoteClients(){
     if(clients.some(client=>String(client.id)===String(selected))) select.value=selected;
 }
 
-window.addQuoteItem = function(item={article:"",description:"",price:"",quantity:1}){
+window.addQuoteItem = function(item={article_id:"",article:"",description:"",price:"",quantity:1}){
     if(quoteItems.length >= 30){ alert("Puoi inserire al massimo 30 articoli."); return; }
-    quoteItems.push({article:String(item.article||""),description:String(item.description||""),price:item.price??"",quantity:item.quantity??1});
+    quoteItems.push({article_id:String(item.article_id||""),article:String(item.article||""),description:String(item.description||""),price:item.price??"",quantity:item.quantity??1});
     renderQuoteItems();
 };
 
@@ -111,12 +147,25 @@ window.updateQuoteItem = function(index,field,value){
     updateQuoteTotals();
 };
 
+window.selectSavedArticle = function(index,id){
+    if(!id || !quoteItems[index]) return;
+    const article=articles.find(item=>String(item.id)===String(id));
+    if(!article) return;
+    quoteItems[index]={...quoteItems[index],article_id:article.id,article:article.name,description:article.description||"",price:round2(article.unit_price)};
+    renderQuoteItems();
+};
+
 function renderQuoteItems(){
     const box=q("quoteItems");
     if(!box) return;
     box.innerHTML=quoteItems.map((item,index)=>`
         <div class="quote-row">
             <div class="quote-row-head"><b>Articolo ${index+1}</b><button class="danger" onclick="removeQuoteItem(${index})">Rimuovi</button></div>
+            <label>Seleziona articolo salvato</label>
+            <select onchange="selectSavedArticle(${index},this.value)">
+                <option value="">Scegli dalla lista oppure compila manualmente</option>
+                ${articles.map(saved=>`<option value="${saved.id}" ${String(saved.id)===String(item.article_id)?"selected":""}>${escapeHTML(saved.name)} · ${money(saved.unit_price)}</option>`).join("")}
+            </select>
             <label>Articolo</label>
             <input value="${escapeHTML(item.article)}" placeholder="Es. Presa Schuko, quadro elettrico..." oninput="updateQuoteItem(${index},'article',this.value)">
             <label>Descrizione</label>
@@ -157,11 +206,53 @@ async function loadQuotes(){
     renderQuotes();
 }
 
+async function loadArticles(){
+    const {data,error}=await supabaseClient.from("articles").select("*").order("name",{ascending:true});
+    if(error){ console.error(error); toast("Esegui l'aggiornamento SQL degli articoli"); return; }
+    articles=data||[];
+    renderArticles();
+    renderQuoteItems();
+}
+
+window.saveArticle = async function(){
+    const name=q("articleName").value.trim();
+    const description=q("articleDescription").value.trim();
+    const unit_price=round2(q("articlePrice").value);
+    if(!name){ alert("Inserisci il nome dell'articolo."); return; }
+    if(unit_price<0){ alert("Inserisci un prezzo valido."); return; }
+    const duplicate=articles.some(item=>item.name.trim().toLowerCase()===name.toLowerCase());
+    if(duplicate){ alert("Questo articolo è già stato salvato."); return; }
+    const button=q("saveArticleButton"); button.disabled=true; button.textContent="Salvataggio...";
+    try{
+        const {data,error}=await supabaseClient.from("articles").insert({name,description,unit_price}).select().single();
+        if(error){ alert("Errore salvataggio articolo:\n"+error.message); return; }
+        articles.push(data); articles.sort((a,b)=>a.name.localeCompare(b.name,"it"));
+        q("articleName").value=""; q("articleDescription").value=""; q("articlePrice").value="";
+        renderArticles(); renderQuoteItems(); toast("Articolo salvato");
+    }finally{ button.disabled=false; button.textContent="Salva articolo"; }
+};
+
+window.deleteArticle = async function(id){
+    if(!confirm("Eliminare questo articolo dall'archivio?")) return;
+    const {error}=await supabaseClient.from("articles").delete().eq("id",id);
+    if(error){ alert(error.message); return; }
+    articles=articles.filter(item=>String(item.id)!==String(id));
+    renderArticles(); renderQuoteItems(); toast("Articolo eliminato");
+};
+
+function renderArticles(){
+    const box=q("articlesList"); if(!box) return;
+    const query=(q("articleSearch")?.value||"").toLowerCase();
+    const list=articles.filter(item=>(item.name+" "+(item.description||"")).toLowerCase().includes(query));
+    box.innerHTML=list.length?list.map(item=>`
+        <div class="item"><div class="between"><div><div class="item-title">${escapeHTML(item.name)}</div><div class="sub">${escapeHTML(item.description||"")}</div></div><b>${money(item.unit_price)}</b></div><button class="danger" style="width:100%;margin-top:9px" onclick="deleteArticle('${item.id}')">Elimina articolo</button></div>`).join(""):'<div class="empty">Nessun articolo salvato.</div>';
+}
+
 window.emitQuote = async function(){
     if(quoteSaving) return;
     const client=findClient(q("quoteClient").value);
     if(!client){ alert("Seleziona il cliente."); return; }
-    const cleanItems=quoteItems.map(item=>({article:String(item.article||"").trim(),description:String(item.description||"").trim(),price:round2(item.price),quantity:round2(item.quantity),total:round2(item.price*item.quantity)}));
+    const cleanItems=quoteItems.map(item=>({article_id:item.article_id||null,article:String(item.article||"").trim(),description:String(item.description||"").trim(),price:round2(item.price),quantity:round2(item.quantity),total:round2(item.price*item.quantity)}));
     if(!cleanItems.length){ alert("Inserisci almeno un articolo."); return; }
     if(cleanItems.some(item=>!item.article || item.price<0 || item.quantity<=0)){ alert("Controlla articolo, prezzo e quantità di tutte le righe."); return; }
     quoteSaving=true;
@@ -234,9 +325,9 @@ refreshQuoteClients();
 q("quoteDate").value=today();
 addQuoteItem();
 supabaseClient.auth.getSession().then(({data})=>{
-    if(data?.session) loadQuotes();
+    if(data?.session){ loadQuotes(); loadArticles(); }
 });
 supabaseClient.auth.onAuthStateChange((event,session)=>{
-    if(event === "SIGNED_IN" && session) loadQuotes();
+    if(event === "SIGNED_IN" && session){ loadQuotes(); loadArticles(); }
 });
 })();
