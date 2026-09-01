@@ -21,6 +21,12 @@ function installQuoteStyles(){
         .quote-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
         .quote-tabs button{background:#eee;border:1px solid #ddd}
         .quote-tabs button.active{background:#111;color:#fff;border-color:#111}
+        .quote-status{display:inline-flex;align-items:center;justify-content:center;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800;margin-top:6px}
+        .quote-status-bozza{background:#eceff1;color:#555}
+        .quote-status-inviato{background:#e3f2fd;color:#1565c0}
+        .quote-status-accettato{background:#e8f5e9;color:#16834b}
+        .quote-status-rifiutato{background:#ffebee;color:#c62828}
+        .quote-status-scaduto{background:#fff3e0;color:#e65100}
         @media(max-width:410px){.nav button{font-size:9px}.nav span{font-size:19px}}
     `;
     document.head.appendChild(style);
@@ -299,7 +305,18 @@ window.emitQuote = async function(){
     button.disabled=true; button.textContent="Emissione in corso...";
     try{
         const currentQuote=editingQuoteId?quotes.find(item=>String(item.id)===String(editingQuoteId)):null;
-        const payload={quote_number:currentQuote?.quote_number||await nextQuoteNumber(),client_id:client.id,quote_date:q("quoteDate").value||today(),subject:q("quoteSubject").value.trim(),notes:q("quoteNotes").value.trim(),validity_days:Number(q("quoteValidity").value)||30,items:cleanItems,total:updateQuoteTotals(),status:"emesso",updated_at:new Date().toISOString()};
+        const payload={
+            quote_number:currentQuote?.quote_number||await nextQuoteNumber(),
+            client_id:client.id,
+            quote_date:q("quoteDate").value||today(),
+            subject:q("quoteSubject").value.trim(),
+            notes:q("quoteNotes").value.trim(),
+            validity_days:Number(q("quoteValidity").value)||30,
+            items:cleanItems,
+            total:updateQuoteTotals(),
+            status:currentQuote?.status||"bozza",
+            updated_at:new Date().toISOString()
+        };
         const request=editingQuoteId
             ? supabaseClient.from("quotes").update(payload).eq("id",editingQuoteId)
             : supabaseClient.from("quotes").insert(payload);
@@ -344,12 +361,161 @@ window.deleteQuote = async function(id){
     quotes=quotes.filter(item=>String(item.id)!==String(id)); renderQuotes(); toast("Preventivo eliminato");
 };
 
+function getQuoteEffectiveStatus(quote){
+    const status=quote?.status||"bozza";
+    if(status==="accettato" || status==="rifiutato") return status;
+    if(!quote?.quote_date) return status;
+
+    const validity=Math.max(1,Number(quote.validity_days)||30);
+    const expiration=new Date(`${quote.quote_date}T23:59:59`);
+    expiration.setDate(expiration.getDate()+validity);
+
+    return new Date()>expiration ? "scaduto" : status;
+}
+
+function quoteStatusLabel(status){
+    const labels={
+        bozza:"BOZZA",
+        inviato:"INVIATO",
+        accettato:"ACCETTATO",
+        rifiutato:"RIFIUTATO",
+        scaduto:"SCADUTO"
+    };
+    return labels[status]||"BOZZA";
+}
+
+function quoteStatusHTML(quote){
+    const status=getQuoteEffectiveStatus(quote);
+    return `<span class="quote-status quote-status-${status}">${quoteStatusLabel(status)}</span>`;
+}
+
+window.changeQuoteStatus = function(id){
+    const quote=quotes.find(item=>String(item.id)===String(id));
+    if(!quote) return;
+
+    q("modalContent").innerHTML=`
+        <h2>Stato preventivo</h2>
+        <div class="sub">${escapeHTML(quote.quote_number||"")}</div>
+        <div style="margin-top:8px;margin-bottom:18px">${quoteStatusHTML(quote)}</div>
+
+        <button class="secondary" style="width:100%;margin-bottom:8px" onclick="updateQuoteStatus('${quote.id}','bozza')">⚪ Bozza</button>
+        <button class="blue" style="width:100%;margin-bottom:8px" onclick="updateQuoteStatus('${quote.id}','inviato')">🔵 Inviato</button>
+        <button class="primary" style="width:100%;margin-bottom:8px" onclick="updateQuoteStatus('${quote.id}','accettato')">✅ Accettato</button>
+        <button class="danger" style="width:100%;margin-bottom:8px" onclick="updateQuoteStatus('${quote.id}','rifiutato')">❌ Rifiutato</button>
+        <button class="secondary" style="width:100%;margin-top:10px" onclick="closeModal()">Chiudi</button>
+    `;
+    q("modal").classList.add("modal-center");
+    q("modal").classList.remove("hidden");
+};
+
+window.updateQuoteStatus = async function(id,status){
+    const allowed=["bozza","inviato","accettato","rifiutato"];
+    if(!allowed.includes(status)) return;
+
+    const quote=quotes.find(item=>String(item.id)===String(id));
+    if(!quote) return;
+
+    const {data,error}=await supabaseClient
+        .from("quotes")
+        .update({status,updated_at:new Date().toISOString()})
+        .eq("id",id)
+        .select()
+        .single();
+
+    if(error){
+        alert("Errore aggiornamento stato:\n"+error.message);
+        return;
+    }
+
+    quotes=quotes.map(item=>String(item.id)===String(id)?data:item);
+    closeModal();
+    renderQuotes();
+
+    if(status==="accettato"){
+        toast("Preventivo accettato");
+        setTimeout(()=>{
+            if(confirm("Preventivo accettato ✅\n\nVuoi creare un appuntamento per questo lavoro?")){
+                createAppointmentFromQuote(id);
+            }
+        },150);
+        return;
+    }
+
+    if(status==="inviato") toast("Preventivo segnato come inviato");
+    if(status==="rifiutato") toast("Preventivo segnato come rifiutato");
+    if(status==="bozza") toast("Preventivo riportato in bozza");
+};
+
+window.createAppointmentFromQuote = function(id){
+    const quote=quotes.find(item=>String(item.id)===String(id));
+    if(!quote) return;
+
+    const client=findClient(quote.client_id);
+    if(!client){
+        alert("Cliente del preventivo non trovato.");
+        return;
+    }
+
+    showPage("appointments");
+
+    const clientInput=q("appointmentClient");
+    const clientIdInput=q("appointmentClientId");
+    const dateInput=q("appointmentDate");
+    const notesInput=q("appointmentNotes");
+    const titleInput=q("appointmentTitle");
+
+    if(clientInput) clientInput.value=client.name;
+    if(clientIdInput) clientIdInput.value=client.id;
+    if(dateInput) dateInput.value=today();
+    if(titleInput && !titleInput.value) titleInput.value=quote.subject||`Lavoro da ${quote.quote_number||"preventivo"}`;
+
+    const itemsText=(quote.items||[])
+        .map(item=>`${Number(item.quantity)||1} x ${item.article||""}`.trim())
+        .filter(Boolean)
+        .join("\n");
+
+    const notes=[
+        `Preventivo ${quote.quote_number||""}`.trim(),
+        quote.subject||"",
+        itemsText,
+        `Importo preventivo: ${money(quote.total||0)}`
+    ].filter(Boolean).join("\n\n");
+
+    if(notesInput) notesInput.value=notes;
+
+    window.scrollTo({top:0,behavior:"smooth"});
+    toast("Appuntamento compilato dal preventivo");
+};
+
 function renderQuotes(){
-    const box=q("quotesList"); if(!box) return;
+    const box=q("quotesList");
+    if(!box) return;
+
     const query=(q("quoteSearch")?.value||"").toLowerCase();
     const list=quotes.filter(item=>(`${item.quote_number} ${clientName(item.client_id)} ${item.subject||""}`).toLowerCase().includes(query));
-    box.innerHTML=list.length?list.map(item=>`
-        <div class="item"><div class="between"><div><div class="item-title">${escapeHTML(item.quote_number)}</div><div class="sub">${escapeHTML(clientName(item.client_id))} · ${formatDate(item.quote_date)}</div>${item.subject?`<div class="sub">${escapeHTML(item.subject)}</div>`:""}</div><b class="green">${money(item.total)}</b></div><div class="actions"><button class="secondary" onclick="editQuote('${item.id}')">Modifica</button><button class="blue" onclick="downloadQuotePDF('${item.id}')">PDF</button><button class="danger" onclick="deleteQuote('${item.id}')">Elimina</button></div></div>`).join(""):'<div class="empty">Nessun preventivo emesso.</div>';
+
+    box.innerHTML=list.length?list.map(item=>{
+        const status=getQuoteEffectiveStatus(item);
+        return `
+        <div class="item">
+            <div class="between">
+                <div>
+                    <div class="item-title">${escapeHTML(item.quote_number)}</div>
+                    <div class="sub">${escapeHTML(clientName(item.client_id))} · ${formatDate(item.quote_date)}</div>
+                    ${item.subject?`<div class="sub">${escapeHTML(item.subject)}</div>`:""}
+                    ${quoteStatusHTML(item)}
+                </div>
+                <b class="green">${money(item.total)}</b>
+            </div>
+            <div class="actions">
+                <button class="secondary" onclick="editQuote('${item.id}')">Modifica</button>
+                <button class="blue" onclick="downloadQuotePDF('${item.id}')">PDF</button>
+                <button class="secondary" onclick="changeQuoteStatus('${item.id}')">Stato</button>
+                ${status==="accettato"?`<button class="primary" onclick="createAppointmentFromQuote('${item.id}')">📅 Appuntamento</button>`:""}
+                <button class="danger" onclick="deleteQuote('${item.id}')">Elimina</button>
+            </div>
+        </div>`;
+    }).join(""):'<div class="empty">Nessun preventivo emesso.</div>';
 }
 
 function loadQuoteLogo(){
@@ -375,11 +541,9 @@ async function createQuotePDF(quote,client){
     const left=15;
     const right=pageWidth-15;
 
-    // Sfondo ghiaccio del modello approvato
     doc.setFillColor(...ice);
     doc.rect(0,0,pageWidth,297,"F");
 
-    // Banner orizzontale Igea Impianti
     doc.setFillColor(255,255,255);
     doc.rect(0,0,pageWidth,51,"F");
     if(logo){
@@ -398,7 +562,6 @@ async function createQuotePDF(quote,client){
     doc.setFillColor(...blue);
     doc.rect(0,51,pageWidth,2.5,"F");
 
-    // Riquadro identificativo ad alto impatto
     doc.setFillColor(...navy);
     doc.roundedRect(116,38,79,25,3,3,"F");
     doc.setTextColor(255,255,255);
@@ -416,7 +579,6 @@ async function createQuotePDF(quote,client){
     doc.setFontSize(7);
     doc.text(`VALIDO ${quote.validity_days||30} GIORNI`,189,57,{align:"right"});
 
-    // Dati impresa e cliente
     const companyLines=[
         "Titolare: Ciro Igea",
         "Via Maria Maligran 15 - 80147 Napoli (NA)",
@@ -496,7 +658,6 @@ async function createQuotePDF(quote,client){
     y=doc.lastAutoTable.finalY+8;
     if(y>236){ doc.addPage(); y=20; }
 
-    // Totale e validità
     doc.setFillColor(...pale);
     doc.roundedRect(109,y,86,23,2.5,2.5,"F");
     doc.setTextColor(...ink);
@@ -533,7 +694,6 @@ async function createQuotePDF(quote,client){
     doc.setFontSize(7.5);
     doc.text("Firma del cliente per accettazione",160,y+18,{align:"center"});
 
-    // Piè di pagina su tutte le pagine
     const totalPages=doc.getNumberOfPages();
     for(let page=1;page<=totalPages;page++){
         doc.setPage(page);
@@ -552,10 +712,15 @@ async function createQuotePDF(quote,client){
 
 function resetQuoteForm(){
     editingQuoteId=null;
-    q("quoteClient").value=""; q("quoteDate").value=today(); q("quoteValidity").value="30"; q("quoteSubject").value=""; q("quoteNotes").value="";
+    q("quoteClient").value="";
+    q("quoteDate").value=today();
+    q("quoteValidity").value="30";
+    q("quoteSubject").value="";
+    q("quoteNotes").value="Il presente preventivo ha validità di 30 giorni dalla data di emissione. I prezzi indicati sono da intendersi IVA esclusa, salvo diversa indicazione.";
     q("emitQuoteButton").textContent="Emetti e crea PDF";
     q("cancelQuoteEditButton").classList.add("hidden");
-    quoteItems=[]; addQuoteItem();
+    quoteItems=[];
+    addQuoteItem();
 }
 
 installQuoteStyles();
