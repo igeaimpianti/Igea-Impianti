@@ -58,8 +58,8 @@ function installQuotePage(){
             <button id="addQuoteItemButton" class="secondary" style="width:100%" onclick="addQuoteItem()">＋ Aggiungi articolo</button>
             <div class="divider"></div>
             <div class="between"><b>Totale preventivo</b><div id="quoteTotal" class="quote-total">€0,00</div></div>
-            <label>Note e condizioni</label>
-            <textarea id="quoteNotes" placeholder="Condizioni di pagamento, esclusioni, altre note..."></textarea>
+          <label>Note e condizioni</label>
+<textarea id="quoteNotes" placeholder="Condizioni di pagamento, esclusioni, altre note...">Il presente preventivo ha validità di 30 giorni dalla data di emissione. I prezzi indicati sono da intendersi IVA esclusa, salvo diversa indicazione.</textarea>
             <button id="emitQuoteButton" class="primary" onclick="emitQuote()">Emetti e crea PDF</button>
             <button id="cancelQuoteEditButton" class="secondary hidden" style="width:100%;margin-top:8px" onclick="resetQuoteForm()">Annulla modifica</button>
         </div>
