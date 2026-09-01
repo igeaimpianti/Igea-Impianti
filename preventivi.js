@@ -284,7 +284,7 @@ window.deleteArticle = async function(id){
     articles=articles.filter(item=>String(item.id)!==String(id));
     renderArticles(); renderQuoteItems(); toast("Articolo eliminato");
 };
-function renderArticles(){
+window.renderArticles = function(){
     const box=q("articlesList");
     if(!box) return;
 
