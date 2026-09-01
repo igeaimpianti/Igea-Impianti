@@ -88,7 +88,7 @@ function installQuotePage(){
             </div>
             <div class="card">
                 <h2>📚 Articoli salvati</h2>
-                <input id="articleSearch" placeholder="🔎 Cerca articolo..." oninput="renderArticles()">
+                <input id="articleSearch" placeholder="🔎 Cerca articolo..." oninput="window.renderArticles(this.value)">
                 <div id="articlesList"></div>
             </div>
         </div>`;
