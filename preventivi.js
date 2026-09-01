@@ -284,13 +284,42 @@ window.deleteArticle = async function(id){
     articles=articles.filter(item=>String(item.id)!==String(id));
     renderArticles(); renderQuoteItems(); toast("Articolo eliminato");
 };
-
 function renderArticles(){
-    const box=q("articlesList"); if(!box) return;
-    const query=(q("articleSearch")?.value||"").toLowerCase();
-    const list=articles.filter(item=>(item.name+" "+(item.description||"")).toLowerCase().includes(query));
+    const box=q("articlesList");
+    if(!box) return;
+
+    const query=(q("articleSearch")?.value||"")
+        .trim()
+        .toLowerCase();
+
+    if(query.length<2){
+        box.innerHTML="";
+        return;
+    }
+
+    const list=articles
+        .filter(item=>
+            (item.name+" "+(item.description||""))
+                .toLowerCase()
+                .includes(query)
+        )
+        .slice(0,10);
+
     box.innerHTML=list.length?list.map(item=>`
-        <div class="item"><div class="between"><div><div class="item-title">${escapeHTML(item.name)}</div><div class="sub">${escapeHTML(item.description||"")}</div></div><b>${money(item.unit_price)}</b></div><div class="actions"><button class="secondary" onclick="editArticle('${item.id}')">Modifica</button><button class="danger" onclick="deleteArticle('${item.id}')">Elimina</button></div></div>`).join(""):'<div class="empty">Nessun articolo salvato.</div>';
+        <div class="item">
+            <div class="between">
+                <div>
+                    <div class="item-title">${escapeHTML(item.name)}</div>
+                    <div class="sub">${escapeHTML(item.description||"")}</div>
+                </div>
+                <b>${money(item.unit_price)}</b>
+            </div>
+            <div class="actions">
+                <button class="secondary" onclick="editArticle('${item.id}')">Modifica</button>
+                <button class="danger" onclick="deleteArticle('${item.id}')">Elimina</button>
+            </div>
+        </div>
+    `).join(""):'<div class="empty">Nessun articolo trovato.</div>';
 }
 
 window.emitQuote = async function(){
