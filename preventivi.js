@@ -27,6 +27,12 @@ function installQuoteStyles(){
         .quote-status-accettato{background:#e8f5e9;color:#16834b}
         .quote-status-rifiutato{background:#ffebee;color:#c62828}
         .quote-status-scaduto{background:#fff3e0;color:#e65100}
+        .quote-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px}
+        .quote-actions button{min-width:0;padding:12px 7px}
+        @media(max-width:600px){
+            .quote-actions{grid-template-columns:repeat(3,minmax(0,1fr))}
+            .quote-actions button{padding:12px 5px;font-size:13px}
+        }
         @media(max-width:410px){.nav button{font-size:9px}.nav span{font-size:19px}}
     `;
     document.head.appendChild(style);
@@ -621,7 +627,7 @@ function renderQuotes(){
                 </div>
                 <b class="green">${money(item.total)}</b>
             </div>
-            <div class="actions">
+            <div class="quote-actions">
                 <button class="secondary" onclick="editQuote('${item.id}')">Modifica</button>
                 <button class="blue" onclick="downloadQuotePDF('${item.id}')">PDF</button>
                 <button class="success" onclick="shareQuoteWhatsApp('${item.id}')">🟢 WhatsApp</button>
