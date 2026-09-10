@@ -399,6 +399,75 @@ window.downloadQuotePDF = async function(id){
     await createQuotePDF(quote,findClient(quote.client_id));
 };
 
+window.shareQuoteWhatsApp = async function(id){
+    const quote=quotes.find(item=>String(item.id)===String(id));
+    if(!quote) return;
+
+    const client=findClient(quote.client_id);
+    if(!client){
+        alert("Cliente del preventivo non trovato.");
+        return;
+    }
+
+    if(!navigator.share){
+        alert("La condivisione non è supportata su questo dispositivo.");
+        return;
+    }
+
+    const message=[
+        `Buongiorno ${client.name},`,
+        "",
+        `le invio il preventivo ${quote.quote_number} di Igea Impianti.`,
+        "",
+        `Importo totale: ${money(quote.total||0)}.`,
+        "",
+        "Resto a disposizione per qualsiasi chiarimento.",
+        "",
+        "Grazie,",
+        "Ciro Igea",
+        "Igea Impianti"
+    ].join("\n");
+
+    try{
+        const pdf=await createQuotePDF(quote,client,{output:"blob"});
+        if(!pdf?.blob) throw new Error("PDF non generato");
+
+        const file=new File([pdf.blob],pdf.fileName,{type:"application/pdf"});
+        const shareData={
+            title:`Preventivo ${quote.quote_number}`,
+            text:message,
+            files:[file]
+        };
+
+        if(navigator.canShare && !navigator.canShare({files:[file]})){
+            alert("Questo dispositivo non consente di condividere direttamente il PDF.");
+            return;
+        }
+
+        await navigator.share(shareData);
+
+        if(quote.status === "bozza"){
+            const {data,error}=await supabaseClient
+                .from("quotes")
+                .update({status:"inviato",updated_at:new Date().toISOString()})
+                .eq("id",quote.id)
+                .select()
+                .single();
+
+            if(!error && data){
+                quotes=quotes.map(item=>String(item.id)===String(quote.id)?data:item);
+                renderQuotes();
+            }
+        }
+
+        toast("Preventivo condiviso");
+    }catch(error){
+        if(error?.name === "AbortError") return;
+        console.error("Condivisione preventivo:",error);
+        alert("Non sono riuscito a condividere il preventivo. Riprova.");
+    }
+};
+
 window.deleteQuote = async function(id){
     if(!confirm("Eliminare definitivamente questo preventivo?")) return;
     const {error}=await supabaseClient.from("quotes").delete().eq("id",id);
@@ -555,6 +624,7 @@ function renderQuotes(){
             <div class="actions">
                 <button class="secondary" onclick="editQuote('${item.id}')">Modifica</button>
                 <button class="blue" onclick="downloadQuotePDF('${item.id}')">PDF</button>
+                <button class="success" onclick="shareQuoteWhatsApp('${item.id}')">🟢 WhatsApp</button>
                 <button class="secondary" onclick="changeQuoteStatus('${item.id}')">Stato</button>
                 ${status==="accettato"?`<button class="primary" onclick="createAppointmentFromQuote('${item.id}')">📅 Appuntamento</button>`:""}
                 <button class="danger" onclick="deleteQuote('${item.id}')">Elimina</button>
@@ -572,7 +642,7 @@ function loadQuoteLogo(){
     });
 }
 
-async function createQuotePDF(quote,client){
+async function createQuotePDF(quote,client,options={}){
     if(!window.jspdf){ alert("Libreria PDF non caricata. Controlla la connessione e riprova."); return; }
     const {jsPDF}=window.jspdf;
     const doc=new jsPDF({unit:"mm",format:"a4",orientation:"portrait"});
@@ -752,7 +822,17 @@ async function createQuotePDF(quote,client){
         doc.text(`PREVENTIVO ${quote.quote_number||"-"} - PAGINA ${page} DI ${totalPages}`,right,288,{align:"right"});
     }
 
-    doc.save(`${quote.quote_number}-${(client?.name||"cliente").replace(/[^a-z0-9]+/gi,"-")}.pdf`);
+    const fileName=`${quote.quote_number}-${(client?.name||"cliente").replace(/[^a-z0-9]+/gi,"-")}.pdf`;
+
+    if(options.output === "blob"){
+        return {
+            blob: doc.output("blob"),
+            fileName
+        };
+    }
+
+    doc.save(fileName);
+    return {fileName};
 }
 
 function resetQuoteForm(){
@@ -776,7 +856,3 @@ addQuoteItem();
 supabaseClient.auth.getSession().then(({data})=>{
     if(data?.session){ loadQuotes(); loadArticles(); }
 });
-supabaseClient.auth.onAuthStateChange((event,session)=>{
-    if(event === "SIGNED_IN" && session){ loadQuotes(); loadArticles(); }
-});
-})();
