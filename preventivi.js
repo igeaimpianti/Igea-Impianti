@@ -856,3 +856,7 @@ addQuoteItem();
 supabaseClient.auth.getSession().then(({data})=>{
     if(data?.session){ loadQuotes(); loadArticles(); }
 });
+    supabaseClient.auth.onAuthStateChange((event,session)=>{
+    if(event === "SIGNED_IN" && session){ loadQuotes(); loadArticles(); }
+});
+})();
