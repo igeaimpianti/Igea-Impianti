@@ -995,6 +995,18 @@ textarea:focus{
         </div>
 
 
+        <label>Cliente</label>
+        <select
+            id="expenseClient"
+            onchange="refreshExpenseJobs()">
+            <option value="">Nessun cliente / movimento generico</option>
+        </select>
+
+        <label>Lavoro</label>
+        <select id="expenseAppointment">
+            <option value="">Nessun lavoro specifico</option>
+        </select>
+
         <input
             id="expenseDescription"
             placeholder="Descrizione">
@@ -1757,8 +1769,11 @@ function showPage(page){
     if(page === "payments")
         renderPayments();
 
-    if(page === "expenses")
+    if(page === "expenses"){
+        refreshExpenseClients();
+        refreshExpenseJobs();
         renderExpenses();
+    }
 
 }
 
@@ -4826,6 +4841,114 @@ async function deletePayment(id){
    MOVIMENTI ENTRATE / SPESE
 ===================================================== */
 
+function refreshExpenseClients(){
+
+    const select = $("expenseClient");
+
+    if(!select) return;
+
+    const selected = select.value;
+
+    select.innerHTML =
+        '<option value="">Nessun cliente / movimento generico</option>' +
+        clients.map(
+            client =>
+                `<option value="${client.id}">${escapeHTML(client.name)}</option>`
+        ).join("");
+
+    if(
+        selected &&
+        clients.some(
+            client =>
+                String(client.id) ===
+                String(selected)
+        )
+    ){
+        select.value = selected;
+    }
+
+}
+
+
+function refreshExpenseJobs(){
+
+    const select = $("expenseAppointment");
+
+    if(!select) return;
+
+    const clientId =
+        $("expenseClient")?.value || "";
+
+    const selected =
+        select.value;
+
+    if(!clientId){
+
+        select.innerHTML =
+            '<option value="">Nessun lavoro specifico</option>';
+
+        return;
+
+    }
+
+    const jobs =
+        appointments
+        .filter(
+            appointment =>
+                String(appointment.client_id) ===
+                String(clientId)
+        )
+        .sort(
+            (a,b) =>
+                (
+                    String(b.date || "") +
+                    String(b.time || "")
+                ).localeCompare(
+                    String(a.date || "") +
+                    String(a.time || "")
+                )
+        );
+
+    select.innerHTML =
+        '<option value="">Nessun lavoro specifico</option>' +
+        jobs.map(
+            appointment => {
+
+                const status =
+                    appointment.status === "completato"
+                    ? "Completato"
+                    : "Programmato";
+
+                const details =
+                    appointment.notes ||
+                    appointment.description ||
+                    appointment.title ||
+                    "Intervento";
+
+                return `
+                    <option value="${appointment.id}">
+                        ${escapeHTML(formatDate(appointment.date))} ·
+                        ${escapeHTML(details)} ·
+                        ${status}
+                    </option>
+                `;
+            }
+        ).join("");
+
+    if(
+        selected &&
+        jobs.some(
+            appointment =>
+                String(appointment.id) ===
+                String(selected)
+        )
+    ){
+        select.value = selected;
+    }
+
+}
+
+
 function selectMovementType(type){
 
     movementType =
@@ -4913,7 +5036,13 @@ async function createExpense(){
             .trim(),
 
         type:
-            movementType
+            movementType,
+
+        client_id:
+            $("expenseClient")?.value || null,
+
+        appointment_id:
+            $("expenseAppointment")?.value || null
 
     };
 
@@ -4959,6 +5088,11 @@ async function createExpense(){
         .value =
         today();
 
+    if($("expenseClient"))
+        $("expenseClient").value = "";
+
+    refreshExpenseJobs();
+
 
     renderAll();
 
@@ -5002,6 +5136,20 @@ function renderExpenses(){
 
                 const isIncome =
                     movement.type === "income";
+
+                const movementClient =
+                    movement.client_id
+                    ? findClient(movement.client_id)
+                    : null;
+
+                const movementAppointment =
+                    movement.appointment_id
+                    ? appointments.find(
+                        appointment =>
+                            String(appointment.id) ===
+                            String(movement.appointment_id)
+                    )
+                    : null;
 
 
                 return `
@@ -5051,6 +5199,36 @@ function renderExpenses(){
                                 }
 
                             </div>
+
+                            ${
+                                movementClient
+                                ?
+                                `
+                                <div class="sub" style="margin-top:5px">
+                                    👤 ${escapeHTML(movementClient.name)}
+                                </div>
+                                `
+                                :
+                                ""
+                            }
+
+                            ${
+                                movementAppointment
+                                ?
+                                `
+                                <div class="sub">
+                                    🔧 ${formatDate(movementAppointment.date)}
+                                    · ${escapeHTML(
+                                        movementAppointment.notes ||
+                                        movementAppointment.description ||
+                                        movementAppointment.title ||
+                                        "Intervento"
+                                    )}
+                                </div>
+                                `
+                                :
+                                ""
+                            }
 
                         </div>
 
@@ -5494,6 +5672,10 @@ function renderAll(){
     renderAppointments();
 
     renderPayments();
+
+    refreshExpenseClients();
+
+    refreshExpenseJobs();
 
     renderExpenses();
 
