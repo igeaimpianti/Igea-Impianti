@@ -3485,13 +3485,14 @@ function renderCustomInstallmentAmounts(count,remaining,forceRedistribute=false)
                         <div>
                             <label>Rata ${index + 1}</label>
                             <input
-                                data-installment-amount
-                                id="installmentAmount${index}"
-                                type="number"
-                                min="0.01"
-                                step="0.01"
-                                value="${value}"
-                                oninput="updateInstallmentSummary(false)">
+    data-installment-amount
+    id="installmentAmount${index}"
+    type="number"
+    min="0"
+    step="0.01"
+    inputmode="decimal"
+    value="0"
+    oninput="updateInstallmentTotals()">
                         </div>
                         <div class="stat" style="margin-bottom:8px">
                             <small>Scadenza</small>
