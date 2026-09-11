@@ -3528,7 +3528,106 @@ window.redistributeInstallments = function(){
 
 };
 
+function updateInstallmentTotals(){
 
+    const total =
+        Number(
+            $("completionAmount")?.value || 0
+        );
+
+    const deposit =
+        Number(
+            $("depositAmount")?.value || 0
+        );
+
+    const remaining =
+        Math.max(
+            0,
+            Math.round(
+                (total - deposit) * 100
+            ) / 100
+        );
+
+    const inputs =
+        document.querySelectorAll(
+            "[data-installment-amount]"
+        );
+
+    let installmentsTotal = 0;
+
+    inputs.forEach(input => {
+
+        installmentsTotal +=
+            Number(input.value || 0);
+
+    });
+
+    installmentsTotal =
+        Math.round(
+            installmentsTotal * 100
+        ) / 100;
+
+    const difference =
+        Math.round(
+            (remaining - installmentsTotal) * 100
+        ) / 100;
+
+    const summary =
+        $("installmentSummary");
+
+    if(!summary) return;
+
+    summary.innerHTML = `
+
+        <div>
+            <span>Totale lavoro</span>
+            <b>${money(total)}</b>
+        </div>
+
+        <div>
+            <span>Acconto</span>
+            <b class="green">
+                ${money(deposit)}
+            </b>
+        </div>
+
+        <div>
+            <span>Residuo</span>
+            <b class="orange">
+                ${money(remaining)}
+            </b>
+        </div>
+
+        <div>
+            <span>Totale rate inserite</span>
+            <b>${money(installmentsTotal)}</b>
+        </div>
+
+        ${
+            Math.abs(difference) > 0.009
+            ?
+            `
+            <div>
+                <span>Da distribuire</span>
+                <b class="red">
+                    ${money(difference)}
+                </b>
+            </div>
+            `
+            :
+            `
+            <div>
+                <span>Controllo rate</span>
+                <b class="green">
+                    ✓ Corretto
+                </b>
+            </div>
+            `
+        }
+
+    `;
+}
+    
 function updateInstallmentSummary(forceRedistribute=false){
 
     if(
