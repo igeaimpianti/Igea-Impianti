@@ -3212,7 +3212,9 @@ function completeAppointment(id){
                 min="1"
                 max="60"
                 value="2"
-                oninput="updateInstallmentSummary()">
+                oninput="updateInstallmentSummary(true)">
+
+            <div id="customInstallmentAmounts"></div>
 
 
             <label>
@@ -3341,7 +3343,7 @@ function completeAppointment(id){
         .remove("hidden");
 
 
-    updateInstallmentSummary();
+    updateInstallmentSummary(true);
 
 }
 
@@ -3378,14 +3380,155 @@ function selectCompletionPaymentType(type){
 
     if(type === "installments"){
 
-        updateInstallmentSummary();
+        updateInstallmentSummary(true);
 
     }
 
 }
 
 
-function updateInstallmentSummary(){
+function renderCustomInstallmentAmounts(count,remaining,forceRedistribute=false){
+
+    const box =
+        $("customInstallmentAmounts");
+
+    if(!box) return;
+
+    const oldValues = [];
+
+    box.querySelectorAll(
+        "input[data-installment-amount]"
+    )
+    .forEach(
+        input =>
+            oldValues.push(
+                input.value
+            )
+    );
+
+    const shouldRedistribute =
+        forceRedistribute ||
+        oldValues.length !== count;
+
+    let automaticAmounts = [];
+
+    if(count > 0){
+
+        const base =
+            Math.floor(
+                (
+                    remaining /
+                    count
+                ) * 100
+            ) / 100;
+
+        for(
+            let i = 0;
+            i < count;
+            i++
+        ){
+
+            let value = base;
+
+            if(i === count - 1){
+
+                value =
+                    Math.round(
+                        (
+                            remaining -
+                            base * (count - 1)
+                        ) * 100
+                    ) / 100;
+
+            }
+
+            automaticAmounts.push(
+                value
+            );
+
+        }
+
+    }
+
+
+    box.innerHTML = `
+
+        <label style="margin-top:12px">
+            Importo di ogni rata
+        </label>
+
+        <div class="sub" style="margin-bottom:8px">
+            Puoi modificare liberamente gli importi. La somma deve essere uguale al residuo.
+        </div>
+
+        ${
+            Array.from(
+                {length:count},
+                (_,index) => {
+
+                    const value =
+                        shouldRedistribute
+                        ?
+                        automaticAmounts[index]
+                        :
+                        (
+                            oldValues[index] !== undefined &&
+                            oldValues[index] !== ""
+                            ?
+                            oldValues[index]
+                            :
+                            automaticAmounts[index]
+                        );
+
+                    return `
+                    <div class="grid2" style="align-items:end">
+                        <div>
+                            <label>Rata ${index + 1}</label>
+                            <input
+                                data-installment-amount
+                                id="installmentAmount${index}"
+                                type="number"
+                                min="0.01"
+                                step="0.01"
+                                value="${value}"
+                                oninput="updateInstallmentSummary(false)">
+                        </div>
+                        <div class="stat" style="margin-bottom:8px">
+                            <small>Scadenza</small>
+                            <strong id="installmentDue${index}">
+                                -
+                            </strong>
+                        </div>
+                    </div>
+                    `;
+
+                }
+            ).join("")
+        }
+
+        <button
+            type="button"
+            class="secondary"
+            style="width:100%;margin-bottom:10px"
+            onclick="redistributeInstallments()">
+            Dividi automaticamente il residuo
+        </button>
+
+    `;
+
+}
+
+
+window.redistributeInstallments = function(){
+
+    updateInstallmentSummary(
+        true
+    );
+
+};
+
+
+function updateInstallmentSummary(forceRedistribute=false){
 
     if(
         completionPaymentType !==
@@ -3408,14 +3551,19 @@ function updateInstallmentSummary(){
 
 
     let count =
-        Number(
-            $("installmentCount")
-            ?.value || 1
+        Math.floor(
+            Number(
+                $("installmentCount")
+                ?.value || 1
+            )
         );
 
 
     if(count < 1)
         count = 1;
+
+    if(count > 60)
+        count = 60;
 
 
     if(deposit < 0)
@@ -3438,30 +3586,81 @@ function updateInstallmentSummary(){
         );
 
 
-    const base =
-        count > 0
-        ?
-        Math.floor(
-            (
-                remaining/
-                count
-            )*100
-        )/100
-        :
-        0;
+    renderCustomInstallmentAmounts(
+        count,
+        remaining,
+        forceRedistribute
+    );
 
 
-    const last =
-        count > 0
-        ?
+    const firstDate =
+        $("firstDueDate")
+        ?.value ||
+        today();
+
+
+    let installmentsTotal = 0;
+
+
+    for(
+        let i = 0;
+        i < count;
+        i++
+    ){
+
+        const input =
+            $(`installmentAmount${i}`);
+
+        const value =
+            Math.max(
+                0,
+                Number(
+                    input?.value || 0
+                )
+            );
+
+        installmentsTotal =
+            Math.round(
+                (
+                    installmentsTotal +
+                    value
+                ) * 100
+            ) / 100;
+
+
+        const due =
+            new Date(
+                firstDate +
+                "T00:00:00"
+            );
+
+        due.setMonth(
+            due.getMonth() + i
+        );
+
+
+        const dueLabel =
+            $(`installmentDue${i}`);
+
+        if(dueLabel){
+
+            dueLabel.textContent =
+                due.toLocaleDateString(
+                    "it-IT"
+                );
+
+        }
+
+    }
+
+
+    const difference =
         Math.round(
             (
-                remaining-
-                base*(count-1)
-            )*100
-        )/100
-        :
-        0;
+                remaining -
+                installmentsTotal
+            ) * 100
+        ) / 100;
 
 
     const summary =
@@ -3489,21 +3688,26 @@ function updateInstallmentSummary(){
         </div>
 
         <div>
-            <span>${count} rate</span>
-            <b>${money(base)}</b>
+            <span>Totale rate inserite</span>
+            <b>${money(installmentsTotal)}</b>
         </div>
 
         ${
-            count > 1 && last !== base
+            Math.abs(difference) > 0.009
             ?
             `
             <div>
-                <span>Ultima rata</span>
-                <b>${money(last)}</b>
+                <span>Differenza da sistemare</span>
+                <b class="red">${money(difference)}</b>
             </div>
             `
             :
-            ""
+            `
+            <div>
+                <span>Controllo rate</span>
+                <b class="green">✓ Corretto</b>
+            </div>
+            `
         }
 
     `;
@@ -3532,7 +3736,9 @@ function updateInstallmentSummary(){
 
     }
 
-} function updateCompletionNet(){
+}
+
+function updateCompletionNet(){
 
     const amount =
         Number(
@@ -3906,49 +4112,90 @@ async function confirmCompletion(id){
 
 
         /* =============================================
-           RATE
+           RATE PERSONALIZZATE
         ============================================= */
 
         if(remaining > 0){
 
-            const base =
-                Math.floor(
-                    (
-                        remaining/
-                        count
-                    )*100
-                )/100;
-
+            const installmentAmounts = [];
 
             for(
-                let i=0;
-                i<count;
+                let i = 0;
+                i < count;
                 i++
             ){
 
-                let installmentAmount =
-                    base;
+                const installmentAmount =
+                    Math.round(
+                        Number(
+                            $(`installmentAmount${i}`)
+                            ?.value || 0
+                        ) * 100
+                    ) / 100;
 
+                if(
+                    !Number.isFinite(
+                        installmentAmount
+                    ) ||
+                    installmentAmount <= 0
+                ){
 
-                if(i === count-1){
+                    alert(
+                        `Inserisci un importo valido per la rata ${i + 1}.`
+                    );
 
-                    installmentAmount =
-                        Math.round(
-                            (
-                                remaining-
-                                base*(count-1)
-                            )*100
-                        )/100;
+                    return;
 
                 }
 
+                installmentAmounts.push(
+                    installmentAmount
+                );
+
+            }
+
+
+            const installmentsTotal =
+                Math.round(
+                    installmentAmounts.reduce(
+                        (sum,value) =>
+                            sum + value,
+                        0
+                    ) * 100
+                ) / 100;
+
+
+            if(
+                Math.abs(
+                    installmentsTotal -
+                    remaining
+                ) > 0.009
+            ){
+
+                alert(
+                    "La somma delle rate deve essere uguale al residuo.\n\n" +
+                    "Residuo: " +
+                    money(remaining) +
+                    "\nTotale rate: " +
+                    money(installmentsTotal)
+                );
+
+                return;
+
+            }
+
+
+            for(
+                let i = 0;
+                i < count;
+                i++
+            ){
 
                 const due =
                     new Date(
                         firstDate+
                         "T00:00:00"
                     );
-
 
                 due.setMonth(
                     due.getMonth()+i
@@ -3960,16 +4207,6 @@ async function confirmCompletion(id){
                     .slice(0,10);
 
 
-                /*
-                   Se non c'è acconto e l'utente
-                   ha scelto "già pagato", la prima
-                   rata viene considerata pagata.
-
-                   Se c'è acconto, l'acconto viene
-                   considerato il pagamento ricevuto
-                   oggi e le rate restano da pagare.
-                */
-
                 const firstInstallmentPaid =
                     deposit === 0 &&
                     received &&
@@ -3978,13 +4215,17 @@ async function confirmCompletion(id){
 
                 paymentRows.push({
 
-                    client_id:client.id,
+                    client_id:
+                        client.id,
 
-                    appointment_id:appointment.id,
+                    appointment_id:
+                        appointment.id,
 
-                    amount:installmentAmount,
+                    amount:
+                        installmentAmounts[i],
 
-                    due_date:dueDate,
+                    due_date:
+                        dueDate,
 
                     payment_date:
                         firstInstallmentPaid
@@ -4123,6 +4364,9 @@ if(expense > 0){
 
             type:
                 "expense",
+
+            client_id:
+                client.id,
 
             appointment_id:
                 appointment.id
@@ -4448,6 +4692,117 @@ function resetAppointmentForm(){
    PAGAMENTI
 ===================================================== */
 
+function getJobFinancials(appointment){
+
+    const jobPayments =
+        payments.filter(
+            payment =>
+                String(payment.appointment_id) ===
+                String(appointment.id)
+        );
+
+    const jobMovements =
+        expenses.filter(
+            movement =>
+                String(movement.appointment_id) ===
+                String(appointment.id)
+        );
+
+    const scheduledTotal =
+        jobPayments.reduce(
+            (sum,payment) =>
+                sum + Number(payment.amount || 0),
+            0
+        );
+
+    const total =
+        Number(appointment.amount || 0) > 0
+        ? Number(appointment.amount || 0)
+        : scheduledTotal;
+
+    const paidPayments =
+        jobPayments
+        .filter(
+            payment =>
+                getPaymentStatus(payment) === "pagato"
+        )
+        .reduce(
+            (sum,payment) =>
+                sum + Number(payment.amount || 0),
+            0
+        );
+
+    const extraIncome =
+        jobMovements
+        .filter(
+            movement =>
+                movement.type === "income"
+        )
+        .reduce(
+            (sum,movement) =>
+                sum + Number(movement.amount || 0),
+            0
+        );
+
+    const jobExpenses =
+        jobMovements
+        .filter(
+            movement =>
+                movement.type !== "income"
+        )
+        .reduce(
+            (sum,movement) =>
+                sum + Number(movement.amount || 0),
+            0
+        );
+
+    const collected =
+        Math.max(
+            0,
+            Math.round(
+                (paidPayments + extraIncome) * 100
+            ) / 100
+        );
+
+    const residual =
+        Math.max(
+            0,
+            Math.round(
+                (total - collected) * 100
+            ) / 100
+        );
+
+    const net =
+        Math.round(
+            (collected - jobExpenses) * 100
+        ) / 100;
+
+    return {
+        total,
+        collected,
+        residual,
+        expenses:jobExpenses,
+        net,
+        jobPayments,
+        jobMovements
+    };
+
+}
+
+
+function jobDisplayTitle(appointment,client){
+
+    return (
+        appointment.notes ||
+        appointment.description ||
+        appointment.title ||
+        client?.name ||
+        "Lavoro"
+    );
+
+}
+
+
 function renderPayments(){
 
     const query =
@@ -4455,85 +4810,107 @@ function renderPayments(){
             $("paymentSearch")
             ?.value || ""
         )
+        .trim()
         .toLowerCase();
 
+    const jobs =
+        appointments
+        .filter(
+            appointment => {
+
+                const hasPayments =
+                    payments.some(
+                        payment =>
+                            String(payment.appointment_id) ===
+                            String(appointment.id)
+                    );
+
+                const hasMovements =
+                    expenses.some(
+                        movement =>
+                            String(movement.appointment_id) ===
+                            String(appointment.id)
+                    );
+
+                return (
+                    hasPayments ||
+                    hasMovements ||
+                    (
+                        appointment.status === "completato" &&
+                        Number(appointment.amount || 0) > 0
+                    )
+                );
+
+            }
+        )
+        .sort(
+            (a,b) =>
+                String(b.date || "")
+                .localeCompare(
+                    String(a.date || "")
+                )
+        );
+
+    const visibleJobs =
+        jobs.filter(
+            appointment => {
+
+                const client =
+                    findClient(appointment.client_id);
+
+                const text =
+                    (
+                        (client?.name || "") + " " +
+                        jobDisplayTitle(appointment,client) + " " +
+                        (appointment.notes || "") + " " +
+                        (appointment.description || "")
+                    )
+                    .toLowerCase();
+
+                return text.includes(query);
+
+            }
+        );
+
+    const allFinancials =
+        jobs.map(
+            appointment =>
+                getJobFinancials(appointment)
+        );
 
     const received =
-        payments
-        .filter(
-            payment =>
-                getPaymentStatus(payment)
-                ===
-                "pagato"
-        )
-        .reduce(
-            (sum,payment)=>
-                sum+
-                Number(
-                    payment.amount || 0
-                ),
+        allFinancials.reduce(
+            (sum,item) =>
+                sum + item.collected,
             0
         );
-
 
     const remaining =
-        payments
-        .filter(
-            payment =>
-                getPaymentStatus(payment)
-                !==
-                "pagato"
-        )
-        .reduce(
-            (sum,payment)=>
-                sum+
-                Number(
-                    payment.amount || 0
-                ),
+        allFinancials.reduce(
+            (sum,item) =>
+                sum + item.residual,
             0
         );
 
-
-    $("paymentsReceived")
-        .textContent =
+    $("paymentsReceived").textContent =
         money(received);
 
-
-    $("paymentsRemaining")
-        .textContent =
+    $("paymentsRemaining").textContent =
         money(remaining);
 
-
-    $("paymentsClients")
-        .textContent =
+    $("paymentsClients").textContent =
         new Set(
-            payments.map(
-                p=>p.client_id
+            jobs.map(
+                appointment =>
+                    appointment.client_id
             )
         ).size;
 
 
-    const clientsWithPayments =
-        clients.filter(
-            client =>
-                client.name
-                .toLowerCase()
-                .includes(query)
-                &&
-                payments.some(
-                    payment =>
-                        String(
-                            payment.client_id
-                        ) ===
-                        String(client.id)
-                )
-        );
-
-
-    if(!clientsWithPayments.length){
+    if(!visibleJobs.length){
 
         $("paymentsList").innerHTML =
-            '<div class="empty">Nessun pagamento.</div>';
+            '<div class="empty">Nessun lavoro con movimenti economici.</div>';
 
         return;
 
@@ -4541,195 +4918,89 @@ function renderPayments(){
 
 
     $("paymentsList").innerHTML =
-        clientsWithPayments
-        .map(
-            client=>{
+        visibleJobs.map(
+            appointment => {
 
-                const clientPayments =
-                    payments
-                    .filter(
-                        payment =>
-                            String(
-                                payment.client_id
-                            ) ===
-                            String(client.id)
-                    )
-                    .sort(
-                        (a,b)=>
-                            String(a.due_date)
-                            .localeCompare(
-                                String(b.due_date)
-                            )
+                const client =
+                    findClient(
+                        appointment.client_id
                     );
 
-
-                const total =
-                    clientPayments.reduce(
-                        (sum,payment)=>
-                            sum+
-                            Number(
-                                payment.amount || 0
-                            ),
-                        0
+                const data =
+                    getJobFinancials(
+                        appointment
                     );
-
-
-                const paid =
-                    clientPayments
-                    .filter(
-                        payment =>
-                            getPaymentStatus(payment)
-                            ===
-                            "pagato"
-                    )
-                    .reduce(
-                        (sum,payment)=>
-                            sum+
-                            Number(
-                                payment.amount || 0
-                            ),
-                        0
-                    );
-
-
-                const remainingClient =
-                    Math.max(
-                        0,
-                        total-paid
-                    );
-
 
                 const percentage =
-                    total
+                    data.total > 0
                     ?
                     Math.min(
                         100,
-                        paid/total*100
+                        data.collected /
+                        data.total * 100
                     )
                     :
                     0;
 
-
                 return `
 
-                <div class="item">
+                <div
+                    class="item"
+                    onclick="openJobFinance('${appointment.id}')"
+                    style="cursor:pointer">
 
                     <div class="between">
 
-                        <div>
+                        <div style="min-width:0">
 
                             <div class="item-title">
-                                ${escapeHTML(client.name)}
+                                ${escapeHTML(client?.name || "Cliente")}
+                            </div>
+
+                            <div
+                                style="font-weight:800;margin-top:4px">
+                                ${escapeHTML(jobDisplayTitle(appointment,client))}
                             </div>
 
                             <div class="sub">
-                                ${money(paid)}
-                                incassati ·
-                                ${money(remainingClient)}
-                                residui
+                                ${formatDate(appointment.date)}
                             </div>
 
                         </div>
 
                         <b>
-                            ${money(total)}
+                            ${money(data.total)}
                         </b>
 
                     </div>
 
+                    <div
+                        class="grid2"
+                        style="margin-top:12px">
+
+                        <div class="stat">
+                            <small>🟢 Incassato</small>
+                            <strong class="green">
+                                ${money(data.collected)}
+                            </strong>
+                        </div>
+
+                        <div class="stat">
+                            <small>🟠 Residuo</small>
+                            <strong class="orange">
+                                ${money(data.residual)}
+                            </strong>
+                        </div>
+
+                    </div>
 
                     <div class="progress">
                         <i style="width:${percentage}%"></i>
                     </div>
 
-
-                    ${clientPayments.map(
-                        payment=>{
-
-                            const status =
-                                getPaymentStatus(
-                                    payment
-                                );
-
-
-                            return `
-
-                            <div
-                                class="item"
-                                style="margin-top:8px;background:#fff">
-
-                                <div class="between">
-
-                                    <b>
-                                        ${money(payment.amount)}
-                                    </b>
-
-                                    <span class="badge ${paymentStatusClass(payment)}">
-
-                                        ${paymentStatusLabel(payment)}
-
-                                    </span>
-
-                                </div>
-
-
-                                <div class="sub">
-
-                                    Scadenza:
-                                    ${formatDate(payment.due_date)}
-
-                                    ${
-                                        payment.payment_date
-                                        ?
-                                        " · Pagato: "+
-                                        formatDate(payment.payment_date)
-                                        :
-                                        ""
-                                    }
-
-                                    ${
-                                        payment.method
-                                        ?
-                                        " · "+
-                                        escapeHTML(payment.method)
-                                        :
-                                        ""
-                                    }
-
-                                </div>
-
-
-                                <div class="actions">
-
-                                    ${
-                                        status !== "pagato"
-                                        ?
-                                        `
-                                        <button
-                                            class="success"
-                                            onclick="markPaymentPaid('${payment.id}')">
-                                            Segna pagato
-                                        </button>
-                                        `
-                                        :
-                                        ""
-                                    }
-
-
-                                    <button
-                                        class="danger"
-                                        onclick="deletePayment('${payment.id}')">
-                                        Elimina
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                            `;
-
-                        }
-                    ).join("")}
+                    <div class="sub" style="text-align:right">
+                        Tocca per aprire il lavoro ›
+                    </div>
 
                 </div>
 
@@ -4740,6 +5011,890 @@ function renderPayments(){
         .join("");
 
 }
+
+
+window.openJobFinance = function(id){
+
+    const appointment =
+        appointments.find(
+            item =>
+                String(item.id) ===
+                String(id)
+        );
+
+    if(!appointment) return;
+
+    const client =
+        findClient(
+            appointment.client_id
+        );
+
+    const data =
+        getJobFinancials(
+            appointment
+        );
+
+    const paymentsHtml =
+        data.jobPayments.length
+        ?
+        [...data.jobPayments]
+        .sort(
+            (a,b) =>
+                String(a.due_date || "")
+                .localeCompare(
+                    String(b.due_date || "")
+                )
+        )
+        .map(
+            payment => {
+
+                const status =
+                    getPaymentStatus(
+                        payment
+                    );
+
+                return `
+                <div class="item" style="background:#fff">
+
+                    <div class="between">
+
+                        <b>${money(payment.amount)}</b>
+
+                        <span class="badge ${paymentStatusClass(payment)}">
+                            ${paymentStatusLabel(payment)}
+                        </span>
+
+                    </div>
+
+                    <div class="sub">
+
+                        Scadenza:
+                        ${formatDate(payment.due_date)}
+
+                        ${
+                            payment.payment_date
+                            ?
+                            " · Pagato: " +
+                            formatDate(payment.payment_date)
+                            :
+                            ""
+                        }
+
+                        ${
+                            payment.method
+                            ?
+                            " · " +
+                            escapeHTML(payment.method)
+                            :
+                            ""
+                        }
+
+                    </div>
+
+                    <div class="actions">
+
+                        ${
+                            status !== "pagato"
+                            ?
+                            `
+                            <button
+                                class="success"
+                                onclick="markPaymentPaid('${payment.id}');setTimeout(()=>openJobFinance('${appointment.id}'),200)">
+                                Segna pagato
+                            </button>
+                            `
+                            :
+                            ""
+                        }
+
+                        <button
+                            class="danger"
+                            onclick="deletePaymentFromJob('${payment.id}','${appointment.id}')">
+                            Elimina
+                        </button>
+
+                    </div>
+
+                </div>
+                `;
+
+            }
+        )
+        .join("")
+        :
+        '<div class="empty">Nessuna rata programmata.</div>';
+
+
+    const movementsHtml =
+        data.jobMovements.length
+        ?
+        [...data.jobMovements]
+        .sort(
+            (a,b) =>
+                String(b.date || "")
+                .localeCompare(
+                    String(a.date || "")
+                )
+        )
+        .map(
+            movement => {
+
+                const income =
+                    movement.type === "income";
+
+                return `
+                <div class="item">
+
+                    <div class="between">
+
+                        <div>
+
+                            <b>
+                                ${
+                                    income
+                                    ?
+                                    "🟢 Entrata"
+                                    :
+                                    "🔴 Spesa"
+                                }
+                            </b>
+
+                            <div class="sub">
+                                ${formatDate(movement.date)}
+                                ${
+                                    movement.description
+                                    ?
+                                    " · " +
+                                    escapeHTML(movement.description)
+                                    :
+                                    ""
+                                }
+                            </div>
+
+                        </div>
+
+                        <b class="${income ? "green" : "red"}">
+                            ${income ? "+" : "-"}
+                            ${money(movement.amount)}
+                        </b>
+
+                    </div>
+
+                    ${
+                        movement.notes
+                        ?
+                        `
+                        <div class="sub">
+                            ${escapeHTML(movement.notes)}
+                        </div>
+                        `
+                        :
+                        ""
+                    }
+
+                    <div class="actions">
+
+                        <button
+                            class="secondary"
+                            onclick="editJobMovement('${movement.id}','${appointment.id}')">
+                            Modifica
+                        </button>
+
+                        <button
+                            class="danger"
+                            onclick="deleteJobMovement('${movement.id}','${appointment.id}')">
+                            Elimina
+                        </button>
+
+                    </div>
+
+                </div>
+                `;
+
+            }
+        )
+        .join("")
+        :
+        '<div class="empty">Nessuna entrata o spesa aggiuntiva.</div>';
+
+
+    $("modalContent").innerHTML = `
+
+        <div class="between">
+
+            <div>
+
+                <h2 style="margin-bottom:3px">
+                    💼 ${escapeHTML(client?.name || "Cliente")}
+                </h2>
+
+                <div class="sub">
+                    ${escapeHTML(jobDisplayTitle(appointment,client))}
+                    · ${formatDate(appointment.date)}
+                </div>
+
+            </div>
+
+            <button
+                class="secondary"
+                onclick="closeModal()">
+                ✕
+            </button>
+
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="grid2">
+
+            <div class="stat">
+                <small>Totale lavoro</small>
+                <strong>${money(data.total)}</strong>
+            </div>
+
+            <div class="stat">
+                <small>🟢 Incassato</small>
+                <strong class="green">
+                    ${money(data.collected)}
+                </strong>
+            </div>
+
+            <div class="stat">
+                <small>🟠 Residuo</small>
+                <strong class="orange">
+                    ${money(data.residual)}
+                </strong>
+            </div>
+
+            <div class="stat">
+                <small>🔴 Spese</small>
+                <strong class="red">
+                    ${money(data.expenses)}
+                </strong>
+            </div>
+
+        </div>
+
+        <div
+            class="stat"
+            style="margin-top:9px;text-align:center">
+
+            <small>💰 Netto incassato</small>
+
+            <strong
+                class="${data.net >= 0 ? "green" : "red"}"
+                style="font-size:22px">
+                ${money(data.net)}
+            </strong>
+
+        </div>
+
+        <div class="actions">
+
+            <button
+                class="success"
+                onclick="addJobMovement('${appointment.id}','income')">
+                ＋ Entrata
+            </button>
+
+            <button
+                class="danger"
+                onclick="addJobMovement('${appointment.id}','expense')">
+                ＋ Spesa
+            </button>
+
+        </div>
+
+        <button
+            class="secondary"
+            style="width:100%;margin-top:8px"
+            onclick="editJobTotal('${appointment.id}')">
+            ✏️ Modifica totale lavoro
+        </button>
+
+        <div class="divider"></div>
+
+        <h3>💳 Rate e pagamenti</h3>
+
+        ${paymentsHtml}
+
+        <div class="divider"></div>
+
+        <h3>💰 Entrate e spese del lavoro</h3>
+
+        ${movementsHtml}
+
+    `;
+
+    $("modal")
+        .classList
+        .add("modal-center");
+
+    $("modal")
+        .classList
+        .remove("hidden");
+
+};
+
+
+window.addJobMovement = function(appointmentId,type){
+
+    const appointment =
+        appointments.find(
+            item =>
+                String(item.id) ===
+                String(appointmentId)
+        );
+
+    if(!appointment) return;
+
+    const client =
+        findClient(
+            appointment.client_id
+        );
+
+    $("modalContent").innerHTML = `
+
+        <h2>
+            ${
+                type === "income"
+                ?
+                "🟢 Nuova entrata"
+                :
+                "🔴 Nuova spesa"
+            }
+        </h2>
+
+        <div class="sub">
+            ${escapeHTML(client?.name || "Cliente")}
+            · ${escapeHTML(jobDisplayTitle(appointment,client))}
+        </div>
+
+        <label>Descrizione</label>
+        <input
+            id="jobMovementDescription"
+            placeholder="${
+                type === "income"
+                ?
+                "Es. Acconto aggiuntivo"
+                :
+                "Es. Materiale elettrico"
+            }">
+
+        <label>Importo</label>
+        <input
+            id="jobMovementAmount"
+            type="number"
+            min="0.01"
+            step="0.01"
+            placeholder="0,00">
+
+        <label>Data</label>
+        <input
+            id="jobMovementDate"
+            type="date"
+            value="${today()}">
+
+        <label>Categoria</label>
+        <input
+            id="jobMovementCategory"
+            value="${
+                type === "income"
+                ?
+                "Incasso lavoro"
+                :
+                "Spesa lavoro"
+            }">
+
+        <label>Note</label>
+        <textarea
+            id="jobMovementNotes"
+            placeholder="Note facoltative"></textarea>
+
+        <div class="actions">
+
+            <button
+                class="secondary"
+                onclick="openJobFinance('${appointment.id}')">
+                Annulla
+            </button>
+
+            <button
+                class="${
+                    type === "income"
+                    ?
+                    "success"
+                    :
+                    "danger"
+                }"
+                onclick="saveJobMovement('${appointment.id}','${type}')">
+                Salva
+            </button>
+
+        </div>
+
+    `;
+
+};
+
+
+window.saveJobMovement = async function(appointmentId,type){
+
+    const appointment =
+        appointments.find(
+            item =>
+                String(item.id) ===
+                String(appointmentId)
+        );
+
+    if(!appointment) return;
+
+    const amount =
+        Math.round(
+            Number(
+                $("jobMovementAmount")
+                ?.value || 0
+            ) * 100
+        ) / 100;
+
+    const date =
+        $("jobMovementDate")
+        ?.value || today();
+
+    if(
+        !Number.isFinite(amount) ||
+        amount <= 0
+    ){
+        alert("Inserisci un importo valido.");
+        return;
+    }
+
+    const payload = {
+
+        description:
+            $("jobMovementDescription")
+            ?.value
+            .trim() ||
+            (
+                type === "income"
+                ?
+                "Entrata lavoro"
+                :
+                "Spesa lavoro"
+            ),
+
+        amount,
+
+        date,
+
+        category:
+            $("jobMovementCategory")
+            ?.value
+            .trim() || "",
+
+        notes:
+            $("jobMovementNotes")
+            ?.value
+            .trim() || "",
+
+        type,
+
+        client_id:
+            appointment.client_id,
+
+        appointment_id:
+            appointment.id
+
+    };
+
+    const {
+        data,
+        error
+    } =
+    await supabaseClient
+        .from("expenses")
+        .insert(payload)
+        .select()
+        .single();
+
+    if(error){
+        alert(
+            "Errore salvataggio movimento:\n" +
+            error.message
+        );
+        return;
+    }
+
+    expenses.push(data);
+
+    renderAll();
+
+    openJobFinance(
+        appointment.id
+    );
+
+    toast(
+        type === "income"
+        ?
+        "Entrata aggiunta al lavoro"
+        :
+        "Spesa aggiunta al lavoro"
+    );
+
+};
+
+
+window.editJobMovement = function(movementId,appointmentId){
+
+    const movement =
+        expenses.find(
+            item =>
+                String(item.id) ===
+                String(movementId)
+        );
+
+    if(!movement) return;
+
+    $("modalContent").innerHTML = `
+
+        <h2>
+            ✏️ Modifica ${
+                movement.type === "income"
+                ?
+                "entrata"
+                :
+                "spesa"
+            }
+        </h2>
+
+        <label>Descrizione</label>
+        <input
+            id="editJobMovementDescription"
+            value="${escapeHTML(movement.description || "")}">
+
+        <label>Importo</label>
+        <input
+            id="editJobMovementAmount"
+            type="number"
+            min="0.01"
+            step="0.01"
+            value="${escapeHTML(movement.amount)}">
+
+        <label>Data</label>
+        <input
+            id="editJobMovementDate"
+            type="date"
+            value="${escapeHTML(movement.date || today())}">
+
+        <label>Categoria</label>
+        <input
+            id="editJobMovementCategory"
+            value="${escapeHTML(movement.category || "")}">
+
+        <label>Note</label>
+        <textarea
+            id="editJobMovementNotes">${escapeHTML(movement.notes || "")}</textarea>
+
+        <div class="actions">
+
+            <button
+                class="secondary"
+                onclick="openJobFinance('${appointmentId}')">
+                Annulla
+            </button>
+
+            <button
+                class="primary"
+                onclick="saveJobMovementEdit('${movementId}','${appointmentId}')">
+                Salva modifiche
+            </button>
+
+        </div>
+
+    `;
+
+};
+
+
+window.saveJobMovementEdit = async function(movementId,appointmentId){
+
+    const amount =
+        Math.round(
+            Number(
+                $("editJobMovementAmount")
+                ?.value || 0
+            ) * 100
+        ) / 100;
+
+    if(
+        !Number.isFinite(amount) ||
+        amount <= 0
+    ){
+        alert("Inserisci un importo valido.");
+        return;
+    }
+
+    const payload = {
+
+        description:
+            $("editJobMovementDescription")
+            ?.value
+            .trim() || "",
+
+        amount,
+
+        date:
+            $("editJobMovementDate")
+            ?.value || today(),
+
+        category:
+            $("editJobMovementCategory")
+            ?.value
+            .trim() || "",
+
+        notes:
+            $("editJobMovementNotes")
+            ?.value
+            .trim() || ""
+
+    };
+
+    const {
+        data,
+        error
+    } =
+    await supabaseClient
+        .from("expenses")
+        .update(payload)
+        .eq("id",movementId)
+        .select()
+        .single();
+
+    if(error){
+        alert(
+            "Errore modifica movimento:\n" +
+            error.message
+        );
+        return;
+    }
+
+    expenses =
+        expenses.map(
+            item =>
+                String(item.id) ===
+                String(movementId)
+                ?
+                data
+                :
+                item
+        );
+
+    renderAll();
+
+    openJobFinance(
+        appointmentId
+    );
+
+    toast(
+        "Movimento aggiornato"
+    );
+
+};
+
+
+window.deleteJobMovement = async function(movementId,appointmentId){
+
+    if(
+        !confirm(
+            "Eliminare questo movimento dal lavoro?"
+        )
+    ) return;
+
+    const {
+        error
+    } =
+    await supabaseClient
+        .from("expenses")
+        .delete()
+        .eq("id",movementId);
+
+    if(error){
+        alert(error.message);
+        return;
+    }
+
+    expenses =
+        expenses.filter(
+            item =>
+                String(item.id) !==
+                String(movementId)
+        );
+
+    renderAll();
+
+    openJobFinance(
+        appointmentId
+    );
+
+    toast(
+        "Movimento eliminato"
+    );
+
+};
+
+
+window.editJobTotal = function(appointmentId){
+
+    const appointment =
+        appointments.find(
+            item =>
+                String(item.id) ===
+                String(appointmentId)
+        );
+
+    if(!appointment) return;
+
+    const data =
+        getJobFinancials(
+            appointment
+        );
+
+    $("modalContent").innerHTML = `
+
+        <h2>✏️ Modifica totale lavoro</h2>
+
+        <label>Totale lavoro</label>
+
+        <input
+            id="editJobTotalAmount"
+            type="number"
+            min="0"
+            step="0.01"
+            value="${escapeHTML(data.total)}">
+
+        <div class="actions">
+
+            <button
+                class="secondary"
+                onclick="openJobFinance('${appointment.id}')">
+                Annulla
+            </button>
+
+            <button
+                class="primary"
+                onclick="saveJobTotal('${appointment.id}')">
+                Salva
+            </button>
+
+        </div>
+
+    `;
+
+};
+
+
+window.saveJobTotal = async function(appointmentId){
+
+    const amount =
+        Math.round(
+            Number(
+                $("editJobTotalAmount")
+                ?.value || 0
+            ) * 100
+        ) / 100;
+
+    if(
+        !Number.isFinite(amount) ||
+        amount < 0
+    ){
+        alert("Inserisci un totale valido.");
+        return;
+    }
+
+    const {
+        data,
+        error
+    } =
+    await supabaseClient
+        .from("appointments")
+        .update({
+            amount
+        })
+        .eq("id",appointmentId)
+        .select()
+        .single();
+
+    if(error){
+        alert(
+            "Errore modifica totale lavoro:\n" +
+            error.message
+        );
+        return;
+    }
+
+    appointments =
+        appointments.map(
+            item =>
+                String(item.id) ===
+                String(appointmentId)
+                ?
+                data
+                :
+                item
+        );
+
+    renderAll();
+
+    openJobFinance(
+        appointmentId
+    );
+
+    toast(
+        "Totale lavoro aggiornato"
+    );
+
+};
+
+
+window.deletePaymentFromJob = async function(paymentId,appointmentId){
+
+    if(
+        !confirm(
+            "Eliminare questo pagamento/rata?"
+        )
+    ) return;
+
+    const {
+        error
+    } =
+    await supabaseClient
+        .from("payments")
+        .delete()
+        .eq("id",paymentId);
+
+    if(error){
+        alert(error.message);
+        return;
+    }
+
+    payments =
+        payments.filter(
+            item =>
+                String(item.id) !==
+                String(paymentId)
+        );
+
+    renderAll();
+
+    openJobFinance(
+        appointmentId
+    );
+
+    toast(
+        "Pagamento eliminato"
+    );
+
+};
 
 
 async function markPaymentPaid(id){
