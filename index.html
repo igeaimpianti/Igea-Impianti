@@ -552,6 +552,11 @@ textarea:focus{
         padding:10px 7px;
     }
 
+    .appointment-actions button{
+        padding:11px 5px;
+        font-size:12px;
+    }
+
 }
 
 </style>
@@ -1363,9 +1368,12 @@ function escapeHTML(value){
 
 function today(){
 
-    return new Date()
-        .toISOString()
-        .slice(0,10);
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth()+1).padStart(2,"0");
+    const day = String(now.getDate()).padStart(2,"0");
+
+    return `${year}-${month}-${day}`;
 
 }
 
@@ -2344,6 +2352,25 @@ function clientHistory(id){
             }
         </div>
 
+        ${
+            client.address
+            ?
+            `
+            <div class="sub" style="margin-top:8px">
+                📍 ${escapeHTML(client.address)}${client.city ? " · "+escapeHTML(client.city) : ""}
+            </div>
+
+            <button
+                class="blue"
+                style="width:100%;margin-top:10px"
+                onclick="openClientMaps('${client.id}')">
+                📍 Apri in Mappe
+            </button>
+            `
+            :
+            ""
+        }
+
         <div class="divider"></div>
 
         <h3>📅 Appuntamenti</h3>
@@ -2446,6 +2473,29 @@ function clientHistory(id){
     $("modal")
         .classList
         .remove("hidden");
+
+}
+
+
+function openClientMaps(id){
+
+    const client = findClient(id);
+
+    if(!client || !client.address){
+        toast("Indirizzo cliente non disponibile");
+        return;
+    }
+
+    const address = [
+        client.address,
+        client.city
+    ]
+    .filter(Boolean)
+    .join(", ");
+
+    window.location.href =
+        "https://maps.apple.com/?q=" +
+        encodeURIComponent(address);
 
 }
 
@@ -2812,105 +2862,36 @@ function appointmentCard(
             appointment.client_id
         );
 
-
     return `
 
     <div class="item">
 
         <div class="between">
-
             <div>
-
-                <div class="item-title">
-
-                    ${escapeHTML(
-                        client?.name ||
-                        "Cliente"
-                    )}
-
-                </div>
-
+                <div class="item-title">${escapeHTML(client?.name || "Cliente")}</div>
                 <div class="sub">
-
-                    ${formatDate(
-                        appointment.date
-                    )}
-
-                    ${
-                        appointment.time
-                        ?
-                        " · "+
-                        escapeHTML(
-                            appointment.time.slice(0,5)
-                        )
-                        :
-                        ""
-                    }
-
+                    ${formatDate(appointment.date)}
+                    ${appointment.time ? " · "+escapeHTML(appointment.time.slice(0,5)) : ""}
                 </div>
-
             </div>
 
-            <span class="badge ${
-                programmed
-                ? "orange"
-                : "green"
-            }">
-
-                ${
-                    programmed
-                    ?
-                    "Programmato"
-                    :
-                    "Completato"
-                }
-
+            <span class="badge ${programmed ? "orange" : "green"}">
+                ${programmed ? "Programmato" : "Completato"}
             </span>
-
         </div>
 
+        ${appointment.notes ? `<div class="sub" style="margin-top:8px">${escapeHTML(appointment.notes)}</div>` : ""}
 
-        ${
-            appointment.notes
-            ?
-            `
-            <div class="sub" style="margin-top:8px">
-                ${escapeHTML(appointment.notes)}
+        ${programmed ? `
+            <div class="actions appointment-actions">
+                <button class="success" onclick="completeAppointment('${appointment.id}')">✓ Completa</button>
+                <button class="secondary" onclick="editProgrammedAppointment('${appointment.id}')">✏️ Modifica</button>
+                <button class="danger" onclick="deleteProgrammedAppointment('${appointment.id}')">🗑️ Elimina</button>
             </div>
-            `
-            :
-            ""
-        }
-
-
-        ${
-            programmed
-            ?
-            `
-            <div class="actions">
-
-                <button
-                    class="success"
-                    onclick="completeAppointment('${appointment.id}')">
-                    ✓ Completa
-                </button>
-
-            </div>
-            `
-            :
-            `
-            <div class="sub" style="margin-top:9px">
-                Appuntamento completato
-            </div>
-
-            <button
-                class="danger"
-                style="width:100%;margin-top:9px"
-                onclick="deleteCompletedAppointment('${appointment.id}')">
-                Elimina appuntamento
-            </button>
-            `
-        }
+        ` : `
+            <div class="sub" style="margin-top:9px">Appuntamento completato</div>
+            <button class="danger" style="width:100%;margin-top:9px" onclick="deleteCompletedAppointment('${appointment.id}')">Elimina appuntamento</button>
+        `}
 
     </div>
 
@@ -2925,121 +2906,154 @@ function appointmentCard(
 
 function renderDashboardAppointments(){
 
-    const upcoming =
-        appointments
-        .filter(
-            appointment =>
-                appointment.status === "programmato"
-                        )
-        .sort(
-            (a,b)=>
-                (
-                    a.date+
-                    (a.time || "")
-                )
-                .localeCompare(
-                    b.date+
-                    (b.time || "")
-                )
-        )
+    const upcoming = appointments
+        .filter(appointment => appointment.status === "programmato")
+        .sort((a,b)=>(a.date+(a.time || "")).localeCompare(b.date+(b.time || "")))
         .slice(0,10);
 
-
     if(!upcoming.length){
-
         $("dashboardAppointments").innerHTML =
             '<div class="empty">Nessun appuntamento programmato.</div>';
-
         return;
-
     }
 
-
-    $("dashboardAppointments").innerHTML =
-        upcoming.map(
-            appointment=>{
-
-                const client =
-                    findClient(
-                        appointment.client_id
-                    );
-
-
-                return `
-
-                <div class="item">
-
-                    <div class="between">
-
-                        <div>
-
-                            <div class="item-title">
-
-                                ${escapeHTML(
-                                    client?.name ||
-                                    "Cliente"
-                                )}
-
-                            </div>
-
-                            <div class="sub">
-
-                                ${formatDate(
-                                    appointment.date
-                                )}
-
-                                ${
-                                    appointment.time
-                                    ?
-                                    " · "+
-                                    escapeHTML(
-                                        appointment.time.slice(0,5)
-                                    )
-                                    :
-                                    ""
-                                }
-
-                            </div>
-
-                            ${
-                                appointment.notes
-                                ?
-                                `
-                                <div class="sub">
-                                    ${escapeHTML(
-                                        appointment.notes
-                                    )}
-                                </div>
-                                `
-                                :
-                                ""
-                            }
-
+    $("dashboardAppointments").innerHTML = upcoming.map(appointment=>{
+        const client = findClient(appointment.client_id);
+        return `
+            <div class="item">
+                <div class="between">
+                    <div>
+                        <div class="item-title">${escapeHTML(client?.name || "Cliente")}</div>
+                        <div class="sub">
+                            ${formatDate(appointment.date)}
+                            ${appointment.time ? " · "+escapeHTML(appointment.time.slice(0,5)) : ""}
                         </div>
-
-                        <span class="badge orange">
-                            Programmato
-                        </span>
-
+                        ${appointment.notes ? `<div class="sub">${escapeHTML(appointment.notes)}</div>` : ""}
                     </div>
-
-
-                    <button
-                        class="success"
-                        style="width:100%;margin-top:10px"
-                        onclick="completeAppointment('${appointment.id}')">
-
-                        ✓ Completa appuntamento
-
-                    </button>
-
+                    <span class="badge orange">Programmato</span>
                 </div>
 
-                `;
+                <div class="actions appointment-actions">
+                    <button class="success" onclick="completeAppointment('${appointment.id}')">✓ Completa</button>
+                    <button class="secondary" onclick="editProgrammedAppointment('${appointment.id}')">✏️ Modifica</button>
+                    <button class="danger" onclick="deleteProgrammedAppointment('${appointment.id}')">🗑️ Elimina</button>
+                </div>
+            </div>
+        `;
+    }).join("");
 
-            }
-        )
-        .join("");
+}
+
+
+function editProgrammedAppointment(id){
+
+    const appointment = appointments.find(
+        item => String(item.id) === String(id)
+    );
+
+    if(!appointment || appointment.status !== "programmato") return;
+
+    $("modalContent").innerHTML = `
+        <h2>✏️ Modifica appuntamento</h2>
+
+        <label>Cliente</label>
+        <select id="editAppointmentClient">
+            ${clients.map(client=>`
+                <option value="${client.id}" ${String(client.id)===String(appointment.client_id)?"selected":""}>
+                    ${escapeHTML(client.name)}
+                </option>
+            `).join("")}
+        </select>
+
+        <label>Data</label>
+        <input id="editAppointmentDate" type="date" value="${escapeHTML(appointment.date || today())}">
+
+        <label>Ora</label>
+        <input id="editAppointmentTime" type="time" value="${escapeHTML((appointment.time || "").slice(0,5))}">
+
+        <label>Note</label>
+        <textarea id="editAppointmentNotes" placeholder="Note appuntamento">${escapeHTML(appointment.notes || "")}</textarea>
+
+        <div class="actions">
+            <button class="secondary" onclick="closeModal()">Annulla</button>
+            <button class="primary" onclick="saveProgrammedAppointmentEdit('${appointment.id}')">Salva modifiche</button>
+        </div>
+    `;
+
+    $("modal").classList.add("modal-center");
+    $("modal").classList.remove("hidden");
+
+}
+
+
+async function saveProgrammedAppointmentEdit(id){
+
+    const appointment = appointments.find(
+        item => String(item.id) === String(id)
+    );
+
+    if(!appointment || appointment.status !== "programmato") return;
+
+    const clientId = $("editAppointmentClient").value;
+    const date = $("editAppointmentDate").value;
+    const time = $("editAppointmentTime").value || null;
+    const notes = $("editAppointmentNotes").value.trim() || null;
+
+    if(!clientId){ alert("Seleziona il cliente."); return; }
+    if(!date){ alert("Inserisci la data."); return; }
+
+    const {data,error} = await supabaseClient
+        .from("appointments")
+        .update({client_id:clientId,date,time,notes})
+        .eq("id",id)
+        .select()
+        .single();
+
+    if(error){
+        alert("Errore modifica appuntamento:\n"+error.message);
+        return;
+    }
+
+    appointments = appointments.map(
+        item => String(item.id) === String(id) ? data : item
+    );
+
+    closeModal();
+    renderAll();
+    toast("Appuntamento aggiornato");
+
+}
+
+
+async function deleteProgrammedAppointment(id){
+
+    const appointment = appointments.find(
+        item => String(item.id) === String(id)
+    );
+
+    if(!appointment || appointment.status !== "programmato") return;
+
+    if(!confirm("Eliminare definitivamente questo appuntamento programmato?")) return;
+
+    const client = findClient(appointment.client_id);
+
+    const {error} = await supabaseClient
+        .from("appointments")
+        .delete()
+        .eq("id",id);
+
+    if(error){
+        alert("Errore eliminazione appuntamento:\n"+error.message);
+        return;
+    }
+
+    appointments = appointments.filter(
+        item => String(item.id) !== String(id)
+    );
+
+    renderAll();
+    await notifyAppointmentDeleted(appointment,client);
+    toast("Appuntamento eliminato");
 
 }
 
@@ -6971,6 +6985,6 @@ function renderAll(){
 init();
 
 </script>
-<script src="preventivi.js?v=6"></script>
+<script src="preventivi.js?v=14"></script>
 </body>
 </html>
