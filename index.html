@@ -1232,7 +1232,7 @@ async function registerNotificationDevice(){
        Notification.permission !== "granted" || !currentUser) return false;
 
     notificationRegistration =
-        await navigator.serviceWorker.register("./sw.js?v=185");
+        await navigator.serviceWorker.register("./sw.js?v=205");
     await navigator.serviceWorker.ready;
 
     let subscription =
@@ -2967,9 +2967,11 @@ function renderDashboardAppointments(){
                     <span class="badge orange">Programmato</span>
                 </div>
 
-                <div class="actions appointment-actions">
+                <div class="actions appointment-actions" style="flex-wrap:wrap">
                     <button class="success" onclick="completeAppointment('${appointment.id}')">✓ Completa</button>
                     <button class="secondary" onclick="editProgrammedAppointment('${appointment.id}')">✏️ Modifica</button>
+                    <button class="blue" onclick="openJobDocuments('${appointment.id}')">📎 Documenti</button>
+                    <button class="secondary" onclick="openAppointmentExpense('${appointment.id}')">💶 Spesa</button>
                     <button class="danger" onclick="deleteProgrammedAppointment('${appointment.id}')">🗑️ Elimina</button>
                 </div>
             </div>
@@ -6960,7 +6962,7 @@ function renderDashboard(){
 
 
 /* =====================================================
-   IGEA V18 - DOCUMENTI E SPESE SU LAVORI APERTI
+   IGEA V20 - DOCUMENTI E SPESE ANCHE IN DASHBOARD
 ===================================================== */
 let workTasks = [];
 let jobDocuments = [];
@@ -6985,7 +6987,7 @@ function renderNextAppointment(){
       .sort((a,b)=>(a.date+(a.time||"" )).localeCompare(b.date+(b.time||"")))[0];
     if(!next){ box.innerHTML='<div class="empty">Nessun prossimo appuntamento.</div>'; return; }
     const client=findClient(next.client_id);
-    box.innerHTML=`<div class="item" style="margin-bottom:0"><div class="between"><div><div class="item-title">${escapeHTML(client?.name||"Cliente")}</div><div class="sub">${formatDate(next.date)}${next.time?" · "+escapeHTML(next.time.slice(0,5)):""}</div>${next.notes?`<div class="sub">${escapeHTML(next.notes)}</div>`:""}</div><span class="badge orange">Prossimo</span></div><div class="actions"><button class="success" onclick="completeAppointment('${next.id}')">✓ Completa</button><button class="secondary" onclick="editProgrammedAppointment('${next.id}')">✏️ Modifica</button></div></div>`;
+    box.innerHTML=`<div class="item" style="margin-bottom:0"><div class="between"><div><div class="item-title">${escapeHTML(client?.name||"Cliente")}</div><div class="sub">${formatDate(next.date)}${next.time?" · "+escapeHTML(next.time.slice(0,5)):""}</div>${next.notes?`<div class="sub">${escapeHTML(next.notes)}</div>`:""}</div><span class="badge orange">Prossimo</span></div><div class="actions" style="flex-wrap:wrap"><button class="success" onclick="completeAppointment('${next.id}')">✓ Completa</button><button class="secondary" onclick="editProgrammedAppointment('${next.id}')">✏️ Modifica</button><button class="blue" onclick="openJobDocuments('${next.id}')">📎 Documenti</button><button class="secondary" onclick="openAppointmentExpense('${next.id}')">💶 Spesa</button></div></div>`;
 }
 
 function renderWorkTasks(){
@@ -7307,7 +7309,7 @@ function startDocumentScan(appointmentId){
     pickDocumentFiles(files=>prepareScannedPDF(appointmentId,files));
 }
 
-async function fileToCanvas(file,maxSide=1800){
+async function fileToCanvas(file,maxSide=2600){
     const url=URL.createObjectURL(file);
     try{
         const img=new Image();
@@ -7439,14 +7441,15 @@ async function openScanEditor(file,index,total){
     return await new Promise(resolve=>{
         scanSession={canvas,corners,resolve,index,total};
         $("modalContent").innerHTML=`
-            <h2>📄 Ritaglia documento</h2>
-            <p class="sub">Pagina ${index+1} di ${total}. Ho cercato automaticamente i bordi. Se serve, trascina i 4 punti esattamente sugli angoli del foglio.</p>
+            <h2>Scanner documento</h2>
+            <p class="sub">Pagina ${index+1} di ${total} · Colore originale HD. Regola i 4 angoli solo se necessario.</p>
             <div style="display:flex;justify-content:center;overflow:hidden;border-radius:14px;background:#111">
                 <canvas id="scanEditorCanvas" style="max-width:100%;touch-action:none"></canvas>
             </div>
-            <div class="actions" style="margin-top:12px">
-                <button class="secondary" onclick="scanResetCorners()">↻ Rileva di nuovo</button>
-                <button class="success" onclick="scanAcceptPage()">✓ Usa pagina</button>
+            <div style="display:flex;gap:8px;margin-top:12px">
+                <button class="secondary" style="flex:1" onclick="scanResetCorners()">⌗ Automatico</button>
+                <button class="secondary" style="flex:1" disabled>🌈 Colore HD</button>
+                <button class="success" style="flex:1" onclick="scanAcceptPage()">✓ Salva</button>
             </div>
             <button class="danger" style="width:100%;margin-top:8px" onclick="scanCancelAll()">Annulla scansione</button>`;
         $("modal").classList.add("modal-center");$("modal").classList.remove("hidden");
@@ -7477,8 +7480,8 @@ function warpDocument(source,corners){
     const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
     let w=Math.max(dist(p[0],p[1]),dist(p[3],p[2]));
     let h=Math.max(dist(p[0],p[3]),dist(p[1],p[2]));
-    w=Math.max(300,Math.min(2200,Math.round(w)));
-    h=Math.max(300,Math.min(3000,Math.round(h)));
+    w=Math.max(300,Math.min(2800,Math.round(w)));
+    h=Math.max(300,Math.min(3800,Math.round(h)));
 
     if(window.cv && cv.Mat){
         let src,dst,srcTri,dstTri,M;
@@ -7504,11 +7507,10 @@ function warpDocument(source,corners){
 }
 
 function enhanceScanCanvas(canvas){
-    const out=document.createElement("canvas");out.width=canvas.width;out.height=canvas.height;
-    const ctx=out.getContext("2d",{alpha:false});
-    ctx.filter="contrast(1.08) brightness(1.03) saturate(.92)";
-    ctx.drawImage(canvas,0,0);
-    ctx.filter="none";
+    // Modalità Colore originale: nessuna desaturazione e nessun filtro distruttivo.
+    const out=document.createElement("canvas");
+    out.width=canvas.width;out.height=canvas.height;
+    out.getContext("2d",{alpha:false}).drawImage(canvas,0,0);
     return out;
 }
 
@@ -7527,7 +7529,7 @@ async function prepareScannedPDF(appointmentId,files){
     const pdf=new jsPDF({unit:"mm",format:"a4",orientation:"portrait"});
     pages.forEach((canvas,i)=>{
         if(i>0)pdf.addPage();
-        const data=canvas.toDataURL("image/jpeg",.88);
+        const data=canvas.toDataURL("image/jpeg",.96);
         const pw=210,ph=297,margin=4,maxW=pw-margin*2,maxH=ph-margin*2;
         const ratio=Math.min(maxW/canvas.width,maxH/canvas.height);
         const w=canvas.width*ratio,h=canvas.height*ratio;
