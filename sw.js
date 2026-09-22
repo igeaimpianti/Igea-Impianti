@@ -1,44 +1,159 @@
-const APP_URL = "./";
+const APP_SCOPE = self.registration.scope;
 
-self.addEventListener("push",event=>{
+self.addEventListener("push", event => {
     let data = {};
 
-    try{
+    try {
         data = event.data ? event.data.json() : {};
-    }catch{
-        data = {body:event.data?.text() || "Nuovo promemoria"};
+    } catch {
+        data = {
+            body: event.data?.text() || "Nuovo promemoria"
+        };
     }
+
+    const appointmentId =
+        data.appointmentId ||
+        data.appointment_id ||
+        data.id ||
+        null;
 
     event.waitUntil(
         self.registration.showNotification(
             data.title || "Igea Impianti",
             {
-                body:data.body || "Promemoria appuntamento",
-                icon:"./icon.png?v=13",
-                badge:"./icon.png?v=13",
-                tag:data.tag || "igea-appointment",
-                renotify:true,
-                data:{url:data.url || APP_URL}
+                body:
+                    data.body ||
+                    "Promemoria appuntamento",
+
+                icon:
+                    "./icon.png?v=15",
+
+                badge:
+                    "./icon.png?v=15",
+
+                tag:
+                    data.tag ||
+                    (
+                        appointmentId
+                        ? `igea-appointment-${appointmentId}`
+                        : "igea-appointment"
+                    ),
+
+                renotify: true,
+
+                data: {
+                    appointmentId
+                }
             }
         )
     );
 });
 
-self.addEventListener("notificationclick",event=>{
-    event.notification.close();
 
-    event.waitUntil((async()=>{
-        const target = new URL(event.notification.data?.url || APP_URL,self.location.origin).href;
-        const windows = await clients.matchAll({type:"window",includeUncontrolled:true});
+self.addEventListener(
+    "notificationclick",
+    event => {
 
-        for(const windowClient of windows){
-            if("focus" in windowClient){
-                await windowClient.focus();
-                if("navigate" in windowClient) await windowClient.navigate(target);
-                return;
-            }
-        }
+        event.notification.close();
 
-        if(clients.openWindow) await clients.openWindow(target);
-    })());
-});
+        event.waitUntil(
+            (async () => {
+
+                const appointmentId =
+                    event.notification
+                    .data
+                    ?.appointmentId ||
+                    null;
+
+                /*
+                 * IMPORTANTE:
+                 * usiamo lo scope reale della PWA.
+                 * In questo modo funziona anche
+                 * dentro una cartella GitHub Pages.
+                 */
+                const target =
+                    new URL(
+                        "./",
+                        APP_SCOPE
+                    );
+
+                if(appointmentId){
+
+                    target.searchParams.set(
+                        "appointment",
+                        appointmentId
+                    );
+
+                }
+
+
+                const windows =
+                    await clients.matchAll({
+                        type:"window",
+                        includeUncontrolled:true
+                    });
+
+
+                for(
+                    const windowClient
+                    of windows
+                ){
+
+                    if(
+                        "focus"
+                        in windowClient
+                    ){
+
+                        await windowClient
+                            .focus();
+
+
+                        if(
+                            appointmentId &&
+                            "postMessage"
+                            in windowClient
+                        ){
+
+                            windowClient
+                                .postMessage({
+                                    type:
+                                        "OPEN_APPOINTMENT",
+
+                                    appointmentId
+                                });
+
+                        }else if(
+                            "navigate"
+                            in windowClient
+                        ){
+
+                            await windowClient
+                                .navigate(
+                                    target.href
+                                );
+
+                        }
+
+                        return;
+
+                    }
+
+                }
+
+
+                if(
+                    clients.openWindow
+                ){
+
+                    await clients
+                        .openWindow(
+                            target.href
+                        );
+
+                }
+
+            })()
+        );
+
+    }
+);
