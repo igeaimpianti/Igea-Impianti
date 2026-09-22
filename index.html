@@ -1231,7 +1231,7 @@ async function registerNotificationDevice(){
        Notification.permission !== "granted" || !currentUser) return false;
 
     notificationRegistration =
-        await navigator.serviceWorker.register("./sw.js?v=15");
+        await navigator.serviceWorker.register("./sw.js?v=165");
     await navigator.serviceWorker.ready;
 
     let subscription =
@@ -6957,7 +6957,7 @@ function renderDashboard(){
 
 
 /* =====================================================
-   IGEA V15 - PROSSIMO APPUNTAMENTO, LAVORI, IA, DOCUMENTI
+   IGEA V16 - ASSISTENTE DATI, PROSSIMO APPUNTAMENTO, LAVORI, DOCUMENTI
 ===================================================== */
 let workTasks = [];
 let jobDocuments = [];
@@ -7016,17 +7016,258 @@ function taskToAppointment(id){
 }
 
 function openIgeaAI(){
-    $("modalContent").innerHTML=`<h2>✨ IA Igea</h2><p class="sub">Assistente rapido del gestionale. In questa versione prepara il testo in base ai tuoi dati senza inviare dati clienti a servizi esterni.</p><label>Cosa vuoi preparare?</label><select id="aiAction"><option value="message">Messaggio cliente</option><option value="job">Descrizione lavoro</option><option value="quote">Testo per preventivo</option></select><label>Scrivi i dettagli</label><textarea id="aiPrompt" placeholder="Es. installazione 4 telecamere Hikvision..."></textarea><button class="primary" onclick="runIgeaAI()">✨ Genera</button><div id="aiResult" class="item" style="margin-top:12px;white-space:pre-wrap"></div><button class="secondary" style="width:100%" onclick="closeModal()">Chiudi</button>`;
-    $("modal").classList.add("modal-center");$("modal").classList.remove("hidden");
+    $("modalContent").innerHTML=`
+        <h2>✨ Assistente Igea</h2>
+        <p class="sub">Chiedimi informazioni sui dati reali del gestionale.</p>
+
+        <div class="actions" style="margin-bottom:10px;flex-wrap:wrap">
+            <button class="secondary" onclick="setIgeaAIExample('Fammi il resoconto di questo mese')">📊 Resoconto mese</button>
+            <button class="secondary" onclick="setIgeaAIExample('Mostrami tutte le fatture dei materiali')">📄 Fatture materiali</button>
+            <button class="secondary" onclick="setIgeaAIExample('Mostrami gli articoli telecamere')">📷 Telecamere</button>
+            <button class="secondary" onclick="setIgeaAIExample('Mostrami i lavori da fare')">🧰 Lavori da fare</button>
+        </div>
+
+        <label>Cosa vuoi sapere?</label>
+        <textarea id="aiPrompt" rows="3"
+            placeholder="Es. Fammi il resoconto di settembre, mostrami gli articoli Hikvision, chi deve ancora pagarmi..."></textarea>
+
+        <button class="primary" style="width:100%" onclick="runIgeaAI()">✨ Chiedi a Igea</button>
+
+        <div id="aiResult" style="margin-top:12px"></div>
+
+        <button class="secondary" style="width:100%;margin-top:12px" onclick="closeModal()">Chiudi</button>
+    `;
+    $("modal").classList.add("modal-center");
+    $("modal").classList.remove("hidden");
+    setTimeout(()=>$("aiPrompt")?.focus(),100);
 }
-function runIgeaAI(){
-    const text=$("aiPrompt").value.trim(); if(!text){toast("Scrivi prima i dettagli");return;}
-    const action=$("aiAction").value;
-    let out="";
-    if(action==="message") out=`Buongiorno, la contatto da Igea Impianti in merito a: ${text}. Resto a disposizione per concordare i dettagli dell'intervento. Grazie, Ciro Igea – Igea Impianti.`;
-    else if(action==="quote") out=`Fornitura e installazione: ${text}. Lavorazione eseguita a regola d'arte, comprensiva di posa, collegamenti, configurazione e verifica finale, salvo diversa indicazione.`;
-    else out=`Intervento: ${text}. Esecuzione, collegamenti e verifica finale del corretto funzionamento.`;
-    $("aiResult").textContent=out;
+
+function setIgeaAIExample(value){
+    if($("aiPrompt")) $("aiPrompt").value=value;
+    runIgeaAI();
+}
+
+function aiNormalize(value){
+    return String(value||"").toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+}
+
+function aiMonthFromPrompt(prompt){
+    const p=aiNormalize(prompt);
+    const now=new Date();
+    const months=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+    let month=now.getMonth(), year=now.getFullYear();
+
+    if(p.includes("mese scorso")){
+        month--;
+        if(month<0){month=11;year--;}
+        return {month,year,label:`${months[month]} ${year}`};
+    }
+
+    months.forEach((name,index)=>{
+        if(p.includes(name)) month=index;
+    });
+
+    const yearMatch=p.match(/\b(20\d{2})\b/);
+    if(yearMatch) year=Number(yearMatch[1]);
+
+    return {month,year,label:`${months[month]} ${year}`};
+}
+
+function aiDateInMonth(date,period){
+    if(!date)return false;
+    const d=new Date(date+"T00:00:00");
+    return d.getFullYear()===period.year && d.getMonth()===period.month;
+}
+
+function aiMoney(value){ return money(Number(value||0)); }
+
+function aiResultCard(title,body){
+    return `<div class="item"><div class="item-title">${escapeHTML(title)}</div>${body}</div>`;
+}
+
+async function aiShowMonthlyReport(prompt){
+    const period=aiMonthFromPrompt(prompt);
+
+    const monthPayments=payments.filter(p=>
+        getPaymentStatus(p)==="pagato" &&
+        aiDateInMonth(p.payment_date||p.due_date,period)
+    );
+    const paymentsIncome=monthPayments.reduce((s,p)=>s+Number(p.amount||0),0);
+
+    const movementsIncome=expenses.filter(e=>
+        e.type==="income" && aiDateInMonth(e.date,period)
+    ).reduce((s,e)=>s+Number(e.amount||0),0);
+
+    const monthExpenses=expenses.filter(e=>
+        e.type!=="income" && aiDateInMonth(e.date,period)
+    );
+    const expenseTotal=monthExpenses.reduce((s,e)=>s+Number(e.amount||0),0);
+    const income=paymentsIncome+movementsIncome;
+
+    const completed=appointments.filter(a=>
+        a.status==="completato" && aiDateInMonth(a.date,period)
+    );
+
+    const unpaid=payments.filter(p=>
+        getPaymentStatus(p)!=="pagato" && aiDateInMonth(p.due_date,period)
+    );
+    const unpaidTotal=unpaid.reduce((s,p)=>s+Number(p.amount||0),0);
+
+    $("aiResult").innerHTML=`
+        ${aiResultCard(`📊 Resoconto ${period.label}`,`
+            <div class="grid2" style="margin-top:10px">
+                <div class="stat"><small>Entrate</small><strong class="green">${aiMoney(income)}</strong></div>
+                <div class="stat"><small>Spese</small><strong class="red">${aiMoney(expenseTotal)}</strong></div>
+                <div class="stat"><small>Netto</small><strong class="blueText">${aiMoney(income-expenseTotal)}</strong></div>
+                <div class="stat"><small>Lavori completati</small><strong>${completed.length}</strong></div>
+            </div>
+            <div class="sub" style="margin-top:10px">Da incassare con scadenza nel mese: <b>${aiMoney(unpaidTotal)}</b> (${unpaid.length} pagamenti).</div>
+        `)}
+    `;
+}
+
+async function aiShowDocuments(prompt){
+    const p=aiNormalize(prompt);
+    let docs=[...jobDocuments];
+
+    const wantsInvoices=p.includes("fattur");
+    const wantsMaterials=p.includes("material");
+    if(wantsInvoices || wantsMaterials){
+        const filtered=docs.filter(d=>{
+            const n=aiNormalize(d.name);
+            return (!wantsInvoices || n.includes("fatt") || n.includes("invoice")) &&
+                   (!wantsMaterials || n.includes("material") || n.includes("fornit") || n.includes("fatt"));
+        });
+        if(filtered.length) docs=filtered;
+    }
+
+    $("aiResult").innerHTML=docs.length
+        ? `<div class="sub" style="margin-bottom:8px">Ho trovato ${docs.length} documenti. I documenti non ancora classificati vengono cercati anche dal nome del PDF.</div>`+
+          docs.map(d=>{
+              const a=appointments.find(x=>String(x.id)===String(d.appointment_id));
+              const c=findClient(d.client_id || a?.client_id);
+              return aiResultCard(`📄 ${d.name}`,`
+                  <div class="sub">${escapeHTML(c?.name||"Cliente")}${a?.date?" · "+formatDate(a.date):""}</div>
+                  <div class="actions">
+                    <button class="blue" onclick="openStoredDocument('${d.id}')">Apri</button>
+                    <button class="secondary" onclick="shareStoredDocument('${d.id}')">Condividi</button>
+                  </div>
+              `);
+          }).join("")
+        : '<div class="empty">Non ho trovato documenti corrispondenti.</div>';
+}
+
+async function aiShowArticles(prompt){
+    const result=await supabaseClient.from("articles").select("*").order("name",{ascending:true});
+    if(result.error){
+        $("aiResult").innerHTML=`<div class="empty">Errore articoli: ${escapeHTML(result.error.message)}</div>`;
+        return;
+    }
+
+    const stop=new Set(["mostrami","mostra","tutti","tutte","gli","le","dei","delle","articoli","articolo","cerca","cercami","trova","catalogo"]);
+    const terms=aiNormalize(prompt).split(/[^a-z0-9]+/).filter(x=>x.length>2&&!stop.has(x));
+    let rows=result.data||[];
+
+    if(terms.length){
+        rows=rows.filter(a=>{
+            const hay=aiNormalize(`${a.name||""} ${a.description||""} ${a.category||""}`);
+            return terms.some(t=>hay.includes(t));
+        });
+    }
+
+    $("aiResult").innerHTML=rows.length
+        ? `<div class="sub" style="margin-bottom:8px">${rows.length} articoli trovati.</div>`+
+          rows.slice(0,50).map(a=>aiResultCard(a.name||"Articolo",`
+              ${a.category?`<div class="sub">${escapeHTML(a.category)}</div>`:""}
+              ${a.description?`<div class="sub" style="margin-top:5px">${escapeHTML(a.description)}</div>`:""}
+              ${a.price!=null?`<div style="margin-top:7px"><b>${aiMoney(a.price)}</b></div>`:""}
+          `)).join("")
+        : '<div class="empty">Nessun articolo trovato con questa ricerca.</div>';
+}
+
+function aiShowWorkTasks(){
+    const rows=workTasks.filter(t=>t.status!=="completato");
+    $("aiResult").innerHTML=rows.length
+        ? rows.map(t=>aiResultCard(`🧰 ${t.title||"Lavoro"}`,`
+            <div class="sub">${escapeHTML(t.client_name||"")}</div>
+            ${t.notes?`<div class="sub">${escapeHTML(t.notes)}</div>`:""}
+            <button class="blue" style="width:100%;margin-top:8px" onclick="taskToAppointment('${t.id}')">📅 Crea appuntamento</button>
+          `)).join("")
+        : '<div class="empty">Non ci sono lavori da eseguire.</div>';
+}
+
+function aiShowUnpaid(){
+    const rows=payments.filter(p=>getPaymentStatus(p)!=="pagato");
+    const total=rows.reduce((s,p)=>s+Number(p.amount||0),0);
+    $("aiResult").innerHTML=rows.length
+        ? aiResultCard(`💳 Da incassare: ${aiMoney(total)}`,`<div class="sub">${rows.length} pagamenti ancora aperti.</div>`)+
+          rows.map(p=>{
+              const c=findClient(p.client_id);
+              return aiResultCard(c?.name||"Cliente",`
+                  <div><b>${aiMoney(p.amount)}</b></div>
+                  <div class="sub">Scadenza: ${formatDate(p.due_date)}</div>
+              `);
+          }).join("")
+        : '<div class="empty">Non risultano pagamenti aperti.</div>';
+}
+
+function aiShowNextAppointment(){
+    const now=new Date();
+    const a=appointments.filter(x=>x.status==="programmato")
+        .filter(x=>new Date(`${x.date}T${x.time||"23:59"}`)>=now)
+        .sort((x,y)=>(x.date+(x.time||"")).localeCompare(y.date+(y.time||"")))[0];
+
+    if(!a){$("aiResult").innerHTML='<div class="empty">Nessun prossimo appuntamento.</div>';return;}
+    const c=findClient(a.client_id);
+    $("aiResult").innerHTML=aiResultCard(`📅 ${c?.name||"Cliente"}`,`
+        <div>${formatDate(a.date)}${a.time?" · "+escapeHTML(a.time.slice(0,5)):""}</div>
+        ${a.notes?`<div class="sub">${escapeHTML(a.notes)}</div>`:""}
+        <div class="actions">
+            <button class="success" onclick="closeModal();completeAppointment('${a.id}')">✓ Completa</button>
+            <button class="secondary" onclick="closeModal();editProgrammedAppointment('${a.id}')">✏️ Modifica</button>
+        </div>
+    `);
+}
+
+async function runIgeaAI(){
+    const input=$("aiPrompt");
+    const resultBox=$("aiResult");
+    const text=input?.value.trim();
+    if(!text){toast("Scrivi cosa vuoi sapere");return;}
+
+    resultBox.innerHTML='<div class="empty">Sto cercando nei dati di Igea Impianti…</div>';
+    const p=aiNormalize(text);
+
+    try{
+        if((p.includes("resoconto")||p.includes("riepilogo")||p.includes("guadagn")||p.includes("entrate")||p.includes("spese")) &&
+           (p.includes("mese")||["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"].some(m=>p.includes(m)))){
+            await aiShowMonthlyReport(text);
+        }else if(p.includes("fattur")||p.includes("document")||p.includes("ricevut")){
+            await aiShowDocuments(text);
+        }else if(p.includes("articol")||p.includes("telecamer")||p.includes("hikvision")||p.includes("ajax")||p.includes("nvr")||p.includes("faret")){
+            await aiShowArticles(text);
+        }else if(p.includes("lavor") && (p.includes("fare")||p.includes("eseguire")||p.includes("da fare"))){
+            aiShowWorkTasks();
+        }else if(p.includes("pagare")||p.includes("pagamenti aperti")||p.includes("deve ancora")||p.includes("da incassare")){
+            aiShowUnpaid();
+        }else if(p.includes("prossimo appuntamento")||p.includes("prossima appuntamento")){
+            aiShowNextAppointment();
+        }else{
+            resultBox.innerHTML=`
+                <div class="item">
+                    <b>Posso interrogare direttamente il gestionale.</b>
+                    <div class="sub" style="margin-top:8px">
+                        Prova: “resoconto di settembre”, “fatture dei materiali”,
+                        “articoli Hikvision”, “lavori da fare”, “chi deve ancora pagarmi”
+                        oppure “prossimo appuntamento”.
+                    </div>
+                </div>`;
+        }
+    }catch(error){
+        console.error("Assistente Igea:",error);
+        resultBox.innerHTML=`<div class="empty">Errore: ${escapeHTML(error.message||String(error))}</div>`;
+    }
 }
 
 function renderPendingScans(){
@@ -7055,7 +7296,7 @@ async function prepareScannedPDF(appointmentId,files){
 async function uploadPendingScans(appointment){
     const selected=pendingScans.filter(x=>String(x.appointmentId)===String(appointment.id));
     for(const doc of selected){
-        const path=`${appointment.client_id}/${appointment.id}/${Date.now()}-${doc.name}`;
+        const path=`${currentUser?.id}/${appointment.client_id}/${appointment.id}/${Date.now()}-${doc.name}`;
         const up=await supabaseClient.storage.from("job-documents").upload(path,doc.blob,{contentType:"application/pdf",upsert:false});
         if(up.error)throw up.error;
         const row={appointment_id:appointment.id,client_id:appointment.client_id,name:doc.name,storage_path:path,mime_type:"application/pdf",user_id:currentUser?.id};
