@@ -1117,6 +1117,17 @@ textarea:focus{
         </div>
 
 
+        <div class="item" onclick="openAllDocuments()" style="cursor:pointer">
+            <div class="between">
+                <div>
+                    <b>📄 Documenti</b>
+                    <div class="sub">Visualizza tutti i documenti caricati.</div>
+                </div>
+                <span style="font-size:22px;color:#999">›</span>
+            </div>
+        </div>
+
+
         <div class="item">
 
             <b>☁️ Database Cloud</b>
@@ -8071,6 +8082,107 @@ async function uploadPendingScans(appointment){
         jobDocuments.unshift(ins.data);
     }
     pendingScans=pendingScans.filter(x=>String(x.appointmentId)!==String(appointment.id));
+}
+
+
+function formatDocumentDate(value){
+    if(!value)return "";
+    const d=new Date(value);
+    if(Number.isNaN(d.getTime()))return "";
+    return d.toLocaleDateString("it-IT",{
+        day:"2-digit",
+        month:"2-digit",
+        year:"numeric"
+    });
+}
+
+function documentJobLabel(appointment){
+    if(!appointment)return "Lavoro non disponibile";
+    const parts=[];
+    if(appointment.date)parts.push(formatDate(appointment.date));
+    if(appointment.time)parts.push(String(appointment.time).slice(0,5));
+    if(appointment.notes)parts.push(appointment.notes);
+    return parts.filter(Boolean).join(" · ") || "Lavoro";
+}
+
+function openAllDocuments(){
+    const docs=[...jobDocuments].sort((a,b)=>
+        String(b.created_at||"").localeCompare(String(a.created_at||""))
+    );
+
+    $("modalContent").innerHTML=`
+        <h2>📄 Documenti</h2>
+        <div class="sub" style="margin-bottom:14px">
+            ${docs.length} ${docs.length===1?"documento caricato":"documenti caricati"}
+        </div>
+
+        <div id="allDocumentsBox">
+            ${docs.length ? docs.map(doc=>{
+                const client=findClient(doc.client_id);
+                const appointment=appointments.find(a=>
+                    String(a.id)===String(doc.appointment_id)
+                );
+
+                return `
+                    <div class="item">
+                        <div class="between" style="align-items:flex-start">
+                            <div style="min-width:0">
+                                <div class="item-title">📄 ${escapeHTML(doc.name||"Documento")}</div>
+                                <div class="sub">
+                                    📅 ${escapeHTML(formatDocumentDate(doc.created_at)||"Data non disponibile")}
+                                </div>
+                                <div class="sub">
+                                    👤 ${escapeHTML(client?.name||"Cliente non disponibile")}
+                                </div>
+                                <div class="sub">
+                                    🧰 ${escapeHTML(documentJobLabel(appointment))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="actions">
+                            <button class="blue" onclick="openStoredDocument('${doc.id}')">Apri</button>
+                            <button class="secondary" onclick="shareStoredDocument('${doc.id}')">Condividi</button>
+                            <button class="danger" onclick="deleteStoredDocumentFromArchive('${doc.id}')">Elimina</button>
+                        </div>
+                    </div>
+                `;
+            }).join("") : '<div class="empty">Nessun documento caricato.</div>'}
+        </div>
+
+        <button class="secondary" style="width:100%" onclick="closeModal()">Chiudi</button>
+    `;
+
+    $("modal").classList.add("modal-center");
+    $("modal").classList.remove("hidden");
+}
+
+async function deleteStoredDocumentFromArchive(id){
+    const d=jobDocuments.find(x=>String(x.id)===String(id));
+    if(!d || !confirm("Eliminare questo documento?"))return;
+
+    const rm=await supabaseClient.storage
+        .from("job-documents")
+        .remove([d.storage_path]);
+
+    if(rm.error){
+        alert(rm.error.message);
+        return;
+    }
+
+    const del=await supabaseClient
+        .from("job_documents")
+        .delete()
+        .eq("id",id);
+
+    if(del.error){
+        alert(del.error.message);
+        return;
+    }
+
+    jobDocuments=jobDocuments.filter(x=>String(x.id)!==String(id));
+    openAllDocuments();
+    toast("Documento eliminato");
 }
 
 async function openJobDocuments(appointmentId){
