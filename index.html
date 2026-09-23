@@ -560,6 +560,23 @@ textarea:focus{
 
 }
 
+/* ===== Assistente Igea V25 - risposta pulita ===== */
+.ai-answer{margin-top:14px;display:grid;gap:12px}
+.ai-answer-head{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:850;margin-bottom:2px}
+.ai-answer-intro{font-size:15px;line-height:1.45;color:#333}
+.ai-section{border:1px solid #e5e5e7;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.035)}
+.ai-section-title{display:flex;align-items:center;gap:9px;padding:13px 14px;font-weight:850;background:#f4f8ff;color:#174a7e}
+.ai-section.expense .ai-section-title{background:#fff3f4;color:#a51d2d}
+.ai-row{display:grid;grid-template-columns:minmax(105px,.8fr) 1.5fr;gap:12px;padding:11px 14px;border-top:1px solid #eeeeef;align-items:start}
+.ai-label{color:#74747a;font-size:14px}
+.ai-value{font-weight:650;line-height:1.4;overflow-wrap:anywhere}
+.ai-value.money-positive{color:#16834b;font-size:19px;font-weight:850}
+.ai-value.money-negative{color:#d9233f;font-size:19px;font-weight:850}
+.ai-paragraph{padding:12px 14px;line-height:1.5}
+.ai-list{margin:0;padding:0;list-style:none}
+.ai-list li{padding:10px 14px;border-top:1px solid #eeeeef;line-height:1.4}
+@media(max-width:430px){.ai-row{grid-template-columns:100px 1fr;gap:8px;padding:10px 12px}.ai-section-title{padding:12px}.ai-answer-intro{font-size:14px}}
+
 </style>
 </head>
 
@@ -7228,6 +7245,73 @@ function aiShowNextAppointment(){
     `);
 }
 
+function renderIgeaAIAnswer(answer){
+    const raw=String(answer||"").replace(/\r/g,"").trim();
+    const lines=raw.split("\n").map(x=>x.trim()).filter(Boolean);
+    const clean=x=>String(x||"")
+        .replace(/^[-*•]+\s*/,"")
+        .replace(/\*\*/g,"")
+        .replace(/^#+\s*/,"")
+        .trim();
+    const isMoney=x=>/€|\beuro\b/i.test(x||"");
+    const sectionExpense=x=>/spes|uscit|costo/i.test(x||"");
+    let html='<div class="ai-answer"><div class="ai-answer-head">✨ <span>Assistente Igea</span></div>';
+    let sectionOpen=false, listOpen=false, introDone=false;
+    const closeList=()=>{ if(listOpen){html+='</ul>';listOpen=false;} };
+    const closeSection=()=>{ closeList(); if(sectionOpen){html+='</div>';sectionOpen=false;} };
+
+    for(const original of lines){
+        const line=clean(original);
+        if(!line) continue;
+
+        // Titoli/sezioni restituiti normalmente dall'IA
+        const looksTitle=/^(ultimo|spese|entrate|uscite|pagamenti|appuntamenti|cliente|riepilogo|resoconto|lavori|documenti|dettagli)/i.test(line)
+            && (original.includes('**') || line.endsWith(':'))
+            && !/^([^:]{1,28}):\s*\S+/.test(line);
+        if(looksTitle){
+            closeSection();
+            const title=line.replace(/:$/,"");
+            const expense=sectionExpense(title);
+            html+=`<div class="ai-section${expense?' expense':''}"><div class="ai-section-title">${expense?'🧾':'🔧'} <span>${escapeHTML(title)}</span></div>`;
+            sectionOpen=true;
+            continue;
+        }
+
+        // Campo: valore (Cliente, Data, Titolo, Note, Importo...)
+        const m=line.match(/^([^:]{1,32}):\s*(.+)$/);
+        if(m){
+            if(!sectionOpen){html+='<div class="ai-section">';sectionOpen=true;}
+            closeList();
+            const label=clean(m[1]);
+            const value=clean(m[2]);
+            let cls='ai-value';
+            if(isMoney(value)) cls += sectionExpense(label)||sectionExpense(raw.slice(Math.max(0,raw.indexOf(original)-120),raw.indexOf(original)+120)) ? ' money-negative':' money-positive';
+            html+=`<div class="ai-row"><div class="ai-label">${escapeHTML(label)}</div><div class="${cls}">${escapeHTML(value)}</div></div>`;
+            continue;
+        }
+
+        // Elenchi
+        if(/^[-*•]\s+/.test(original)){
+            if(!sectionOpen){html+='<div class="ai-section">';sectionOpen=true;}
+            if(!listOpen){html+='<ul class="ai-list">';listOpen=true;}
+            html+=`<li>${escapeHTML(line)}</li>`;
+            continue;
+        }
+
+        // Frase introduttiva: fuori dalla card, testo normale
+        closeList();
+        if(!introDone && !sectionOpen){
+            html+=`<div class="ai-answer-intro">${escapeHTML(line)}</div>`;
+            introDone=true;
+        }else{
+            if(!sectionOpen){html+='<div class="ai-section">';sectionOpen=true;}
+            html+=`<div class="ai-paragraph">${escapeHTML(line)}</div>`;
+        }
+    }
+    closeSection();
+    return html+'</div>';
+}
+
 async function runIgeaAI(){
     const input=$("aiPrompt");
     const resultBox=$("aiResult");
@@ -7247,11 +7331,7 @@ async function runIgeaAI(){
         const answer=String(data?.answer||"").trim();
         if(!answer)throw new Error("Nessuna risposta ricevuta dall’IA.");
 
-        resultBox.innerHTML=`
-            <div class="item">
-                <div class="item-title">✨ Assistente Igea</div>
-                <div style="white-space:pre-wrap;line-height:1.5;margin-top:8px">${escapeHTML(answer)}</div>
-            </div>`;
+        resultBox.innerHTML=renderIgeaAIAnswer(answer);
     }catch(error){
         console.error("Assistente Igea:",error);
         const message=error?.context?.body?.error || error?.message || String(error);
