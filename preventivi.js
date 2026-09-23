@@ -3223,48 +3223,448 @@ supabaseClient
     );
 
 /* =====================================================
-   ASSISTENTE IGEA - PREVENTIVI IA V26
+   ASSISTENTE IGEA - PREVENTIVO IA V27
+   Anteprima PDF -> Salva / Modifica / Annulla
 ===================================================== */
 
-window.openAIQuoteDraft = async function(payload = {}) {
+let aiQuotePreviewUrl = null;
 
-    try {
+function revokeAIQuotePreviewUrl(){
+    if(aiQuotePreviewUrl){
+        try{
+            URL.revokeObjectURL(aiQuotePreviewUrl);
+        }catch(error){}
+        aiQuotePreviewUrl = null;
+    }
+}
+
+function buildAIQuotePreviewData(client){
+
+    const cleanItems = quoteItems.map(item=>({
+
+        article_id:
+            item.article_id || null,
+
+        article:
+            String(item.article || "").trim(),
+
+        description:
+            String(item.description || "").trim(),
+
+        price:
+            round2(item.price),
+
+        quantity:
+            round2(item.quantity),
+
+        total:
+            round2(
+                (Number(item.price) || 0) *
+                (Number(item.quantity) || 0)
+            )
+
+    }));
+
+
+    if(!cleanItems.length){
+        throw new Error(
+            "Il preventivo non contiene articoli."
+        );
+    }
+
+
+    const invalid =
+        cleanItems.find(item=>
+            !item.article ||
+            !Number.isFinite(Number(item.price)) ||
+            Number(item.price) < 0 ||
+            Number(item.quantity) <= 0
+        );
+
+
+    if(invalid){
+        throw new Error(
+            "Controlla prezzo e quantità degli articoli."
+        );
+    }
+
+
+    return {
+
+        quote_number:"ANTEPRIMA",
+
+        client_id:
+            client.id,
+
+        quote_date:
+            q("quoteDate")?.value || today(),
+
+        subject:
+            q("quoteSubject")?.value?.trim() ||
+            "Preventivo lavori",
+
+        notes:
+            q("quoteNotes")?.value?.trim() || "",
+
+        validity_days:
+            Number(
+                q("quoteValidity")?.value
+            ) || 30,
+
+        items:
+            cleanItems,
+
+        total:
+            round2(
+                cleanItems.reduce(
+                    (sum,item)=>
+                        sum + Number(item.total || 0),
+                    0
+                )
+            ),
+
+        status:"bozza"
+
+    };
+}
+
+
+async function showAIQuotePDFPreview(client){
+
+    const previewQuote =
+        buildAIQuotePreviewData(client);
+
+
+    const pdf =
+        await createQuotePDF(
+            previewQuote,
+            client,
+            {
+                output:"blob"
+            }
+        );
+
+
+    if(!pdf?.blob){
+
+        throw new Error(
+            "Non sono riuscito a generare il PDF."
+        );
+
+    }
+
+
+    revokeAIQuotePreviewUrl();
+
+
+    aiQuotePreviewUrl =
+        URL.createObjectURL(
+            pdf.blob
+        );
+
+
+    const modal =
+        q("modal");
+
+    const modalContent =
+        q("modalContent");
+
+
+    modal.classList.add(
+        "modal-center"
+    );
+
+
+    modalContent.innerHTML = `
+
+        <h2>
+            🧾 Anteprima preventivo
+        </h2>
+
+
+        <div
+            class="sub"
+            style="margin-bottom:12px">
+
+            ${escapeHTML(client.name)}
+
+            ·
+
+            ${money(previewQuote.total)}
+
+        </div>
+
+
+        <iframe
+
+            src="${aiQuotePreviewUrl}"
+
+            title="Anteprima PDF preventivo"
+
+            style="
+                width:100%;
+                height:56vh;
+                border:1px solid #ddd;
+                border-radius:14px;
+                background:#f5f5f7;
+            ">
+
+        </iframe>
+
+
+        <div
+            style="
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:8px;
+                margin-top:12px;
+            ">
+
+
+            <button
+                class="primary"
+                onclick="saveAIQuotePreview()">
+
+                💾 Salva
+
+            </button>
+
+
+            <button
+                class="secondary"
+                onclick="editAIQuotePreview()">
+
+                ✏️ Modifica
+
+            </button>
+
+
+        </div>
+
+
+        <button
+
+            class="danger"
+
+            style="
+                width:100%;
+                margin-top:8px;
+            "
+
+            onclick="cancelAIQuotePreview()">
+
+            ❌ Annulla
+
+        </button>
+
+    `;
+
+
+    modal.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+/* =====================================================
+   SALVA PREVENTIVO
+===================================================== */
+
+window.saveAIQuotePreview =
+async function(){
+
+    const modal =
+        q("modal");
+
+
+    modal.classList.add(
+        "hidden"
+    );
+
+
+    modal.classList.remove(
+        "modal-center"
+    );
+
+
+    revokeAIQuotePreviewUrl();
+
+
+    /*
+       Utilizziamo la funzione originale
+       del gestionale.
+
+       Questa:
+       - assegna PREV-2026-XXX
+       - salva nel database
+       - crea il PDF definitivo
+    */
+
+    await window.emitQuote();
+
+};
+
+
+/* =====================================================
+   MODIFICA PREVENTIVO
+===================================================== */
+
+window.editAIQuotePreview =
+function(){
+
+    q("modal")
+        ?.classList
+        .add("hidden");
+
+
+    q("modal")
+        ?.classList
+        .remove("modal-center");
+
+
+    revokeAIQuotePreviewUrl();
+
+
+    showPage(
+        "quotes"
+    );
+
+
+    showQuoteArea(
+        "create"
+    );
+
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+
+    toast(
+        "Modifica il preventivo e poi premi Emetti e crea PDF"
+    );
+
+};
+
+
+/* =====================================================
+   ANNULLA PREVENTIVO
+===================================================== */
+
+window.cancelAIQuotePreview =
+function(){
+
+    q("modal")
+        ?.classList
+        .add("hidden");
+
+
+    q("modal")
+        ?.classList
+        .remove("modal-center");
+
+
+    revokeAIQuotePreviewUrl();
+
+
+    resetQuoteForm();
+
+
+    if(
+        typeof igeaPendingAction !==
+        "undefined"
+    ){
+
+        igeaPendingAction = null;
+
+    }
+
+
+    showPage(
+        "dashboard"
+    );
+
+
+    toast(
+        "Preventivo annullato"
+    );
+
+};
+
+
+/* =====================================================
+   CREA PREVENTIVO DALL'IA
+===================================================== */
+
+window.openAIQuoteDraft =
+async function(payload = {}){
+
+    try{
+
+
+        /* =========================
+           CLIENTE
+        ========================= */
 
         const clientName =
             String(
                 payload.client_name || ""
-            ).trim();
+            )
+            .trim();
+
 
         if(!clientName){
+
             throw new Error(
                 "Cliente mancante nel preventivo."
             );
+
         }
 
 
-        /* ===============================
-           CERCA CLIENTE
-        =============================== */
-
-        const normalize = value =>
-            String(value || "")
+        const normalize =
+            value =>
+                String(value || "")
                 .trim()
-                .toLowerCase();
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(
+                    /[\u0300-\u036f]/g,
+                    ""
+                );
+
 
         const wanted =
-            normalize(clientName);
+            normalize(
+                clientName
+            );
+
 
         const client =
-            clients.find(item =>
-                normalize(item.name) === wanted
-            )
-            ||
-            clients.find(item =>
-                normalize(item.name).includes(wanted)
-                ||
-                wanted.includes(
+
+            clients.find(
+                item =>
                     normalize(item.name)
-                )
+                    ===
+                    wanted
+            )
+
+            ||
+
+            clients.find(
+                item =>
+
+                    normalize(item.name)
+                    .includes(wanted)
+
+                    ||
+
+                    wanted.includes(
+                        normalize(item.name)
+                    )
+
             );
 
 
@@ -3277,14 +3677,16 @@ window.openAIQuoteDraft = async function(payload = {}) {
         }
 
 
-        /* ===============================
-           CONTROLLA ARTICOLI
-        =============================== */
+        /* =========================
+           ARTICOLI
+        ========================= */
 
         const incomingItems =
             Array.isArray(payload.items)
-                ? payload.items
-                : [];
+            ?
+            payload.items
+            :
+            [];
 
 
         if(!incomingItems.length){
@@ -3297,202 +3699,361 @@ window.openAIQuoteDraft = async function(payload = {}) {
 
 
         const preparedItems =
-            incomingItems.map(item => {
-
-                const description =
-                    String(
-                        item.description ||
-                        item.name ||
-                        item.article ||
-                        ""
-                    ).trim();
+            incomingItems.map(
+                item=>{
 
 
-                const quantity =
-                    Math.max(
-                        0.01,
-                        Number(
-                            item.quantity || 1
+                    const requestedName =
+                        String(
+
+                            item.article ||
+
+                            item.name ||
+
+                            item.description ||
+
+                            ""
+
                         )
-                    );
+                        .trim();
 
 
-                const unitPrice =
-                    Number(
-                        item.unit_price ??
-                        item.price ??
-                        0
-                    );
-
-
-                /* ===============================
-                   CERCA ARTICOLO ARCHIVIATO
-                =============================== */
-
-                const search =
-                    normalize(description);
-
-
-                const savedArticle =
-                    articles.find(article => {
-
-                        const name =
-                            normalize(
-                                article.name
-                            );
-
-                        return (
-                            name === search ||
-                            name.includes(search) ||
-                            search.includes(name)
+                    const search =
+                        normalize(
+                            requestedName
                         );
 
-                    });
+
+                    const savedArticle =
+                        articles.find(
+                            article=>{
 
 
-                return {
-
-                    article_id:
-                        savedArticle?.id || "",
-
-                    article:
-                        savedArticle?.name ||
-                        description,
-
-                    description:
-                        savedArticle?.description ||
-                        description,
-
-                    price:
-                        unitPrice,
-
-                    quantity:
-                        quantity
-
-                };
-
-            });
+                                const name =
+                                    normalize(
+                                        article.name
+                                    );
 
 
-        /* ===============================
-           VALIDAZIONE PREZZI
-        =============================== */
+                                return (
 
-        const invalid =
-            preparedItems.find(item =>
-                !item.article ||
-                !Number.isFinite(
-                    Number(item.price)
-                ) ||
-                Number(item.price) < 0 ||
-                Number(item.quantity) <= 0
+                                    name === search
+
+                                    ||
+
+                                    name.includes(
+                                        search
+                                    )
+
+                                    ||
+
+                                    search.includes(
+                                        name
+                                    )
+
+                                );
+
+                            }
+                        );
+
+
+                    /* =========================
+                       PREZZO
+                    ========================= */
+
+                    const rawAIPrice =
+
+                        item.unit_price
+
+                        ??
+
+                        item.price;
+
+
+                    const hasAIPrice =
+
+                        rawAIPrice !== undefined
+
+                        &&
+
+                        rawAIPrice !== null
+
+                        &&
+
+                        rawAIPrice !== ""
+
+                        &&
+
+                        Number.isFinite(
+                            Number(rawAIPrice)
+                        );
+
+
+                    /*
+                       Se l'IA non manda il prezzo,
+                       utilizziamo quello
+                       dell'articolo salvato.
+                    */
+
+                    const unitPrice =
+
+                        hasAIPrice
+
+                        ?
+
+                        Number(rawAIPrice)
+
+                        :
+
+                        Number(
+                            savedArticle
+                            ?.unit_price
+                        );
+
+
+                    const quantity =
+
+                        Math.max(
+
+                            0.01,
+
+                            Number(
+                                item.quantity || 1
+                            )
+
+                        );
+
+
+                    return {
+
+                        article_id:
+                            savedArticle?.id || "",
+
+
+                        article:
+                            savedArticle?.name ||
+                            requestedName,
+
+
+                        description:
+
+                            String(
+                                item.description || ""
+                            )
+                            .trim()
+
+                            ||
+
+                            savedArticle
+                            ?.description
+
+                            ||
+
+                            requestedName,
+
+
+                        price:
+
+                            Number.isFinite(
+                                unitPrice
+                            )
+
+                            ?
+
+                            unitPrice
+
+                            :
+
+                            "",
+
+
+                        quantity:
+                            quantity
+
+                    };
+
+                }
             );
 
 
-        if(invalid){
+        /* =========================
+           CONTROLLO PREZZI
+        ========================= */
+
+        const missingPrice =
+
+            preparedItems.find(
+                item =>
+
+                    !item.article
+
+                    ||
+
+                    item.price === ""
+
+                    ||
+
+                    !Number.isFinite(
+                        Number(item.price)
+                    )
+
+                    ||
+
+                    Number(item.price) < 0
+
+                    ||
+
+                    Number(item.quantity) <= 0
+
+            );
+
+
+        if(missingPrice){
 
             throw new Error(
-                "Una delle voci del preventivo non contiene prezzo o quantità validi."
+
+                `Manca un prezzo valido per "${
+                    missingPrice.article ||
+                    "una voce"
+                }".`
+
             );
 
         }
 
 
-        /* ===============================
-           APRE SEZIONE PREVENTIVI
-        =============================== */
+        /* =========================
+           PREPARA PAGINA PREVENTIVI
+        ========================= */
 
-        showPage("quotes");
+        showPage(
+            "quotes"
+        );
 
-        showQuoteArea("create");
+
+        showQuoteArea(
+            "create"
+        );
+
 
         refreshQuoteClients();
 
 
-        /* ===============================
-           RESET MODIFICA
-        =============================== */
-
-        editingQuoteId = null;
+        editingQuoteId =
+            null;
 
 
-        /* ===============================
+        /* =========================
            CLIENTE
-        =============================== */
+        ========================= */
 
-        if(q("quoteClient")){
+        if(
+            q("quoteClient")
+        ){
 
-            q("quoteClient").value =
+            q("quoteClient")
+                .value =
                 client.id;
 
         }
 
 
-        /* ===============================
+        /* =========================
            DATA
-        =============================== */
+        ========================= */
 
-        if(q("quoteDate")){
+        if(
+            q("quoteDate")
+        ){
 
-            q("quoteDate").value =
+            q("quoteDate")
+                .value =
                 today();
 
         }
 
 
-        /* ===============================
+        /* =========================
            VALIDITÀ
-        =============================== */
+        ========================= */
 
-        if(q("quoteValidity")){
+        if(
+            q("quoteValidity")
+        ){
 
-            q("quoteValidity").value =
+            q("quoteValidity")
+                .value =
+
                 Number(
-                    payload.validity_days || 30
+                    payload.validity_days ||
+                    30
                 );
 
         }
 
 
-        /* ===============================
+        /* =========================
            OGGETTO
-        =============================== */
+        ========================= */
 
-        if(q("quoteSubject")){
+        if(
+            q("quoteSubject")
+        ){
 
-            q("quoteSubject").value =
+            q("quoteSubject")
+                .value =
+
                 String(
-                    payload.object ||
-                    payload.subject ||
+
+                    payload.object
+
+                    ||
+
+                    payload.subject
+
+                    ||
+
                     "Preventivo lavori"
+
                 );
 
         }
 
 
-        /* ===============================
+        /* =========================
            NOTE
-        =============================== */
+        ========================= */
 
-        if(q("quoteNotes")){
+        if(
+            q("quoteNotes")
+        ){
 
             const defaultNotes =
+
                 "Il presente preventivo ha validità di 30 giorni dalla data di emissione. " +
+
                 "I prezzi indicati sono da intendersi IVA esclusa, salvo diversa indicazione.";
 
 
-            q("quoteNotes").value =
+            q("quoteNotes")
+                .value =
+
                 String(
-                    payload.notes ||
+
+                    payload.notes
+
+                    ||
+
                     defaultNotes
+
                 );
 
         }
 
 
-        /* ===============================
-           ARTICOLI
-        =============================== */
+        /* =========================
+           CARICA ARTICOLI
+        ========================= */
 
         quoteItems =
             preparedItems;
@@ -3501,11 +4062,13 @@ window.openAIQuoteDraft = async function(payload = {}) {
         renderQuoteItems();
 
 
-        /* ===============================
-           PULSANTI
-        =============================== */
+        /* =========================
+           PULSANTE
+        ========================= */
 
-        if(q("emitQuoteButton")){
+        if(
+            q("emitQuoteButton")
+        ){
 
             q("emitQuoteButton")
                 .textContent =
@@ -3519,55 +4082,35 @@ window.openAIQuoteDraft = async function(payload = {}) {
             .add("hidden");
 
 
-        /* ===============================
-           CHIUDI AZIONE IA
-        =============================== */
+        /* =========================
+           AZIONE IA COMPLETATA
+        ========================= */
 
         if(
             typeof igeaPendingAction !==
             "undefined"
         ){
 
-            igeaPendingAction = null;
+            igeaPendingAction =
+                null;
 
         }
 
 
-        /* ===============================
-           SCROLL
-        =============================== */
+        /* =========================
+           CREA SUBITO ANTEPRIMA PDF
+        ========================= */
 
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
-
-
-        toast(
-            "Preventivo preparato dall’Assistente Igea"
+        await showAIQuotePDFPreview(
+            client
         );
-
-
-        /*
-         * IMPORTANTE:
-         *
-         * L'IA prepara il preventivo.
-         *
-         * Tu puoi controllarlo/modificarlo.
-         *
-         * Premendo:
-         *
-         * "Emetti e crea PDF"
-         *
-         * viene utilizzato il normale
-         * sistema preventivi già presente.
-         */
 
 
         return true;
 
 
-    } catch(error){
+    }catch(error){
+
 
         console.error(
             "Preventivo IA:",
@@ -3576,11 +4119,19 @@ window.openAIQuoteDraft = async function(payload = {}) {
 
 
         alert(
-            "Assistente Igea:\n\n" +
+
+            "Assistente Igea:\n\n"
+
+            +
+
             (
-                error?.message ||
+                error?.message
+
+                ||
+
                 "Non sono riuscito a preparare il preventivo."
             )
+
         );
 
 
