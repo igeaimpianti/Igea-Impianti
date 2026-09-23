@@ -7312,6 +7312,144 @@ function renderIgeaAIAnswer(answer){
     return html+'</div>';
 }
 
+
+/* =====================================================
+   IGEA AI OPERATIVO V26
+   Le scritture vengono eseguite solo dopo conferma utente.
+===================================================== */
+let igeaPendingAction = null;
+
+function aiActionLabel(type){
+    return ({
+        create_expense:"Registra spesa",
+        create_income:"Registra entrata",
+        create_work_task:"Aggiungi lavoro da fare",
+        create_appointment:"Crea appuntamento",
+        create_client:"Crea cliente",
+        create_quote:"Prepara preventivo"
+    })[type] || "Conferma operazione";
+}
+
+function renderIgeaAIAction(action, answer=""){
+    igeaPendingAction = action || null;
+    const p = action?.payload || {};
+    const type = action?.type || "";
+    const rows = [];
+
+    if(p.client_name) rows.push(["Cliente",p.client_name]);
+    if(p.name) rows.push(["Nome",p.name]);
+    if(p.description) rows.push(["Descrizione",p.description]);
+    if(p.title) rows.push(["Titolo",p.title]);
+    if(p.amount!=null) rows.push(["Importo",money(p.amount)]);
+    if(p.date) rows.push(["Data",formatDate(p.date)]);
+    if(p.time) rows.push(["Ora",String(p.time).slice(0,5)]);
+    if(p.category) rows.push(["Categoria",p.category]);
+    if(p.notes) rows.push(["Note",p.notes]);
+
+    let items="";
+    if(Array.isArray(p.items) && p.items.length){
+        items = `<div class="ai-section"><div class="ai-section-title">🧾 <span>Voci preventivo</span></div>`+
+        p.items.map(i=>`<div class="ai-row"><div class="ai-label">${escapeHTML(i.description||i.name||"Voce")} × ${escapeHTML(i.quantity??1)}</div><div class="ai-value money-positive">${money(i.unit_price||0)}</div></div>`).join("")+
+        `</div>`;
+    }
+
+    return `
+      <div class="ai-answer">
+        <div class="ai-answer-head">✨ <span>Assistente Igea</span></div>
+        ${answer ? `<div class="ai-answer-intro">${escapeHTML(answer)}</div>` : ""}
+        <div class="ai-section">
+          <div class="ai-section-title">⚡ <span>${escapeHTML(aiActionLabel(type))}</span></div>
+          ${rows.map(([k,v])=>`<div class="ai-row"><div class="ai-label">${escapeHTML(k)}</div><div class="ai-value">${escapeHTML(v)}</div></div>`).join("")}
+        </div>
+        ${items}
+        <div class="actions" style="margin-top:12px">
+          <button class="secondary" onclick="cancelIgeaAction()">Annulla</button>
+          <button class="primary" onclick="confirmIgeaAction()">✓ Conferma</button>
+        </div>
+      </div>`;
+}
+
+function cancelIgeaAction(){
+    igeaPendingAction=null;
+    $("aiResult").innerHTML='<div class="empty">Operazione annullata.</div>';
+}
+
+function aiFindClientByName(name){
+    const n=aiNormalize(name||"");
+    if(!n) return null;
+    return clients.find(c=>aiNormalize(c.name)===n) ||
+           clients.find(c=>aiNormalize(c.name).includes(n) || n.includes(aiNormalize(c.name))) || null;
+}
+
+async function confirmIgeaAction(){
+    const action=igeaPendingAction;
+    if(!action) return;
+    const p=action.payload||{};
+    const resultBox=$("aiResult");
+    resultBox.innerHTML='<div class="empty">⏳ Eseguo l’operazione…</div>';
+
+    try{
+        let result=null;
+
+        if(action.type==="create_expense" || action.type==="create_income"){
+            const client=aiFindClientByName(p.client_name);
+            if(p.client_name && !client) throw new Error("Cliente non trovato: "+p.client_name);
+            const payload={
+                description:String(p.description|| (action.type==="create_expense"?"Spesa":"Entrata")),
+                amount:Number(p.amount||0),
+                date:p.date||today(),
+                category:String(p.category||""),
+                notes:String(p.notes||""),
+                type:action.type==="create_expense"?"expense":"income",
+                client_id:client?.id||null,
+                appointment_id:null
+            };
+            if(!(payload.amount>0)) throw new Error("Importo non valido.");
+            const q=await supabaseClient.from("expenses").insert(payload).select().single();
+            if(q.error) throw q.error;
+            expenses.unshift(q.data); result=q.data;
+        }
+        else if(action.type==="create_work_task"){
+            const payload={title:String(p.title||"Lavoro"),client_name:String(p.client_name||""),notes:String(p.notes||""),status:"da_fare",user_id:currentUser?.id};
+            const q=await supabaseClient.from("work_tasks").insert(payload).select().single();
+            if(q.error) throw q.error;
+            workTasks.unshift(q.data); result=q.data;
+        }
+        else if(action.type==="create_appointment"){
+            const client=aiFindClientByName(p.client_name);
+            if(!client) throw new Error("Cliente non trovato: "+(p.client_name||""));
+            const payload={client_id:client.id,date:p.date||today(),time:p.time||null,title:p.title||"Intervento",notes:p.notes||"",status:"programmato"};
+            const q=await supabaseClient.from("appointments").insert(payload).select().single();
+            if(q.error) throw q.error;
+            appointments.push(q.data); result=q.data;
+        }
+        else if(action.type==="create_client"){
+            const payload={name:String(p.name||"").trim(),phone:String(p.phone||""),email:String(p.email||""),address:String(p.address||""),city:String(p.city||""),notes:String(p.notes||"")};
+            if(!payload.name) throw new Error("Nome cliente mancante.");
+            const q=await supabaseClient.from("clients").insert(payload).select().single();
+            if(q.error) throw q.error;
+            clients.push(q.data); result=q.data;
+        }
+        else if(action.type==="create_quote"){
+            // Il preventivo viene passato al modulo preventivi già esistente.
+            if(typeof window.openAIQuoteDraft==="function"){
+                await window.openAIQuoteDraft(p);
+                igeaPendingAction=null;
+                return;
+            }
+            throw new Error("Per completare la creazione automatica del PDF preventivo serve aggiornare anche preventivi.js.");
+        }
+        else throw new Error("Azione non ancora supportata: "+action.type);
+
+        igeaPendingAction=null;
+        renderAll();
+        resultBox.innerHTML=`<div class="ai-section"><div class="ai-section-title">✅ <span>Operazione completata</span></div><div class="ai-answer-intro">${escapeHTML(action.success_message||"Dati salvati correttamente.")}</div></div>`;
+    }catch(error){
+        console.error("Azione Igea:",error);
+        resultBox.innerHTML=`<div class="empty">Errore: ${escapeHTML(error?.message||String(error))}</div>`;
+    }
+}
+
 async function runIgeaAI(){
     const input=$("aiPrompt");
     const resultBox=$("aiResult");
@@ -7322,13 +7460,17 @@ async function runIgeaAI(){
 
     try{
         const {data,error}=await supabaseClient.functions.invoke("igea-ai",{
-            body:{message:text}
+            body:{message:text, local_date:today(), timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||"Europe/Rome"}
         });
 
         if(error)throw error;
         if(data?.error)throw new Error(data.error);
 
         const answer=String(data?.answer||"").trim();
+        if(data?.action){
+            resultBox.innerHTML=renderIgeaAIAction(data.action,answer);
+            return;
+        }
         if(!answer)throw new Error("Nessuna risposta ricevuta dall’IA.");
 
         resultBox.innerHTML=renderIgeaAIAnswer(answer);
