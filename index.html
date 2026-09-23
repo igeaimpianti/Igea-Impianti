@@ -1232,7 +1232,7 @@ async function registerNotificationDevice(){
        Notification.permission !== "granted" || !currentUser) return false;
 
     notificationRegistration =
-        await navigator.serviceWorker.register("./sw.js?v=205");
+        await navigator.serviceWorker.register("./sw.js?v=215");
     await navigator.serviceWorker.ready;
 
     let subscription =
@@ -6962,7 +6962,7 @@ function renderDashboard(){
 
 
 /* =====================================================
-   IGEA V20 - DOCUMENTI E SPESE ANCHE IN DASHBOARD
+   IGEA V21 - DOC SCANNER A4 COLORE PULITO
 ===================================================== */
 let workTasks = [];
 let jobDocuments = [];
@@ -7442,13 +7442,13 @@ async function openScanEditor(file,index,total){
         scanSession={canvas,corners,resolve,index,total};
         $("modalContent").innerHTML=`
             <h2>Scanner documento</h2>
-            <p class="sub">Pagina ${index+1} di ${total} · Colore originale HD. Regola i 4 angoli solo se necessario.</p>
+            <p class="sub">Pagina ${index+1} di ${total} · Scanner Colore Pulito · bordi, prospettiva e ombre corretti. Regola gli angoli solo se necessario.</p>
             <div style="display:flex;justify-content:center;overflow:hidden;border-radius:14px;background:#111">
                 <canvas id="scanEditorCanvas" style="max-width:100%;touch-action:none"></canvas>
             </div>
             <div style="display:flex;gap:8px;margin-top:12px">
                 <button class="secondary" style="flex:1" onclick="scanResetCorners()">⌗ Automatico</button>
-                <button class="secondary" style="flex:1" disabled>🌈 Colore HD</button>
+                <button class="secondary" style="flex:1" disabled>✨ Colore pulito</button>
                 <button class="success" style="flex:1" onclick="scanAcceptPage()">✓ Salva</button>
             </div>
             <button class="danger" style="width:100%;margin-top:8px" onclick="scanCancelAll()">Annulla scansione</button>`;
@@ -7507,11 +7507,42 @@ function warpDocument(source,corners){
 }
 
 function enhanceScanCanvas(canvas){
-    // Modalità Colore originale: nessuna desaturazione e nessun filtro distruttivo.
+    // Scanner "Colore pulito": conserva i colori e corregge l'illuminazione del foglio.
     const out=document.createElement("canvas");
-    out.width=canvas.width;out.height=canvas.height;
-    out.getContext("2d",{alpha:false}).drawImage(canvas,0,0);
-    return out;
+    out.width=canvas.width; out.height=canvas.height;
+    if(!(window.cv && cv.Mat)){
+        out.getContext("2d",{alpha:false}).drawImage(canvas,0,0);
+        return out;
+    }
+    let src,rgb,lab,planes,L,bg,clean,merged,clahe,p1,p2,channels;
+    try{
+        src=cv.imread(canvas);
+        rgb=new cv.Mat(); cv.cvtColor(src,rgb,cv.COLOR_RGBA2RGB);
+        lab=new cv.Mat(); cv.cvtColor(rgb,lab,cv.COLOR_RGB2Lab);
+        planes=new cv.MatVector(); cv.split(lab,planes);
+        L=planes.get(0);
+        bg=new cv.Mat();
+        let k=Math.max(31,Math.round(Math.min(canvas.width,canvas.height)/18));
+        if(k%2===0)k++;
+        cv.GaussianBlur(L,bg,new cv.Size(k,k),0,0,cv.BORDER_REPLICATE);
+        clean=new cv.Mat();
+        cv.divide(L,bg,clean,255);
+        clahe=new cv.CLAHE(1.35,new cv.Size(8,8));
+        clahe.apply(clean,clean);
+        p1=planes.get(1); p2=planes.get(2);
+        channels=new cv.MatVector();
+        channels.push_back(clean); channels.push_back(p1); channels.push_back(p2);
+        merged=new cv.Mat(); cv.merge(channels,merged);
+        cv.cvtColor(merged,rgb,cv.COLOR_Lab2RGB);
+        cv.imshow(out,rgb);
+        return out;
+    }catch(e){
+        console.warn("Pulizia scanner colore:",e);
+        out.getContext("2d",{alpha:false}).drawImage(canvas,0,0);
+        return out;
+    }finally{
+        [src,rgb,lab,planes,L,bg,clean,merged,clahe,p1,p2,channels].forEach(x=>{try{x?.delete?.()}catch{}});
+    }
 }
 
 async function prepareScannedPDF(appointmentId,files){
@@ -7526,20 +7557,22 @@ async function prepareScannedPDF(appointmentId,files){
     if(!name){renderPendingScans();return;}
 
     const {jsPDF}=window.jspdf;
-    const pdf=new jsPDF({unit:"mm",format:"a4",orientation:"portrait"});
+    const pdf=new jsPDF({unit:"mm",format:"a4",orientation:"portrait",compress:true});
     pages.forEach((canvas,i)=>{
         if(i>0)pdf.addPage();
-        const data=canvas.toDataURL("image/jpeg",.96);
-        const pw=210,ph=297,margin=4,maxW=pw-margin*2,maxH=ph-margin*2;
+        const data=canvas.toDataURL("image/jpeg",.97);
+        const pw=210,ph=297,margin=8,maxW=pw-margin*2,maxH=ph-margin*2;
+        pdf.setFillColor(255,255,255);
+        pdf.rect(0,0,pw,ph,"F");
         const ratio=Math.min(maxW/canvas.width,maxH/canvas.height);
         const w=canvas.width*ratio,h=canvas.height*ratio;
-        pdf.addImage(data,"JPEG",(pw-w)/2,(ph-h)/2,w,h,undefined,"FAST");
+        pdf.addImage(data,"JPEG",(pw-w)/2,(ph-h)/2,w,h,undefined,"MEDIUM");
     });
 
     const safe=(name.toLowerCase().endsWith(".pdf")?name:name+".pdf").replace(/[^a-zA-Z0-9._-]/g,"-");
     pendingScans.push({appointmentId,name:safe,blob:pdf.output("blob")});
     renderPendingScans();closeModal();
-    toast("Documento ritagliato e pronto");
+    toast("Scansione A4 pulita e pronta");
 }
 
 async function uploadPendingScans(appointment){
