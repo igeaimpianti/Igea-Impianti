@@ -1232,7 +1232,7 @@ async function registerNotificationDevice(){
        Notification.permission !== "granted" || !currentUser) return false;
 
     notificationRegistration =
-        await navigator.serviceWorker.register("./sw.js?v=215");
+        await navigator.serviceWorker.register("./sw.js?v=235");
     await navigator.serviceWorker.ready;
 
     let subscription =
@@ -6962,7 +6962,7 @@ function renderDashboard(){
 
 
 /* =====================================================
-   IGEA V21 - DOC SCANNER A4 COLORE PULITO
+   IGEA V23 - SCANNER AUTOMATICO SENZA ANGOLI
 ===================================================== */
 let workTasks = [];
 let jobDocuments = [];
@@ -7383,7 +7383,7 @@ async function autoDetectDocument(canvas){
 function drawScanEditor(){
     const c=$("scanEditorCanvas"); if(!c||!scanSession)return;
     const source=scanSession.canvas, ctx=c.getContext("2d");
-    const maxW=Math.min(680,window.innerWidth-48), maxH=Math.min(window.innerHeight*.58,720);
+    const maxW=Math.min(680,window.innerWidth-72), maxH=Math.min(window.innerHeight*.52,680);
     const scale=Math.min(maxW/source.width,maxH/source.height,1);
     c.width=Math.round(source.width*scale); c.height=Math.round(source.height*scale);
     c.style.width=c.width+"px";c.style.height=c.height+"px";
@@ -7397,9 +7397,9 @@ function drawScanEditor(){
     ctx.lineWidth=3;ctx.strokeStyle="#22c55e";
     ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.stroke();
     pts.forEach((p,i)=>{
-        ctx.beginPath();ctx.arc(p.x,p.y,13,0,Math.PI*2);ctx.fillStyle="#fff";ctx.fill();
-        ctx.lineWidth=4;ctx.strokeStyle="#16834b";ctx.stroke();
-        ctx.fillStyle="#111";ctx.font="bold 12px -apple-system";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(String(i+1),p.x,p.y);
+        ctx.beginPath();ctx.arc(p.x,p.y,9,0,Math.PI*2);ctx.fillStyle="#fff";ctx.fill();
+        ctx.lineWidth=3;ctx.strokeStyle="#16834b";ctx.stroke();
+        ctx.fillStyle="#111";ctx.font="bold 10px -apple-system";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(String(i+1),p.x,p.y);
     });
     ctx.restore();
     scanSession.displayScale=scale;
@@ -7412,13 +7412,36 @@ function bindScanEditor(){
         const r=c.getBoundingClientRect(),t=e.touches?.[0]||e;
         return {x:(t.clientX-r.left)*(c.width/r.width),y:(t.clientY-r.top)*(c.height/r.height)};
     };
+    const drawMagnifier=(p)=>{
+        drawScanEditor();
+        if(dragging<0)return;
+        const ctx=c.getContext("2d"), sc=scanSession.displayScale||1;
+        const source=scanSession.canvas;
+        const sx=Math.max(0,Math.min(source.width,p.x/sc));
+        const sy=Math.max(0,Math.min(source.height,p.y/sc));
+        const radius=44, zoom=2.7;
+        let mx=p.x+62,my=p.y-68;
+        if(mx+radius>c.width)mx=p.x-62;
+        if(my-radius<0)my=p.y+68;
+        ctx.save();
+        ctx.beginPath();ctx.arc(mx,my,radius,0,Math.PI*2);ctx.clip();
+        ctx.fillStyle="#fff";ctx.fillRect(mx-radius,my-radius,radius*2,radius*2);
+        const sw=radius*2/(zoom*sc), sh=sw;
+        ctx.drawImage(source,sx-sw/2,sy-sh/2,sw,sh,mx-radius,my-radius,radius*2,radius*2);
+        ctx.strokeStyle="#00a85a";ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(mx-radius,my);ctx.lineTo(mx+radius,my);
+        ctx.moveTo(mx,my-radius);ctx.lineTo(mx,my+radius);ctx.stroke();
+        ctx.restore();
+        ctx.beginPath();ctx.arc(mx,my,radius,0,Math.PI*2);ctx.lineWidth=4;ctx.strokeStyle="#fff";ctx.stroke();
+        ctx.beginPath();ctx.arc(mx,my,radius-2,0,Math.PI*2);ctx.lineWidth=2;ctx.strokeStyle="#00a85a";ctx.stroke();
+    };
     const down=e=>{
         const p=pos(e),sc=scanSession.displayScale||1;
         const pts=scanSession.corners.map(q=>({x:q.x*sc,y:q.y*sc}));
         let best=Infinity;
         pts.forEach((q,i)=>{const d=Math.hypot(q.x-p.x,q.y-p.y);if(d<best){best=d;dragging=i;}});
-        if(best>45)dragging=-1;
-        if(dragging>=0)e.preventDefault();
+        if(best>38)dragging=-1;
+        if(dragging>=0){e.preventDefault();drawMagnifier(p);}
     };
     const move=e=>{
         if(dragging<0)return;e.preventDefault();
@@ -7427,34 +7450,126 @@ function bindScanEditor(){
             x:Math.max(0,Math.min(scanSession.canvas.width,p.x/sc)),
             y:Math.max(0,Math.min(scanSession.canvas.height,p.y/sc))
         };
-        drawScanEditor();
+        drawMagnifier(p);
     };
-    const up=()=>dragging=-1;
+    const up=()=>{dragging=-1;drawScanEditor();};
     c.addEventListener("pointerdown",down);c.addEventListener("pointermove",move);
     c.addEventListener("pointerup",up);c.addEventListener("pointercancel",up);
-    c.addEventListener("touchstart",down,{passive:false});c.addEventListener("touchmove",move,{passive:false});c.addEventListener("touchend",up);
 }
 
 async function openScanEditor(file,index,total){
-    const canvas=await fileToCanvas(file);
-    const corners=await autoDetectDocument(canvas);
+    const canvas=await fileToCanvas(file,3000);
+
+    $("modalContent").innerHTML=`
+        <h2>Scanner documento</h2>
+        <div style="padding:30px 12px;text-align:center">
+            <div style="font-size:44px">📄</div>
+            <div style="font-weight:800;font-size:18px;margin-top:10px">Ritaglio automatico...</div>
+            <div class="sub" style="margin-top:6px">Rilevo il foglio, correggo prospettiva e ombre.</div>
+        </div>`;
+    $("modal").classList.add("modal-center");
+    $("modal").classList.remove("hidden");
+
+    // Multi-pass detector: original + contrast/threshold variants.
+    const corners=await autoDetectDocumentPro(canvas);
+    const warped=warpDocument(canvas,corners);
+    const cleaned=enhanceScanCanvas(warped);
+
     return await new Promise(resolve=>{
-        scanSession={canvas,corners,resolve,index,total};
-        $("modalContent").innerHTML=`
-            <h2>Scanner documento</h2>
-            <p class="sub">Pagina ${index+1} di ${total} · Scanner Colore Pulito · bordi, prospettiva e ombre corretti. Regola gli angoli solo se necessario.</p>
-            <div style="display:flex;justify-content:center;overflow:hidden;border-radius:14px;background:#111">
-                <canvas id="scanEditorCanvas" style="max-width:100%;touch-action:none"></canvas>
-            </div>
-            <div style="display:flex;gap:8px;margin-top:12px">
-                <button class="secondary" style="flex:1" onclick="scanResetCorners()">⌗ Automatico</button>
-                <button class="secondary" style="flex:1" disabled>✨ Colore pulito</button>
-                <button class="success" style="flex:1" onclick="scanAcceptPage()">✓ Salva</button>
-            </div>
-            <button class="danger" style="width:100%;margin-top:8px" onclick="scanCancelAll()">Annulla scansione</button>`;
-        $("modal").classList.add("modal-center");$("modal").classList.remove("hidden");
-        requestAnimationFrame(()=>{drawScanEditor();bindScanEditor();});
+        scanSession={canvas,corners,previewCanvas:cleaned,resolve,index,total};
+        showScanFinalPreviewAuto();
     });
+}
+
+async function autoDetectDocumentPro(canvas){
+    const ok=await waitForOpenCV();
+    if(!ok)return defaultScanCorners(canvas.width,canvas.height);
+
+    let src,gray,small;
+    try{
+        src=cv.imread(canvas);
+        gray=new cv.Mat();
+        cv.cvtColor(src,gray,cv.COLOR_RGBA2GRAY);
+
+        const maxSide=1400;
+        const scale=Math.min(1,maxSide/Math.max(canvas.width,canvas.height));
+        small=new cv.Mat();
+        cv.resize(gray,small,new cv.Size(Math.round(canvas.width*scale),Math.round(canvas.height*scale)),0,0,cv.INTER_AREA);
+
+        const variants=[];
+        const g1=new cv.Mat(); cv.GaussianBlur(small,g1,new cv.Size(5,5),0); variants.push(g1);
+        const g2=new cv.Mat(); cv.bilateralFilter(small,g2,9,60,60); variants.push(g2);
+
+        let best=null,bestScore=-1;
+        for(const base of variants){
+            for(const mode of [0,1,2]){
+                const edge=new cv.Mat();
+                if(mode===0){
+                    cv.Canny(base,edge,35,120);
+                }else if(mode===1){
+                    cv.adaptiveThreshold(base,edge,255,cv.ADAPTIVE_THRESH_GAUSSIAN_C,cv.THRESH_BINARY,31,9);
+                }else{
+                    cv.threshold(base,edge,0,255,cv.THRESH_BINARY+cv.THRESH_OTSU);
+                }
+                const kernel=cv.Mat.ones(5,5,cv.CV_8U);
+                cv.morphologyEx(edge,edge,cv.MORPH_CLOSE,kernel,new cv.Point(-1,-1),2);
+
+                const contours=new cv.MatVector(),hierarchy=new cv.Mat();
+                cv.findContours(edge,contours,hierarchy,cv.RETR_LIST,cv.CHAIN_APPROX_SIMPLE);
+
+                const imgArea=small.cols*small.rows;
+                for(let i=0;i<contours.size();i++){
+                    const cnt=contours.get(i);
+                    const area=Math.abs(cv.contourArea(cnt));
+                    if(area<imgArea*.18){cnt.delete();continue;}
+                    const peri=cv.arcLength(cnt,true);
+                    const approx=new cv.Mat();
+                    cv.approxPolyDP(cnt,approx,.018*peri,true);
+                    if(approx.rows===4 && cv.isContourConvex(approx)){
+                        const pts=[];
+                        for(let r=0;r<4;r++)pts.push({x:approx.intPtr(r,0)[0],y:approx.intPtr(r,0)[1]});
+                        const ordered=orderCorners(pts);
+                        const edgePenalty=ordered.reduce((a,p)=>a+(Math.min(p.x,p.y,small.cols-p.x,small.rows-p.y)<4?1:0),0);
+                        const score=area/imgArea-edgePenalty*.08;
+                        if(score>bestScore){bestScore=score;best=ordered;}
+                    }
+                    approx.delete();cnt.delete();
+                }
+                contours.delete();hierarchy.delete();kernel.delete();edge.delete();
+            }
+        }
+        variants.forEach(x=>x.delete());
+        if(!best)return defaultScanCorners(canvas.width,canvas.height);
+        return best.map(p=>({x:p.x/scale,y:p.y/scale}));
+    }catch(e){
+        console.warn("Rilevamento automatico avanzato:",e);
+        return defaultScanCorners(canvas.width,canvas.height);
+    }finally{
+        [src,gray,small].forEach(x=>{try{x?.delete?.()}catch{}});
+    }
+}
+
+function showScanFinalPreviewAuto(){
+    if(!scanSession?.previewCanvas)return;
+    const p=scanSession.previewCanvas;
+    const preview=document.createElement("canvas");
+    const max=1000,scale=Math.min(1,max/Math.max(p.width,p.height));
+    preview.width=Math.round(p.width*scale);preview.height=Math.round(p.height*scale);
+    preview.getContext("2d",{alpha:false}).drawImage(p,0,0,preview.width,preview.height);
+    const data=preview.toDataURL("image/jpeg",.94);
+    $("modalContent").innerHTML=`
+        <h2>Documento pronto</h2>
+        <p class="sub">Ritagliato e raddrizzato automaticamente · Colore pulito.</p>
+        <div style="background:#e9eaec;padding:14px;border-radius:16px;display:flex;justify-content:center">
+          <div style="background:#fff;width:min(100%,430px);aspect-ratio:210/297;box-shadow:0 5px 22px rgba(0,0,0,.16);display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box">
+            <img src="${data}" style="max-width:100%;max-height:100%;object-fit:contain">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+          <button class="secondary" onclick="scanRetakeCurrent()">📷 Rifai foto</button>
+          <button class="success" onclick="scanConfirmPreview()">✓ Conferma</button>
+        </div>
+        <button class="danger" style="width:100%;margin-top:8px" onclick="scanCancelAll()">Annulla scansione</button>`;
 }
 
 async function scanResetCorners(){
@@ -7470,9 +7585,72 @@ function scanCancelAll(){
 
 function scanAcceptPage(){
     if(!scanSession)return;
-    const {canvas,corners,resolve}=scanSession;
-    const result=warpDocument(canvas,corners);
-    scanSession=null;resolve(result);
+    const originalSession=scanSession;
+    const result=enhanceScanCanvas(warpDocument(originalSession.canvas,originalSession.corners));
+    scanSession.previewCanvas=result;
+    scanSession.originalCorners=originalSession.corners.map(p=>({...p}));
+    showScanFinalPreview();
+}
+
+function showScanFinalPreview(){
+    if(!scanSession?.previewCanvas)return;
+    const p=scanSession.previewCanvas;
+    const preview=document.createElement("canvas");
+    const max=900,scale=Math.min(1,max/Math.max(p.width,p.height));
+    preview.width=Math.round(p.width*scale);preview.height=Math.round(p.height*scale);
+    preview.getContext("2d",{alpha:false}).drawImage(p,0,0,preview.width,preview.height);
+    const data=preview.toDataURL("image/jpeg",.92);
+    $("modalContent").innerHTML=`
+        <h2>Anteprima A4</h2>
+        <p class="sub">Controlla il risultato prima di salvarlo.</p>
+        <div style="background:#e9eaec;padding:14px;border-radius:16px;display:flex;justify-content:center">
+          <div style="background:#fff;width:min(100%,430px);aspect-ratio:210/297;box-shadow:0 5px 22px rgba(0,0,0,.16);display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box">
+            <img src="${data}" style="max-width:100%;max-height:100%;object-fit:contain">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+          <button class="secondary" onclick="scanRetakeCurrent()">📷 Rifai foto</button>
+          <button class="secondary" onclick="scanBackToCorners()">⌗ Modifica bordi</button>
+        </div>
+        <button class="success" style="width:100%;margin-top:8px" onclick="scanConfirmPreview()">✓ Conferma pagina</button>
+        <button class="danger" style="width:100%;margin-top:8px" onclick="scanCancelAll()">Annulla scansione</button>`;
+}
+
+function scanBackToCorners(){
+    if(!scanSession)return;
+    const {index,total}=scanSession;
+    $("modalContent").innerHTML=`
+        <h2>Scanner documento</h2>
+        <p class="sub">Pagina ${index+1} di ${total} · trascina gli angoli con la lente di precisione.</p>
+        <div style="display:flex;justify-content:center;overflow:visible;border-radius:14px;background:#111;padding:10px">
+            <canvas id="scanEditorCanvas" style="max-width:100%;touch-action:none"></canvas>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="secondary" style="flex:1" onclick="scanResetCorners()">⌗ Automatico</button>
+            <button class="secondary" style="flex:1" disabled>✨ Colore pulito</button>
+            <button class="success" style="flex:1" onclick="scanAcceptPage()">✓ Anteprima</button>
+        </div>
+        <button class="danger" style="width:100%;margin-top:8px" onclick="scanCancelAll()">Annulla scansione</button>`;
+    requestAnimationFrame(()=>{drawScanEditor();bindScanEditor();});
+}
+
+function scanConfirmPreview(){
+    if(!scanSession?.previewCanvas)return;
+    const result=scanSession.previewCanvas, resolve=scanSession.resolve;
+    scanSession=null; resolve(result);
+}
+
+function scanRetakeCurrent(){
+    if(!scanSession)return;
+    const old=scanSession, resolve=old.resolve, index=old.index,total=old.total;
+    pickDocumentFiles(async files=>{
+        if(!files?.length)return;
+        const canvas=await fileToCanvas(files[0],3000);
+        const corners=await autoDetectDocumentPro(canvas);
+        const previewCanvas=enhanceScanCanvas(warpDocument(canvas,corners));
+        scanSession={canvas,corners,previewCanvas,resolve,index,total};
+        showScanFinalPreviewAuto();
+    });
 }
 
 function warpDocument(source,corners){
@@ -7550,7 +7728,7 @@ async function prepareScannedPDF(appointmentId,files){
     for(let i=0;i<files.length;i++){
         const page=await openScanEditor(files[i],i,files.length);
         if(!page){renderPendingScans();return;}
-        pages.push(enhanceScanCanvas(page));
+        pages.push(page);
     }
 
     const name=prompt("Nome del PDF (es. gl-security)","documento");
