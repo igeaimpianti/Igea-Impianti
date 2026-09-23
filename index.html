@@ -577,6 +577,18 @@ textarea:focus{
 .ai-list li{padding:10px 14px;border-top:1px solid #eeeeef;line-height:1.4}
 @media(max-width:430px){.ai-row{grid-template-columns:100px 1fr;gap:8px;padding:10px 12px}.ai-section-title{padding:12px}.ai-answer-intro{font-size:14px}}
 
+
+/* ===== Assistente Igea V28 - memoria conversazione ===== */
+.ai-v28-toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.ai-v28-toolbar .secondary{padding:9px 11px;font-size:12px}
+.ai-v28-history{display:flex;flex-direction:column;gap:9px;max-height:46vh;overflow:auto;padding:4px 2px 10px;scroll-behavior:smooth}
+.ai-v28-msg{max-width:88%;padding:10px 12px;border-radius:16px;line-height:1.42;overflow-wrap:anywhere}
+.ai-v28-msg.user{align-self:flex-end;background:#111;color:#fff;border-bottom-right-radius:5px}
+.ai-v28-msg.assistant{align-self:flex-start;background:#f2f2f4;color:#111;border:1px solid #e3e3e6;border-bottom-left-radius:5px}
+.ai-v28-composer{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-top:10px}
+.ai-v28-composer textarea{margin:0;min-height:52px;max-height:130px}
+.ai-v28-send{width:auto!important;min-width:72px;height:52px}
+
 </style>
 </head>
 
@@ -7039,21 +7051,30 @@ function taskToAppointment(id){
 
 function openIgeaAI(){
     $("modalContent").innerHTML=`
-        <h2>✨ Assistente Igea</h2>
-        <p class="sub">Chiedimi informazioni sui dati reali del gestionale.</p>
+        <div class="ai-v28-toolbar">
+            <div>
+                <h2 style="margin:0">✨ Assistente Igea V28</h2>
+                <div class="sub">Assistente operativo con memoria della conversazione.</div>
+            </div>
+            <button class="secondary" onclick="clearIgeaAIHistory()">Nuova chat</button>
+        </div>
 
-        <label>Cosa vuoi sapere?</label>
-        <textarea id="aiPrompt" rows="3"
-            placeholder="Scrivi liberamente, es. Quanti clienti ho? Quanto ho speso questo mese? Mostrami gli articoli Hikvision..."></textarea>
+        <div id="aiChatHistory" class="ai-v28-history"></div>
 
-        <button class="primary" style="width:100%" onclick="runIgeaAI()">✨ Chiedi a Igea</button>
+        <div id="aiResult" style="margin-top:6px"></div>
 
-        <div id="aiResult" style="margin-top:12px"></div>
+        <div class="ai-v28-composer">
+            <textarea id="aiPrompt" rows="2"
+                placeholder="Scrivi a Igea..."
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();runIgeaAI();}"></textarea>
+            <button class="primary ai-v28-send" onclick="runIgeaAI()">Invia</button>
+        </div>
 
         <button class="secondary" style="width:100%;margin-top:12px" onclick="closeModal()">Chiudi</button>
     `;
     $("modal").classList.add("modal-center");
     $("modal").classList.remove("hidden");
+    renderIgeaAIHistory();
     setTimeout(()=>$("aiPrompt")?.focus(),100);
 }
 
@@ -7450,30 +7471,109 @@ async function confirmIgeaAction(){
     }
 }
 
+/* =====================================================
+   ASSISTENTE IGEA V28 - MEMORIA CONVERSAZIONE
+===================================================== */
+
+let igeaAIHistory = [];
+
+try{
+    const savedAIHistory = JSON.parse(localStorage.getItem("igeaAIHistoryV28") || "[]");
+    if(Array.isArray(savedAIHistory)) igeaAIHistory = savedAIHistory.slice(-10);
+}catch(_){
+    igeaAIHistory = [];
+}
+
+function saveIgeaAIHistory(){
+    try{
+        localStorage.setItem("igeaAIHistoryV28",JSON.stringify(igeaAIHistory.slice(-10)));
+    }catch(_){}
+}
+
+function addIgeaAIHistory(role,content){
+    const value=String(content||"").trim();
+    if(!value)return;
+    igeaAIHistory.push({role,content:value});
+    igeaAIHistory=igeaAIHistory.slice(-10);
+    saveIgeaAIHistory();
+}
+
+function renderIgeaAIHistory(){
+    const box=$("aiChatHistory");
+    if(!box)return;
+
+    const visible=igeaAIHistory.filter(item=>
+        item?.role &&
+        item?.content &&
+        !String(item.content).startsWith("AZIONE PREPARATA:")
+    );
+
+    box.innerHTML=visible.length
+        ? visible.map(item=>`
+            <div class="ai-v28-msg ${item.role==="user"?"user":"assistant"}">
+                ${escapeHTML(item.content)}
+            </div>`).join("")
+        : '<div class="empty">Ciao 👋 Dimmi cosa vuoi fare nel gestionale.</div>';
+
+    box.scrollTop=box.scrollHeight;
+}
+
+function clearIgeaAIHistory(){
+    igeaAIHistory=[];
+    saveIgeaAIHistory();
+    igeaPendingAction=null;
+    renderIgeaAIHistory();
+    if($("aiResult")) $("aiResult").innerHTML="";
+    if($("aiPrompt")) $("aiPrompt").value="";
+    toast("Nuova conversazione");
+}
+
 async function runIgeaAI(){
     const input=$("aiPrompt");
     const resultBox=$("aiResult");
-    const text=input?.value.trim();
-    if(!text){toast("Scrivi cosa vuoi sapere");return;}
+    const userText=input?.value.trim();
 
-    resultBox.innerHTML='<div class="empty">✨ Assistente Igea sta analizzando i dati…</div>';
+    if(!userText){
+        toast("Scrivi cosa vuoi sapere");
+        return;
+    }
+
+    const previousHistory=[...igeaAIHistory];
+    addIgeaAIHistory("user",userText);
+    if(input) input.value="";
+    renderIgeaAIHistory();
+
+    resultBox.innerHTML='<div class="empty">✨ Igea sta pensando…</div>';
 
     try{
         const {data,error}=await supabaseClient.functions.invoke("igea-ai",{
-            body:{message:text, local_date:today(), timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||"Europe/Rome"}
+            body:{
+                message:userText,
+                local_date:today(),
+                timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||"Europe/Rome",
+                history:previousHistory
+            }
         });
 
         if(error)throw error;
         if(data?.error)throw new Error(data.error);
 
         const answer=String(data?.answer||"").trim();
+
+        if(answer){
+            addIgeaAIHistory("assistant",answer);
+            renderIgeaAIHistory();
+        }
+
         if(data?.action){
+            addIgeaAIHistory("assistant","AZIONE PREPARATA: "+JSON.stringify(data.action));
             resultBox.innerHTML=renderIgeaAIAction(data.action,answer);
             return;
         }
+
         if(!answer)throw new Error("Nessuna risposta ricevuta dall’IA.");
 
-        resultBox.innerHTML=renderIgeaAIAnswer(answer);
+        resultBox.innerHTML="";
     }catch(error){
         console.error("Assistente Igea:",error);
         const message=error?.context?.body?.error || error?.message || String(error);
@@ -8143,6 +8243,6 @@ function renderAll(){
 init();
 
 </script>
-<script src="preventivi.js?v=27"></script>
+<script src="preventivi.js?v=28"></script>
 </body>
 </html>
