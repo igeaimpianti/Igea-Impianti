@@ -1232,7 +1232,7 @@ async function registerNotificationDevice(){
        Notification.permission !== "granted" || !currentUser) return false;
 
     notificationRegistration =
-        await navigator.serviceWorker.register("./sw.js?v=235");
+        await navigator.serviceWorker.register("./sw.js?v=245");
     await navigator.serviceWorker.ready;
 
     let subscription =
@@ -6962,7 +6962,7 @@ function renderDashboard(){
 
 
 /* =====================================================
-   IGEA V23 - SCANNER AUTOMATICO SENZA ANGOLI
+   IGEA V24 - IA GEMINI + SPESE CORRETTE
 ===================================================== */
 let workTasks = [];
 let jobDocuments = [];
@@ -7025,16 +7025,9 @@ function openIgeaAI(){
         <h2>✨ Assistente Igea</h2>
         <p class="sub">Chiedimi informazioni sui dati reali del gestionale.</p>
 
-        <div class="actions" style="margin-bottom:10px;flex-wrap:wrap">
-            <button class="secondary" onclick="setIgeaAIExample('Fammi il resoconto di questo mese')">📊 Resoconto mese</button>
-            <button class="secondary" onclick="setIgeaAIExample('Mostrami tutte le fatture dei materiali')">📄 Fatture materiali</button>
-            <button class="secondary" onclick="setIgeaAIExample('Mostrami gli articoli telecamere')">📷 Telecamere</button>
-            <button class="secondary" onclick="setIgeaAIExample('Mostrami i lavori da fare')">🧰 Lavori da fare</button>
-        </div>
-
         <label>Cosa vuoi sapere?</label>
         <textarea id="aiPrompt" rows="3"
-            placeholder="Es. Fammi il resoconto di settembre, mostrami gli articoli Hikvision, chi deve ancora pagarmi..."></textarea>
+            placeholder="Scrivi liberamente, es. Quanti clienti ho? Quanto ho speso questo mese? Mostrami gli articoli Hikvision..."></textarea>
 
         <button class="primary" style="width:100%" onclick="runIgeaAI()">✨ Chiedi a Igea</button>
 
@@ -7241,37 +7234,28 @@ async function runIgeaAI(){
     const text=input?.value.trim();
     if(!text){toast("Scrivi cosa vuoi sapere");return;}
 
-    resultBox.innerHTML='<div class="empty">Sto cercando nei dati di Igea Impianti…</div>';
-    const p=aiNormalize(text);
+    resultBox.innerHTML='<div class="empty">✨ Assistente Igea sta analizzando i dati…</div>';
 
     try{
-        if((p.includes("resoconto")||p.includes("riepilogo")||p.includes("guadagn")||p.includes("entrate")||p.includes("spese")) &&
-           (p.includes("mese")||["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"].some(m=>p.includes(m)))){
-            await aiShowMonthlyReport(text);
-        }else if(p.includes("fattur")||p.includes("document")||p.includes("ricevut")){
-            await aiShowDocuments(text);
-        }else if(p.includes("articol")||p.includes("telecamer")||p.includes("hikvision")||p.includes("ajax")||p.includes("nvr")||p.includes("faret")){
-            await aiShowArticles(text);
-        }else if(p.includes("lavor") && (p.includes("fare")||p.includes("eseguire")||p.includes("da fare"))){
-            aiShowWorkTasks();
-        }else if(p.includes("pagare")||p.includes("pagamenti aperti")||p.includes("deve ancora")||p.includes("da incassare")){
-            aiShowUnpaid();
-        }else if(p.includes("prossimo appuntamento")||p.includes("prossima appuntamento")){
-            aiShowNextAppointment();
-        }else{
-            resultBox.innerHTML=`
-                <div class="item">
-                    <b>Posso interrogare direttamente il gestionale.</b>
-                    <div class="sub" style="margin-top:8px">
-                        Prova: “resoconto di settembre”, “fatture dei materiali”,
-                        “articoli Hikvision”, “lavori da fare”, “chi deve ancora pagarmi”
-                        oppure “prossimo appuntamento”.
-                    </div>
-                </div>`;
-        }
+        const {data,error}=await supabaseClient.functions.invoke("igea-ai",{
+            body:{message:text}
+        });
+
+        if(error)throw error;
+        if(data?.error)throw new Error(data.error);
+
+        const answer=String(data?.answer||"").trim();
+        if(!answer)throw new Error("Nessuna risposta ricevuta dall’IA.");
+
+        resultBox.innerHTML=`
+            <div class="item">
+                <div class="item-title">✨ Assistente Igea</div>
+                <div style="white-space:pre-wrap;line-height:1.5;margin-top:8px">${escapeHTML(answer)}</div>
+            </div>`;
     }catch(error){
         console.error("Assistente Igea:",error);
-        resultBox.innerHTML=`<div class="empty">Errore: ${escapeHTML(error.message||String(error))}</div>`;
+        const message=error?.context?.body?.error || error?.message || String(error);
+        resultBox.innerHTML=`<div class="empty">Errore IA: ${escapeHTML(message)}</div>`;
     }
 }
 
@@ -7818,22 +7802,17 @@ async function saveAppointmentExpense(appointmentId){
 
     // Uses the same expenses table already used by the gestionale.
     const payload={
-        user_id:currentUser?.id,
-        client_id:appointment.client_id,
-        appointment_id:appointment.id,
-        type:"expense",
+        description:notes,
         amount,
         date,
-        notes
+        category:"Spesa lavoro",
+        notes:"",
+        type:"expense",
+        client_id:appointment.client_id,
+        appointment_id:appointment.id
     };
 
-    let result=await supabaseClient.from("expenses").insert(payload).select().single();
-
-    // Compatibility fallback for databases where expenses has no appointment_id column.
-    if(result.error && /appointment_id/i.test(result.error.message||"")){
-        delete payload.appointment_id;
-        result=await supabaseClient.from("expenses").insert(payload).select().single();
-    }
+    const result=await supabaseClient.from("expenses").insert(payload).select().single();
 
     if(result.error){alert("Errore salvataggio spesa:\n"+result.error.message);return;}
     expenses.unshift(result.data);
