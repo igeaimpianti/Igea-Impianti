@@ -2960,16 +2960,10 @@ function appointmentCard(
                 <button class="danger" onclick="deleteProgrammedAppointment('${appointment.id}')">🗑️ Elimina</button>
             </div>
         ` : `
-            <div onclick="openCompletedAppointmentDetail('${appointment.id}')" style="cursor:pointer;margin-top:9px">
-                <div class="between" style="align-items:center">
-                    <div>
-                        <div class="sub">Guadagno netto</div>
-                        <div style="font-size:19px;font-weight:850;color:${Number(appointment.net || 0) < 0 ? "#d9364f" : "#16834b"}">
-                            ${money(appointment.net || 0)}
-                        </div>
-                    </div>
-                    <span style="font-size:24px;color:#aaa">›</span>
-                </div>
+            <div class="sub" style="margin-top:9px">Appuntamento completato</div>
+            <div class="actions">
+                <button class="blue" onclick="openJobDocuments('${appointment.id}')">📎 Documenti</button>
+                <button class="danger" onclick="deleteCompletedAppointment('${appointment.id}')">Elimina</button>
             </div>
         `}
 
@@ -2977,176 +2971,6 @@ function appointmentCard(
 
     `;
 
-}
-
-
-
-/* =====================================================
-   DETTAGLIO APPUNTAMENTO COMPLETATO - V29
-===================================================== */
-
-function openCompletedAppointmentDetail(id){
-
-    const appointment = appointments.find(
-        item => String(item.id) === String(id)
-    );
-
-    if(!appointment || appointment.status !== "completato"){
-        toast("Appuntamento non trovato");
-        return;
-    }
-
-    const client = findClient(appointment.client_id);
-
-    const linkedExpenses = expenses.filter(
-        item => String(item.appointment_id) === String(id)
-            && (item.type || "expense") === "expense"
-    );
-
-    const expensesTotal = linkedExpenses.length
-        ? linkedExpenses.reduce((sum,item)=>sum + Number(item.amount || 0),0)
-        : Number(appointment.expense || 0);
-
-    const gross = Number(appointment.amount || 0);
-    const net = Math.round((gross - expensesTotal) * 100) / 100;
-
-    const docs = (typeof jobDocuments !== "undefined" ? jobDocuments : [])
-        .filter(doc => String(doc.appointment_id) === String(id));
-
-    $("modalContent").innerHTML = `
-        <div class="between" style="align-items:flex-start">
-            <div>
-                <h2 style="margin-bottom:4px">📋 Dettaglio appuntamento</h2>
-                <div class="item-title">${escapeHTML(client?.name || "Cliente")}</div>
-                <div class="sub">
-                    ${formatDate(appointment.date)}
-                    ${appointment.time ? " · "+escapeHTML(appointment.time.slice(0,5)) : ""}
-                </div>
-            </div>
-            <span class="badge green">Completato</span>
-        </div>
-
-        ${appointment.notes ? `
-            <div class="item" style="margin-top:14px">
-                <b>📝 Lavoro eseguito</b>
-                <div class="sub" style="margin-top:6px">${escapeHTML(appointment.notes)}</div>
-            </div>
-        ` : ""}
-
-        <h3 style="margin-top:18px">💰 Riepilogo economico</h3>
-        <div class="rate-summary">
-            <div>
-                <span>Guadagno</span>
-                <b class="green">${money(gross)}</b>
-            </div>
-            <div>
-                <span>Spese</span>
-                <b class="red">${money(expensesTotal)}</b>
-            </div>
-            <div style="border-top:1px solid #ddd;margin-top:5px;padding-top:9px">
-                <span><b>Netto</b></span>
-                <b style="font-size:19px;color:${net < 0 ? "#d9364f" : "#16834b"}">${money(net)}</b>
-            </div>
-        </div>
-
-        <h3 style="margin-top:18px">💸 Spese del lavoro</h3>
-        ${
-            linkedExpenses.length
-            ? linkedExpenses.map(item=>`
-                <div class="item">
-                    <div class="between">
-                        <div>
-                            <b>${escapeHTML(item.description || item.notes || "Spesa")}</b>
-                            <div class="sub">
-                                ${item.date ? formatDate(item.date) : ""}
-                                ${item.category ? " · "+escapeHTML(item.category) : ""}
-                            </div>
-                        </div>
-                        <b class="red">${money(item.amount)}</b>
-                    </div>
-                </div>
-            `).join("")
-            : Number(appointment.expense || 0) > 0
-                ? `<div class="item"><div class="between"><b>Spesa registrata al completamento</b><b class="red">${money(appointment.expense)}</b></div></div>`
-                : '<div class="empty">Nessuna spesa collegata.</div>'
-        }
-
-        <h3 style="margin-top:18px">📎 Documenti allegati</h3>
-        <button class="blue" style="width:100%;margin-bottom:10px" onclick="startDocumentScanAndUpload('${appointment.id}')">
-            📷 Scansiona e aggiungi documento
-        </button>
-
-        ${
-            docs.length
-            ? docs.map(doc=>`
-                <div class="item">
-                    <b>${escapeHTML(doc.name || "Documento")}</b>
-                    <div class="actions">
-                        <button class="blue" onclick="openStoredDocument('${doc.id}')">Apri</button>
-                        <button class="secondary" onclick="shareStoredDocument('${doc.id}')">Condividi</button>
-                        <button class="danger" onclick="deleteStoredDocumentFromCompletedDetail('${doc.id}','${appointment.id}')">Elimina</button>
-                    </div>
-                </div>
-            `).join("")
-            : '<div class="empty">Nessun documento allegato.</div>'
-        }
-
-        <div class="divider"></div>
-
-        <button class="danger" style="width:100%" onclick="deleteCompletedAppointmentFromDetail('${appointment.id}')">
-            🗑️ Elimina appuntamento
-        </button>
-
-        <button class="secondary" style="width:100%;margin-top:8px" onclick="closeModal()">
-            Chiudi
-        </button>
-    `;
-
-    $("modal").classList.add("modal-center");
-    $("modal").classList.remove("hidden");
-}
-
-async function deleteStoredDocumentFromCompletedDetail(documentId,appointmentId){
-    const doc = jobDocuments.find(item=>String(item.id)===String(documentId));
-    if(!doc || !confirm("Eliminare questo documento?")) return;
-
-    const rm = await supabaseClient.storage
-        .from("job-documents")
-        .remove([doc.storage_path]);
-
-    if(rm.error){
-        alert(rm.error.message);
-        return;
-    }
-
-    const del = await supabaseClient
-        .from("job_documents")
-        .delete()
-        .eq("id",documentId);
-
-    if(del.error){
-        alert(del.error.message);
-        return;
-    }
-
-    jobDocuments = jobDocuments.filter(
-        item=>String(item.id)!==String(documentId)
-    );
-
-    openCompletedAppointmentDetail(appointmentId);
-    toast("Documento eliminato");
-}
-
-async function deleteCompletedAppointmentFromDetail(id){
-    await deleteCompletedAppointment(id);
-
-    const stillExists = appointments.some(
-        item => String(item.id) === String(id)
-    );
-
-    if(!stillExists){
-        closeModal();
-    }
 }
 
 
@@ -3334,6 +3158,17 @@ function completeAppointment(id){
     completionPaymentType =
         "single";
 
+    // Spese già registrate dalla Dashboard per questo appuntamento.
+    // Al completamento devono essere considerate, non duplicate.
+    const existingJobExpense = Math.round(
+        expenses
+        .filter(movement =>
+            String(movement.appointment_id) === String(appointment.id) &&
+            movement.type !== "income"
+        )
+        .reduce((sum,movement) => sum + Number(movement.amount || 0),0) * 100
+    ) / 100;
+
 
     $("modalContent").innerHTML = `
 
@@ -3385,10 +3220,15 @@ function completeAppointment(id){
 <input
     id="completionExpense"
     type="number"
-    min="0"
+    min="${existingJobExpense}"
     step="0.01"
+    value="${existingJobExpense}"
+    data-existing-expense="${existingJobExpense}"
     placeholder="0,00"
     oninput="updateCompletionNet()">
+<div class="sub" style="margin-top:5px">
+    ${existingJobExpense > 0 ? `Già registrate dalla Dashboard: ${money(existingJobExpense)}. Se aumenti il totale verrà salvata solo la differenza.` : `Nessuna spesa già registrata.`}
+</div>
 
 
 <div class="rate-summary" style="margin-top:12px;">
@@ -3583,7 +3423,8 @@ function completeAppointment(id){
             <b>📄 Documenti del lavoro</b>
             <div class="sub">Puoi fotografare scontrini, fatture o DDT. Verranno salvati in PDF nel lavoro.</div>
             <button class="blue" style="width:100%;margin-top:10px" onclick="startDocumentScan('${id}')">📷 Scansiona documento</button>
-            <div id="pendingDocumentList" class="sub" style="margin-top:8px"></div>
+            <div id="existingDocumentList" class="sub" style="margin-top:8px"></div>
+            <div id="pendingDocumentList" data-appointment-id="${id}" class="sub" style="margin-top:8px"></div>
         </div>
 
         <div class="actions">
@@ -3617,6 +3458,9 @@ function completeAppointment(id){
 
 
     updateInstallmentSummary(false);
+    updateCompletionNet();
+    renderCompletionDocuments(id);
+    renderPendingScans();
 
 }
 
@@ -4335,14 +4179,29 @@ async function confirmCompletion(id){
             )*100
         )/100;
 
+    const existingExpense =
+        Math.round(
+            Number(
+                $("completionExpense")
+                ?.dataset?.existingExpense || 0
+            ) * 100
+        ) / 100;
+
+    // Viene creata una nuova riga solo per l'eventuale spesa aggiunta
+    // durante il completamento. Quella già presente resta dov'è.
+    const additionalExpense =
+        Math.round(Math.max(0, expense - existingExpense) * 100) / 100;
+
 
     if(
         !Number.isFinite(expense) ||
-        expense < 0
+        expense < existingExpense
     ){
 
         alert(
-            "Inserisci una spesa valida."
+            existingExpense > 0
+            ? "Le spese già registrate non possono essere ridotte da questa schermata. Totale minimo: " + money(existingExpense)
+            : "Inserisci una spesa valida."
         );
 
         return;
@@ -4736,7 +4595,7 @@ async function confirmCompletion(id){
    SALVATAGGIO SPESA DEL LAVORO
 ================================================= */
 
-if(expense > 0){
+if(additionalExpense > 0){
 
     const {
         data:createdExpense,
@@ -4751,7 +4610,7 @@ if(expense > 0){
                 client.name,
 
             amount:
-                expense,
+                additionalExpense,
 
             date:
                 today(),
@@ -7772,9 +7631,19 @@ let scanSession=null;
 
 function renderPendingScans(){
     const box=$("pendingDocumentList"); if(!box)return;
-    box.innerHTML=pendingScans.length
-        ? pendingScans.map((x,i)=>`📄 ${escapeHTML(x.name||`Documento ${i+1}`)}`).join("<br>")
-        : "Nessun documento aggiunto.";
+    const appointmentId=box.dataset.appointmentId || "";
+    const selected=pendingScans.filter(x=>!appointmentId || String(x.appointmentId)===String(appointmentId));
+    box.innerHTML=selected.length
+        ? `<b>Da salvare:</b><br>` + selected.map((x,i)=>`📄 ${escapeHTML(x.name||`Documento ${i+1}`)}`).join("<br>")
+        : "Nessun nuovo documento da salvare.";
+}
+
+function renderCompletionDocuments(appointmentId){
+    const box=$("existingDocumentList"); if(!box)return;
+    const existing=jobDocuments.filter(doc=>String(doc.appointment_id)===String(appointmentId));
+    box.innerHTML=existing.length
+        ? `<b>Già salvati (${existing.length}):</b><br>` + existing.map(doc=>`📎 ${escapeHTML(doc.name||"Documento")}`).join("<br>")
+        : "Nessun documento già salvato.";
 }
 
 function waitForOpenCV(timeout=12000){
