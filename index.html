@@ -20,6 +20,7 @@
 <meta name="theme-color" content="#ffffff">
 
 <title>Igea Impianti</title>
+<!-- V30: lavori->appuntamento auto-rimozione + conti/spese senza duplicati -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
@@ -2807,6 +2808,29 @@ const payload = {
     appointments.push(data);
 
 
+    // Se l'appuntamento nasce da "Lavori da eseguire",
+    // il lavoro viene rimosso SOLO dopo che l'appuntamento è stato salvato correttamente.
+    if(pendingWorkTaskId){
+        const taskIdToRemove = pendingWorkTaskId;
+
+        const {error:taskDeleteError} =
+            await supabaseClient
+                .from("work_tasks")
+                .delete()
+                .eq("id",taskIdToRemove);
+
+        if(taskDeleteError){
+            console.error("Errore rimozione lavoro da eseguire:", taskDeleteError);
+            toast("Appuntamento salvato, ma il lavoro è rimasto in Lavori da eseguire");
+        }else{
+            workTasks = workTasks.filter(
+                task => String(task.id) !== String(taskIdToRemove)
+            );
+            pendingWorkTaskId = null;
+        }
+    }
+
+
     resetAppointmentForm();
 
     renderAll();
@@ -3325,6 +3349,20 @@ function completeAppointment(id){
     if(!appointment) return;
 
 
+    // Spese già registrate prima del completamento del lavoro.
+    // Devono essere conteggiate, ma non duplicate.
+    const existingJobExpense =
+        Math.round(
+            expenses
+                .filter(movement =>
+                    String(movement.appointment_id) === String(appointment.id) &&
+                    movement.type !== "income"
+                )
+                .reduce((sum,movement) => sum + Number(movement.amount || 0), 0)
+            * 100
+        ) / 100;
+
+
     const client =
         findClient(
             appointment.client_id
@@ -3387,8 +3425,13 @@ function completeAppointment(id){
     type="number"
     min="0"
     step="0.01"
+    value="${existingJobExpense}"
     placeholder="0,00"
     oninput="updateCompletionNet()">
+
+<div class="sub" style="margin-top:-3px;margin-bottom:8px">
+    Le spese già inserite in questo appuntamento sono comprese automaticamente.
+</div>
 
 
 <div class="rate-summary" style="margin-top:12px;">
@@ -4325,7 +4368,20 @@ async function confirmCompletion(id){
 
     /*
        SPESA DEL LAVORO
+       "expense" rappresenta il TOTALE spese del lavoro.
+       Le spese già presenti non devono essere inserite una seconda volta.
     */
+
+    const existingExpenseTotal =
+        Math.round(
+            expenses
+                .filter(movement =>
+                    String(movement.appointment_id) === String(appointment.id) &&
+                    movement.type !== "income"
+                )
+                .reduce((sum,movement) => sum + Number(movement.amount || 0), 0)
+            * 100
+        ) / 100;
 
     const expense =
         Math.round(
@@ -4348,6 +4404,20 @@ async function confirmCompletion(id){
         return;
 
     }
+
+    if(expense + 0.009 < existingExpenseTotal){
+        alert(
+            "Hai già registrato " + money(existingExpenseTotal) +
+            " di spese su questo lavoro. Il totale non può essere inferiore."
+        );
+        return;
+    }
+
+    const newExpenseToInsert =
+        Math.max(
+            0,
+            Math.round((expense - existingExpenseTotal) * 100) / 100
+        );
 
 
     /*
@@ -4736,7 +4806,7 @@ async function confirmCompletion(id){
    SALVATAGGIO SPESA DEL LAVORO
 ================================================= */
 
-if(expense > 0){
+if(newExpenseToInsert > 0){
 
     const {
         data:createdExpense,
@@ -4751,7 +4821,7 @@ if(expense > 0){
                 client.name,
 
             amount:
-                expense,
+                newExpenseToInsert,
 
             date:
                 today(),
@@ -7181,6 +7251,7 @@ function renderDashboard(){
    IGEA V24 - IA GEMINI + SPESE CORRETTE
 ===================================================== */
 let workTasks = [];
+let pendingWorkTaskId = null;
 let jobDocuments = [];
 let pendingScans = [];
 
@@ -7229,6 +7300,7 @@ async function deleteWorkTask(id){
 }
 function taskToAppointment(id){
     const task=workTasks.find(t=>String(t.id)===String(id)); if(!task)return;
+    pendingWorkTaskId = id;
     showPage("appointments");
     const match=clients.find(c=>(c.name||"").toLowerCase()===(task.client_name||"").toLowerCase());
     if(match){$("appointmentClient").value=match.name;$("appointmentClientId").value=match.id;} else {$("appointmentClient").value=task.client_name||"";}
