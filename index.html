@@ -666,7 +666,7 @@ textarea:focus{
 
     <div class="card">
 
-        <h2>📊 Riepilogo</h2>
+        <h2>📊 Riepilogo economico</h2><div class="sub" style="margin-bottom:12px">Incassi e uscite effettivamente registrati, anche per lavori non completati.</div>
 
         <select
             id="dashboardPeriod"
@@ -689,7 +689,8 @@ textarea:focus{
             </option>
 
         </select>
-
+        <div class="grid2" style="margin:10px 0"><input id="dashDateFrom" type="date" aria-label="Dal" onchange="renderDashboard()"><input id="dashDateTo" type="date" aria-label="Al" onchange="renderDashboard()"></div>
+        <div class="sub" style="margin-bottom:10px">Imposta entrambe le date per un periodo personalizzato.</div>
         <div class="grid3">
 
             <div class="stat">
@@ -729,7 +730,7 @@ textarea:focus{
             </div>
 
         </div>
-
+        <div id="dashExtraSummary" style="margin-top:12px"></div>
     </div>
 
 
@@ -2974,13 +2975,14 @@ function appointmentCard(
         </div>
 
         ${appointment.notes ? `<div class="sub" style="margin-top:8px">${escapeHTML(appointment.notes)}</div>` : ""}
+        ${programmed ? jobMovementPreview(appointment.id) : ""}
 
         ${programmed ? `
             <div class="actions appointment-actions" style="flex-wrap:wrap">
                 <button class="success" onclick="completeAppointment('${appointment.id}')">✓ Completa</button>
                 <button class="secondary" onclick="editProgrammedAppointment('${appointment.id}')">✏️ Modifica</button>
                 <button class="blue" onclick="openJobDocuments('${appointment.id}')">📎 Documenti</button>
-                <button class="secondary" onclick="openAppointmentExpense('${appointment.id}')">💶 Spesa</button>
+                <button class="secondary" onclick="openAppointmentExpense('${appointment.id}')">💶 Entrata / Uscita</button>
                 <button class="danger" onclick="deleteProgrammedAppointment('${appointment.id}')">🗑️ Elimina</button>
             </div>
         ` : `
@@ -3207,11 +3209,12 @@ function renderDashboardAppointments(){
                     <span class="badge orange">Programmato</span>
                 </div>
 
+                ${jobMovementPreview(appointment.id)}
                 <div class="actions appointment-actions" style="flex-wrap:wrap">
                     <button class="success" onclick="completeAppointment('${appointment.id}')">✓ Completa</button>
                     <button class="secondary" onclick="editProgrammedAppointment('${appointment.id}')">✏️ Modifica</button>
                     <button class="blue" onclick="openJobDocuments('${appointment.id}')">📎 Documenti</button>
-                    <button class="secondary" onclick="openAppointmentExpense('${appointment.id}')">💶 Spesa</button>
+                    <button class="secondary" onclick="openAppointmentExpense('${appointment.id}')">💶 Entrata / Uscita</button>
                     <button class="danger" onclick="deleteProgrammedAppointment('${appointment.id}')">🗑️ Elimina</button>
                 </div>
             </div>
@@ -3376,6 +3379,8 @@ function completeAppointment(id){
     $("modalContent").innerHTML = `
 
         <h2>💳 Completa appuntamento</h2>
+        ${jobMovementPreview(appointment.id)}
+        <div class="sub" style="margin-bottom:12px">Le entrate già registrate rimangono nei movimenti. Non registrarle nuovamente come pagamento incassato, per evitare doppi conteggi.</div>
 
         <div class="item">
 
@@ -7152,6 +7157,20 @@ function getExpensesForPeriod(period){
 }
 
 
+function jobMovementTotals(id){
+ const list=expenses.filter(x=>String(x.appointment_id)===String(id));
+ const sum=type=>Math.round(list.filter(x=>(x.type||"expense")===type).reduce((n,x)=>n+Number(x.amount||0),0)*100)/100;
+ return {income:sum("income"),expense:sum("expense"),list};
+}
+function jobMovementPreview(id){
+ const t=jobMovementTotals(id);
+ return `<div class="grid3" style="margin-top:10px"><div class="stat"><small>Entrate attuali</small><strong class="green">${money(t.income)}</strong></div><div class="stat"><small>Uscite attuali</small><strong class="red">${money(t.expense)}</strong></div><div class="stat"><small>Saldo provvisorio</small><strong>${money(t.income-t.expense)}</strong></div></div>`;
+}
+function inDashboardRange(date){
+ const from=$("dashDateFrom")?.value, to=$("dashDateTo")?.value;
+ if(from&&to)return !!date && date>=from && date<=to;
+ return isInPeriod(date,$("dashboardPeriod").value);
+}
 function renderDashboard(){
 
     const period =
@@ -7171,21 +7190,25 @@ function renderDashboard(){
         );
 
 
+    const custom=!!($("dashDateFrom")?.value && $("dashDateTo")?.value);
+    const rangeIncome=custom ? expenses.filter(x=>x.type==="income"&&inDashboardRange(x.date)).reduce((n,x)=>n+Number(x.amount||0),0)+payments.filter(x=>getPaymentStatus(x)==="pagato"&&inDashboardRange(x.payment_date||x.due_date)).reduce((n,x)=>n+Number(x.amount||0),0) : income;
+    const rangeExpense=custom ? expenses.filter(x=>x.type!=="income"&&inDashboardRange(x.date)).reduce((n,x)=>n+Number(x.amount||0),0) : expenseTotal;
+    $("dashExtraSummary").innerHTML=`<div class="grid2"><div class="stat"><small>Da incassare (rate/pagamenti)</small><strong class="orange">${money(payments.filter(x=>getPaymentStatus(x)!=="pagato").reduce((n,x)=>n+Number(x.amount||0),0))}</strong></div><div class="stat"><small>Lavori aperti</small><strong>${appointments.filter(x=>x.status==="programmato").length}</strong></div><div class="stat"><small>Lavori completati nel periodo</small><strong>${appointments.filter(x=>x.status==="completato"&&inDashboardRange(x.date)).length}</strong></div><div class="stat"><small>Movimenti nel periodo</small><strong>${expenses.filter(x=>inDashboardRange(x.date)).length}</strong></div></div><div class="sub" style="margin-top:10px">Il netto è un saldo di cassa (entrate registrate meno uscite), non l'utile fiscale.</div>`;
     $("dashIncome")
         .textContent =
-        money(income);
+        money(rangeIncome);
 
 
     $("dashExpenses")
         .textContent =
-        money(expenseTotal);
+        money(rangeExpense);
 
 
     $("dashNet")
         .textContent =
         money(
-            income-
-            expenseTotal
+            rangeIncome-
+            rangeExpense
         );
 
 
@@ -7274,7 +7297,7 @@ function renderNextAppointment(){
       .sort((a,b)=>(a.date+(a.time||"" )).localeCompare(b.date+(b.time||"")))[0];
     if(!next){ box.innerHTML='<div class="empty">Nessun prossimo appuntamento.</div>'; return; }
     const client=findClient(next.client_id);
-    box.innerHTML=`<div class="item" style="margin-bottom:0"><div class="between"><div><div class="item-title">${escapeHTML(client?.name||"Cliente")}</div><div class="sub">${formatDate(next.date)}${next.time?" · "+escapeHTML(next.time.slice(0,5)):""}</div>${next.notes?`<div class="sub">${escapeHTML(next.notes)}</div>`:""}</div><span class="badge orange">Prossimo</span></div><div class="actions" style="flex-wrap:wrap"><button class="success" onclick="completeAppointment('${next.id}')">✓ Completa</button><button class="secondary" onclick="editProgrammedAppointment('${next.id}')">✏️ Modifica</button><button class="blue" onclick="openJobDocuments('${next.id}')">📎 Documenti</button><button class="secondary" onclick="openAppointmentExpense('${next.id}')">💶 Spesa</button></div></div>`;
+    box.innerHTML=`<div class="item" style="margin-bottom:0"><div class="between"><div><div class="item-title">${escapeHTML(client?.name||"Cliente")}</div><div class="sub">${formatDate(next.date)}${next.time?" · "+escapeHTML(next.time.slice(0,5)):""}</div>${next.notes?`<div class="sub">${escapeHTML(next.notes)}</div>`:""}</div><span class="badge orange">Prossimo</span></div><div class="actions" style="flex-wrap:wrap"><button class="success" onclick="completeAppointment('${next.id}')">✓ Completa</button><button class="secondary" onclick="editProgrammedAppointment('${next.id}')">✏️ Modifica</button><button class="blue" onclick="openJobDocuments('${next.id}')">📎 Documenti</button><button class="secondary" onclick="openAppointmentExpense('${next.id}')">💶 Entrata / Uscita</button></div></div>`;
 }
 
 function renderWorkTasks(){
@@ -8457,17 +8480,20 @@ function openAppointmentExpense(appointmentId){
     const client=findClient(appointment.client_id);
 
     $("modalContent").innerHTML=`
-        <h2>💶 Registra spesa</h2>
+        <h2>💶 Registra entrata o uscita</h2>
         <div class="sub" style="margin-bottom:10px">
             ${escapeHTML(client?.name||"Cliente")} · ${formatDate(appointment.date)}
         </div>
+        ${jobMovementPreview(appointmentId)}
+        <label>Tipo di movimento</label>
+        <select id="quickExpenseType"><option value="expense">🔴 Uscita</option><option value="income">🟢 Entrata</option></select>
         <label>Importo</label>
         <input id="quickExpenseAmount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00">
         <label>Descrizione</label>
         <input id="quickExpenseNotes" placeholder="Es. materiale elettrico, telecamere, cavo...">
-        <label>Data spesa</label>
+        <label>Data movimento</label>
         <input id="quickExpenseDate" type="date" value="${today()}">
-        <button class="primary" style="width:100%" onclick="saveAppointmentExpense('${appointmentId}')">Salva spesa</button>
+        <button class="primary" style="width:100%" onclick="saveAppointmentExpense('${appointmentId}')">Salva movimento</button>
         <button class="secondary" style="width:100%;margin-top:8px" onclick="closeModal()">Annulla</button>
     `;
     $("modal").classList.add("modal-center");
@@ -8478,7 +8504,8 @@ async function saveAppointmentExpense(appointmentId){
     const appointment=appointments.find(a=>String(a.id)===String(appointmentId));
     if(!appointment)return;
     const amount=Number(String($("quickExpenseAmount")?.value||"").replace(",","."));
-    const notes=$("quickExpenseNotes")?.value.trim()||"Spesa lavoro";
+    const type=$("quickExpenseType")?.value==="income"?"income":"expense";
+    const notes=$("quickExpenseNotes")?.value.trim()||(type==="income"?"Entrata lavoro":"Spesa lavoro");
     const date=$("quickExpenseDate")?.value||today();
     if(!amount || amount<=0){toast("Inserisci l'importo della spesa");return;}
 
@@ -8487,9 +8514,9 @@ async function saveAppointmentExpense(appointmentId){
         description:notes,
         amount,
         date,
-        category:"Spesa lavoro",
+        category:type==="income"?"Entrata lavoro":"Spesa lavoro",
         notes:"",
-        type:"expense",
+        type,
         client_id:appointment.client_id,
         appointment_id:appointment.id
     };
@@ -8500,7 +8527,7 @@ async function saveAppointmentExpense(appointmentId){
     expenses.unshift(result.data);
     closeModal();
     renderAll();
-    toast("Spesa registrata senza completare il lavoro");
+    toast("Movimento salvato senza completare il lavoro");
 }
 
 async function startDocumentScanAndUpload(appointmentId){
