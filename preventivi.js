@@ -57,7 +57,7 @@ function installQuotePage(){
         </div>
         <div id="quoteCreateArea">
         <div class="card">
-            <h2>🧾 Crea preventivo</h2>
+            <h2>Nuovo preventivo</h2>
 
             <label>Cliente</label>
             <select id="quoteClient"></select>
@@ -185,6 +185,7 @@ function installQuotePage(){
 
     const nav=document.querySelector("nav.nav");
 
+    if(q("navQuotes")) return;
     const button=document.createElement("button");
 
     button.id="navQuotes";

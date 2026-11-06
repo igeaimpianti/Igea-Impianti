@@ -1,0 +1,564 @@
+
+
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Arial,sans-serif;
+    background:#f5f5f7;
+    color:#111;
+}
+
+button,input,select,textarea{
+    font:inherit;
+}
+
+button{
+    border:0;
+    border-radius:14px;
+    padding:13px 15px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.app{
+    max-width:760px;
+    margin:auto;
+    min-height:100vh;
+    padding-bottom:100px;
+}
+
+header{
+    position:sticky;
+    top:0;
+    z-index:50;
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(20px);
+    border-bottom:1px solid #ddd;
+    padding:calc(12px + env(safe-area-inset-top)) 16px 12px;
+}
+
+.header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.brand img{
+    width:44px;
+    height:44px;
+    border-radius:12px;
+    object-fit:contain;
+}
+
+.brand h1{
+    font-size:20px;
+    margin:0;
+}
+
+.brand small{
+    color:#777;
+}
+
+main{
+    padding:14px;
+}
+
+.hidden{
+    display:none!important;
+}
+
+.card{
+    background:#fff;
+    border:1px solid #ddd;
+    border-radius:19px;
+    padding:16px;
+    margin-bottom:14px;
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+
+h2{
+    font-size:19px;
+    margin:0 0 14px;
+}
+
+h3{
+    margin:0 0 8px;
+}
+
+label{
+    display:block;
+    color:#666;
+    font-size:13px;
+    margin:9px 0 6px;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    border:1px solid #ccc;
+    background:#fff;
+    border-radius:13px;
+    padding:13px;
+    font-size:16px;
+    outline:none;
+    margin-bottom:8px;
+}
+
+textarea{
+    min-height:80px;
+    resize:vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+    border-color:#555;
+}
+
+.primary{
+    background:#111;
+    color:#fff;
+    width:100%;
+}
+
+.secondary{
+    background:#eee;
+    border:1px solid #ddd;
+}
+
+.success{
+    background:#e9f8ef;
+    color:#16834b;
+    border:1px solid #c8ead6;
+}
+
+.danger{
+    background:#fff0f2;
+    color:#c62845;
+    border:1px solid #ffd1d8;
+}
+
+.blue{
+    background:#edf5fb;
+    color:#1769aa;
+    border:1px solid #d4e6f5;
+}
+
+.incomeBtn{
+    background:#e9f8ef;
+    color:#16834b;
+    border:2px solid #bde5ca;
+}
+
+.expenseBtn{
+    background:#fff0f2;
+    color:#c62845;
+    border:2px solid #ffd1d8;
+}
+
+.grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+}
+
+.grid3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+}
+
+.stat{
+    background:#f7f7f8;
+    border:1px solid #e3e3e5;
+    border-radius:14px;
+    padding:12px;
+}
+
+.stat small{
+    display:block;
+    color:#777;
+    font-size:11px;
+    margin-bottom:5px;
+}
+
+.stat strong{
+    font-size:16px;
+}
+
+.green{
+    color:#16834b;
+}
+
+.red{
+    color:#d9364f;
+}
+
+.orange{
+    color:#a66a00;
+}
+
+.blueText{
+    color:#1769aa;
+}
+
+.item{
+    background:#fafafa;
+    border:1px solid #ddd;
+    border-radius:15px;
+    padding:14px;
+    margin-bottom:9px;
+}
+
+.item-title{
+    font-weight:800;
+    font-size:16px;
+}
+
+.sub{
+    color:#777;
+    font-size:13px;
+    line-height:1.45;
+    margin-top:4px;
+}
+
+.between{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+}
+
+.actions{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+}
+
+.actions button{
+    flex:1;
+}
+
+.badge{
+    display:inline-block;
+    padding:5px 8px;
+    border-radius:8px;
+    background:#eee;
+    color:#666;
+    font-size:11px;
+}
+
+.badge.green{
+    background:#eaf8f0;
+    color:#16834b;
+}
+
+.badge.orange{
+    background:#fff5df;
+    color:#a66a00;
+}
+
+.badge.blue{
+    background:#edf5fb;
+    color:#1769aa;
+}
+
+.badge.red{
+    background:#fff0f2;
+    color:#c62845;
+}
+
+.empty{
+    text-align:center;
+    color:#888;
+    padding:24px 8px;
+}
+
+.nav{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:100;
+    height:82px;
+    background:rgba(255,255,255,.97);
+    backdrop-filter:blur(20px);
+    border-top:1px solid #ddd;
+    display:flex;
+    padding-bottom:env(safe-area-inset-bottom);
+}
+
+.nav button{
+    flex:1;
+    background:transparent;
+    color:#888;
+    border-radius:0;
+    padding:6px 2px;
+    font-size:10px;
+}
+
+.nav button.active{
+    color:#111;
+    font-weight:800;
+}
+
+.nav span{
+    display:block;
+    font-size:21px;
+    margin-bottom:3px;
+}
+
+.client-picker{
+    position:relative;
+}
+
+.client-results{
+    position:absolute;
+    left:0;
+    right:0;
+    top:100%;
+    z-index:200;
+    background:#fff;
+    border:1px solid #ccc;
+    border-radius:13px;
+    max-height:240px;
+    overflow:auto;
+    box-shadow:0 10px 30px rgba(0,0,0,.2);
+}
+
+.client-result{
+    padding:13px;
+    border-bottom:1px solid #eee;
+}
+
+.client-result:last-child{
+    border-bottom:0;
+}
+
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:500;
+    background:rgba(0,0,0,.45);
+    display:flex;
+    align-items:flex-end;
+}
+
+.modal.hidden{
+    display:none;
+}
+
+.modalbox{
+    width:100%;
+    max-width:760px;
+    margin:auto 0 0;
+    background:#fff;
+    border-radius:24px 24px 0 0;
+    padding:20px 16px calc(20px + env(safe-area-inset-bottom));
+    max-height:94vh;
+    overflow:auto;
+}
+
+.modal-center{
+    align-items:center;
+    padding:15px;
+}
+
+.modal-center .modalbox{
+    border-radius:24px;
+    margin:auto;
+}
+
+.toast{
+    position:fixed;
+    left:14px;
+    right:14px;
+    bottom:95px;
+    z-index:1000;
+    background:#111;
+    color:#fff;
+    border-radius:13px;
+    padding:13px;
+    text-align:center;
+}
+
+.toast.hidden{
+    display:none;
+}
+
+.login{
+    position:fixed;
+    inset:0;
+    z-index:10000;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:22px;
+}
+
+.login.hidden{
+    display:none;
+}
+
+.loginbox{
+    width:100%;
+    max-width:400px;
+    text-align:center;
+}
+
+.loginbox img{
+    width:80px;
+    height:80px;
+    border-radius:20px;
+    object-fit:contain;
+}
+
+.loginbox h1{
+    margin:12px 0 4px;
+}
+
+.loginbox p{
+    color:#777;
+    margin-bottom:20px;
+}
+
+.progress{
+    height:8px;
+    background:#e5e5e5;
+    border-radius:99px;
+    overflow:hidden;
+    margin:9px 0;
+}
+
+.progress i{
+    display:block;
+    height:100%;
+    background:#16834b;
+}
+
+.payment-type{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+    margin-bottom:10px;
+}
+
+.payment-type button{
+    border:2px solid #ddd;
+    background:#f7f7f8;
+}
+
+.payment-type button.active{
+    border-color:#111;
+    background:#111;
+    color:#fff;
+}
+
+.movement-type{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+    margin-bottom:10px;
+}
+
+.movement-type button{
+    min-height:52px;
+}
+
+.movement-type button.active{
+    box-shadow:inset 0 0 0 2px #111;
+}
+
+.history-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:12px;
+}
+
+.divider{
+    height:1px;
+    background:#e5e5e5;
+    margin:16px 0;
+}
+
+.rate-summary{
+    background:#f7f7f8;
+    border:1px solid #e3e3e5;
+    border-radius:14px;
+    padding:12px;
+    margin:8px 0 12px;
+}
+
+.rate-summary div{
+    display:flex;
+    justify-content:space-between;
+    padding:4px 0;
+}
+
+.deposit-box{
+    background:#e9f8ef;
+    border:1px solid #c8ead6;
+    border-radius:14px;
+    padding:12px;
+    margin-bottom:10px;
+}
+
+@media(max-width:410px){
+
+    .grid3{
+        gap:5px;
+    }
+
+    .stat{
+        padding:10px 7px;
+    }
+
+    .appointment-actions button{
+        padding:11px 5px;
+        font-size:12px;
+    }
+
+}
+
+/* ===== Assistente Igea V25 - risposta pulita ===== */
+.ai-answer{margin-top:14px;display:grid;gap:12px}
+.ai-answer-head{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:850;margin-bottom:2px}
+.ai-answer-intro{font-size:15px;line-height:1.45;color:#333}
+.ai-section{border:1px solid #e5e5e7;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.035)}
+.ai-section-title{display:flex;align-items:center;gap:9px;padding:13px 14px;font-weight:850;background:#f4f8ff;color:#174a7e}
+.ai-section.expense .ai-section-title{background:#fff3f4;color:#a51d2d}
+.ai-row{display:grid;grid-template-columns:minmax(105px,.8fr) 1.5fr;gap:12px;padding:11px 14px;border-top:1px solid #eeeeef;align-items:start}
+.ai-label{color:#74747a;font-size:14px}
+.ai-value{font-weight:650;line-height:1.4;overflow-wrap:anywhere}
+.ai-value.money-positive{color:#16834b;font-size:19px;font-weight:850}
+.ai-value.money-negative{color:#d9233f;font-size:19px;font-weight:850}
+.ai-paragraph{padding:12px 14px;line-height:1.5}
+.ai-list{margin:0;padding:0;list-style:none}
+.ai-list li{padding:10px 14px;border-top:1px solid #eeeeef;line-height:1.4}
+@media(max-width:430px){.ai-row{grid-template-columns:100px 1fr;gap:8px;padding:10px 12px}.ai-section-title{padding:12px}.ai-answer-intro{font-size:14px}}
+
+
+/* ===== Assistente Igea V28 - memoria conversazione ===== */
+.ai-v28-toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.ai-v28-toolbar .secondary{padding:9px 11px;font-size:12px}
+.ai-v28-history{display:flex;flex-direction:column;gap:9px;max-height:46vh;overflow:auto;padding:4px 2px 10px;scroll-behavior:smooth}
+.ai-v28-msg{max-width:88%;padding:10px 12px;border-radius:16px;line-height:1.42;overflow-wrap:anywhere}
+.ai-v28-msg.user{align-self:flex-end;background:#111;color:#fff;border-bottom-right-radius:5px}
+.ai-v28-msg.assistant{align-self:flex-start;background:#f2f2f4;color:#111;border:1px solid #e3e3e6;border-bottom-left-radius:5px}
+.ai-v28-composer{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-top:10px}
+.ai-v28-composer textarea{margin:0;min-height:52px;max-height:130px}
+.ai-v28-send{width:auto!important;min-width:72px;height:52px}
+
