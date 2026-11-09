@@ -15,7 +15,7 @@ async function galleryRender(){
  const {data:albums,error}=await supabaseClient.from("photo_albums").select("*").order("created_at",{ascending:false});
  if(error){root.textContent="Errore: "+error.message;return;}
  if(!galleryAlbum){
- root.innerHTML=albums.length?albums.map(a=>'<button class="gallery-album" data-album="'+a.id+'">📁 '+escapeHTML(a.title)+'</button>').join(""):'<div class="empty">Nessun album. Crea il primo o carica foto in un lavoro.</div>';
+ root.innerHTML=albums.length?'<div class="gallery-album-list">'+albums.map(a=>'<button class="gallery-album" data-album="'+a.id+'"><span class="gallery-album-symbol">▦</span><span class="gallery-album-name">'+escapeHTML(a.title)+'</span><span class="gallery-album-arrow">›</span></button>').join("")+'</div>':'<div class="empty">Nessun album. Crea il primo o carica foto in un lavoro.</div>';
  root.querySelectorAll("[data-album]").forEach(b=>b.onclick=()=>{galleryAlbum=b.dataset.album;galleryRender();});
  return;
  }
@@ -39,11 +39,12 @@ async function galleryRender(){
  const grid=ge("galleryGrid");
  const viewable=[];
  if(!photos.length)grid.textContent="Nessuna foto";
- for(const p of photos){
- const {data,error:e}=await supabaseClient.storage.from("job-documents").createSignedUrl(p.storage_path,3600);
+ const signed=await Promise.all(photos.map(async p=>({p, result:await supabaseClient.storage.from("job-documents").createSignedUrl(p.storage_path,3600)})));
+ for(const {p,result} of signed){
+ const {data,error:e}=result;
  if(e)continue;
  const box=document.createElement("div");box.className="gallery-photo gallery-tile";
- const img=document.createElement("img");const raw=/\.(dng|raw|cr2|nef|arw)$/i.test(p.name||"");if(raw){img.alt="Originale RAW";img.style.display="none";const label=document.createElement("div");label.className="gallery-raw-label";label.textContent="📷 RAW · "+p.name;box.append(label);}else{img.src=data.signedUrl;img.alt=p.name;img.loading="lazy";}const photoIndex=viewable.push({url:data.signedUrl,name:p.name,raw})-1;
+ const img=document.createElement("img");const raw=/\.(dng|raw|cr2|nef|arw)$/i.test(p.name||"");if(raw){img.alt="Originale RAW";img.style.display="none";const label=document.createElement("div");label.className="gallery-raw-label";label.textContent="📷 RAW · "+p.name;box.append(label);}else{img.src=data.signedUrl;img.alt=p.name;img.loading="lazy";img.decoding="async";img.fetchPriority="low";}const photoIndex=viewable.push({url:data.signedUrl,name:p.name,raw})-1;
  img.onclick=()=>galleryShowViewer(viewable,photoIndex);img.tabIndex=0;img.setAttribute("role","button");img.setAttribute("aria-label","Apri "+(p.name||"foto"));img.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();galleryShowViewer(viewable,photoIndex);}};if(raw)box.querySelector(".gallery-raw-label").onclick=()=>galleryShowViewer(viewable,photoIndex);
  const del=document.createElement("button");del.textContent="✕";del.title="Elimina foto";del.setAttribute("aria-label","Elimina foto");del.className="gallery-tile-delete";del.onclick=async()=>{if(!confirm("Eliminare questa foto?"))return;const d=await supabaseClient.from("gallery_photos").delete().eq("id",p.id);if(d.error){toast(d.error.message);return;}await supabaseClient.storage.from("job-documents").remove([p.storage_path]);galleryRender();};
  box.append(img,del);grid.append(box);
@@ -113,7 +114,7 @@ async function galleryClientAlbum(clientId){
 async function galleryOptimize(file){
  const raw=/\.(dng|raw|cr2|nef|arw)$/i.test(file.name);
  if(raw)throw Error("RAW/DNG: conversione non disponibile su questo dispositivo. Il file originale non è stato caricato.");
- if(file.type==="image/png")return file;
+ if(file.type==="image/png"||file.type==="image/jpeg"||file.type==="image/webp")return file;
  if(!/^image\/(jpeg|webp|heic|heif)$/i.test(file.type))throw Error("Formato immagine non supportato");
  let bitmap;
  try{
@@ -132,7 +133,8 @@ async function galleryOptimize(file){
 async function galleryUpload(files,albumId,appointmentId,onProgress){
  if(!currentUser)throw Error("Accesso richiesto");
  let done=0;const errors=[];const allFiles=Array.from(files||[]);let processed=0;
- for(const file of allFiles){
+ const queue=allFiles.slice();
+ const uploadOne=async(file)=>{
   if(!file.type.startsWith("image/")&&!/\.(dng|raw|cr2|nef|arw)$/i.test(file.name)){errors.push(file.name+": formato non riconosciuto");processed++;onProgress?.(processed,allFiles.length,file.name);continue;}
   try{
    const prepared=await galleryOptimize(file);
@@ -144,7 +146,8 @@ async function galleryUpload(files,albumId,appointmentId,onProgress){
    if(ins.error){await supabaseClient.storage.from("job-documents").remove([path]);throw Error("Database: "+ins.error.message);}
    done++;
   }catch(error){errors.push(file.name+": "+(error.message||String(error))+" (verifica limite file del bucket Supabase)");}finally{processed++;onProgress?.(processed,allFiles.length,file.name);}
- }
+ };
+ await Promise.all(Array.from({length:Math.min(2,queue.length)},async()=>{while(queue.length){await uploadOne(queue.shift());}}));
  if(errors.length)toast("Foto non caricate: "+errors.join(" | "));
  else if(done)toast(done+" foto caricate");
  return {done,errors};
@@ -163,5 +166,6 @@ function galleryForJob(appointmentId){
  if(document.getElementById("igeaGalleryModernStyle"))return;
  const style=document.createElement("style");style.id="igeaGalleryModernStyle";
  style.textContent=`#galleryContent .gallery-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;margin-top:16px}#galleryContent .gallery-tile{position:relative!important;min-width:0!important;aspect-ratio:1/1!important;overflow:hidden!important;border:0!important;border-radius:7px!important;background:#182233!important;padding:0!important;display:block!important}#galleryContent .gallery-tile>img{display:block;width:100%!important;height:100%!important;object-fit:cover!important;cursor:pointer;border:0!important;border-radius:0!important}#galleryContent .gallery-tile-delete{position:absolute!important;top:6px;right:6px;width:25px!important;height:25px!important;min-width:0!important;min-height:0!important;padding:0!important;border-radius:50%!important;background:rgba(12,18,29,.72)!important;color:white!important;border:1px solid rgba(255,255,255,.35)!important;backdrop-filter:blur(8px);font-size:15px!important;line-height:1!important;opacity:.85}#galleryContent .gallery-tile-delete:active{background:#a52a3d!important}#galleryViewer.gallery-viewer{position:fixed!important;inset:0!important;z-index:99999!important;background:rgba(5,9,17,.98)!important;align-items:center!important;justify-content:center!important;padding:0!important}#galleryViewer .gallery-viewer-stage{position:absolute!important;inset:75px 0 85px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important}#galleryViewer .gallery-viewer-stage img{width:100%!important;height:100%!important;object-fit:contain!important;max-width:100%!important;max-height:100%!important}#galleryViewer .gallery-viewer-close,#galleryViewer .gallery-viewer-download{position:absolute!important;top:calc(16px + env(safe-area-inset-top));width:43px!important;height:43px!important;min-width:0!important;min-height:0!important;border-radius:50%!important;background:rgba(45,56,74,.78)!important;color:#fff!important;border:1px solid #ffffff2a!important;font-size:24px!important;display:grid!important;place-items:center!important;z-index:3!important;padding:0!important}#galleryViewer .gallery-viewer-close{left:17px!important}#galleryViewer .gallery-viewer-download{right:17px!important}#galleryViewer .gallery-viewer-count{position:absolute!important;top:calc(28px + env(safe-area-inset-top));left:75px!important;right:75px!important;text-align:center!important;color:#e8edf6!important;font-size:13px!important;letter-spacing:.8px!important;z-index:2!important}#galleryViewer .gallery-viewer-prev,#galleryViewer .gallery-viewer-next{position:absolute!important;top:50%!important;transform:translateY(-50%)!important;width:38px!important;height:48px!important;min-width:0!important;padding:0!important;border-radius:12px!important;background:#15203388!important;color:white!important;font-size:32px!important;z-index:3!important}#galleryViewer .gallery-viewer-prev{left:8px!important}#galleryViewer .gallery-viewer-next{right:8px!important}#galleryViewer .gallery-viewer-prev:disabled,#galleryViewer .gallery-viewer-next:disabled{opacity:.15!important}@media(max-width:650px){#galleryViewer .gallery-viewer-prev,#galleryViewer .gallery-viewer-next{display:none!important}#galleryContent .gallery-grid{gap:3px!important}#galleryContent .gallery-tile{border-radius:4px!important}}`;
+ style.textContent += "\n/* IGEA PRO | Galleria fotografica premium */\n#galleryPanel{background:#080b11!important;border-color:#202b3a!important;color:#f8fafc!important}\n#galleryPanel h2{font-weight:750!important;letter-spacing:-.6px!important}\n#galleryContent .gallery-album-list{display:grid;gap:10px;margin-top:20px}\n#galleryContent .gallery-album{display:flex!important;align-items:center;gap:15px;text-align:left;background:linear-gradient(135deg,#151e2b,#0d121c)!important;border:1px solid #29374a!important;border-radius:19px!important;padding:18px!important;box-shadow:0 8px 24px #0003;color:#f8fafc!important}\n#galleryContent .gallery-album-symbol{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:#123a64;color:#72bbff;font-size:29px}\n#galleryContent .gallery-album-name{flex:1;font-size:16px;font-weight:700;overflow:hidden;text-overflow:ellipsis}\n#galleryContent .gallery-album-arrow{font-size:28px;color:#8ca8c9}\n#galleryContent .gallery-grid{gap:2px!important;margin-top:18px!important}\n#galleryContent .gallery-tile{background:#090e17!important;border-radius:2px!important;content-visibility:auto;contain-intrinsic-size:110px}\n#galleryContent .gallery-tile-delete{opacity:0!important;transition:opacity .15s}\n#galleryContent .gallery-tile:hover .gallery-tile-delete,#galleryContent .gallery-tile:focus-within .gallery-tile-delete{opacity:1!important}\n#galleryViewer.gallery-viewer{background:#000!important}\n#galleryViewer .gallery-viewer-close,#galleryViewer .gallery-viewer-download{background:#1c1c1eaa!important;border:1px solid #ffffff20!important;backdrop-filter:blur(18px)}\n#galleryViewer .gallery-viewer-stage img{user-select:none;-webkit-user-select:none}\n@media(hover:none){#galleryContent .gallery-tile-delete{opacity:.8!important}}\n";
  document.head.append(style);
 })();
