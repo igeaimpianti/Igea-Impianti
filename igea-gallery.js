@@ -16,23 +16,15 @@ async function galleryRender(){
  if(error){root.textContent="Errore: "+error.message;return;}
  if(!galleryAlbum){
  ge("galleryBackSlot")?.replaceChildren();
- root.innerHTML=albums.length?'<div class="gallery-album-list">'+albums.map(a=>'<button class="gallery-album" data-album="'+a.id+'"><span class="gallery-album-symbol" data-cover="'+a.id+'">▦</span><span class="gallery-album-name">'+escapeHTML(a.title)+'</span><span class="gallery-album-arrow">›</span></button>').join("")+'</div>':'<div class="empty">Nessun album. Crea il primo o carica foto in un lavoro.</div>';
- // Retrieve one cover for each album without touching the original photos.
- if(albums.length){
-  try{
-   const ids=albums.map(a=>a.id);
-   const {data:covers,error:coverError}=await supabaseClient.from("gallery_photos").select("album_id,storage_path,name,created_at").in("album_id",ids).order("created_at",{ascending:false}).limit(300);
-   if(!coverError&&covers){
-    const seen=new Set();
-    await Promise.all(covers.filter(p=>{if(seen.has(p.album_id))return false;seen.add(p.album_id);return !/\\.(dng|raw|cr2|nef|arw)$/i.test(p.name||"");}).map(async p=>{
-     const {data}=await supabaseClient.storage.from("job-documents").createSignedUrl(p.storage_path,3600);
-     const cover=Array.from(root.querySelectorAll("[data-cover]")).find(el=>el.dataset.cover===String(p.album_id));
-     if(data?.signedUrl&&cover){const img=document.createElement("img");img.src=data.signedUrl;img.alt="Anteprima album";img.loading="lazy";img.decoding="async";cover.replaceChildren(img);}
-    }));
-   }
-  }catch(e){console.warn("Anteprime album:",e);}
+ root.innerHTML=albums.length?'<div class="gallery-album-list">'+albums.map(album=>
+  '<button type="button" class="gallery-album" data-album="'+escapeHTML(String(album.id))+'">'+
+  '<span class="gallery-cover" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="9" cy="9" r="1.5"/><path d="m3 17 5-4 4 3 4-5 5 5"/></svg></span>'+
+  '<span class="gallery-card-caption"><strong>'+escapeHTML(album.title)+'</strong><small></small></span></button>'
+ ).join("")+'</div>':'<div class="gallery-empty"><strong>Nessun album</strong><p>Usa il + per creare un album o aggiungi foto dalla scheda di un lavoro.</p></div>';
+ for(const card of root.querySelectorAll("[data-album]")){
+  card.onclick=()=>{galleryAlbum=card.dataset.album;galleryRender();};
+  galleryLoadCover(card).catch(error=>console.warn("Copertina album",error));
  }
- root.querySelectorAll("[data-album]").forEach(b=>b.onclick=()=>{galleryAlbum=b.dataset.album;galleryRender();});
  return;
  }
  const album=albums.find(a=>a.id===galleryAlbum);if(!album){galleryAlbum=null;return galleryRender();}
@@ -55,23 +47,45 @@ async function galleryRender(){
  };
  const grid=ge("galleryGrid");
  const viewable=[];
- if(!photos.length)grid.textContent="Nessuna foto";
+ if(!photos.length){grid.innerHTML='<p class="gallery-empty">Carica le prime foto di questo album.</p>';return;}
  const signed=await Promise.all(photos.map(async p=>({p, result:await supabaseClient.storage.from("job-documents").createSignedUrl(p.storage_path,3600)})));
  for(const {p,result} of signed){
  const {data,error:e}=result;
  if(e)continue;
  const box=document.createElement("div");box.className="gallery-photo gallery-tile";
- const img=document.createElement("img");const raw=/\.(dng|raw|cr2|nef|arw)$/i.test(p.name||"");if(raw){img.alt="Originale RAW";img.style.display="none";const label=document.createElement("div");label.className="gallery-raw-label";label.textContent="📷 RAW · "+p.name;box.append(label);}else{img.src=data.signedUrl;img.alt=p.name;img.loading="lazy";img.decoding="async";img.fetchPriority="low";}const photoIndex=viewable.push({url:data.signedUrl,name:p.name,raw,id:p.id,storagePath:p.storage_path})-1;
+ const img=document.createElement("img");const raw=galleryIsRaw(p.name);if(raw){img.alt="Originale RAW";img.style.display="none";const label=document.createElement("div");label.className="gallery-raw-label";label.textContent="📷 RAW · "+p.name;box.append(label);}else{img.src=data.signedUrl;img.alt=p.name;img.loading="lazy";img.decoding="async";img.fetchPriority="low";}const photoIndex=viewable.push({url:data.signedUrl,name:p.name,raw,id:p.id,storagePath:p.storage_path})-1;
  img.onclick=()=>galleryShowViewer(viewable,photoIndex);img.tabIndex=0;img.setAttribute("role","button");img.setAttribute("aria-label","Apri "+(p.name||"foto"));img.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();galleryShowViewer(viewable,photoIndex);}};if(raw)box.querySelector(".gallery-raw-label").onclick=()=>galleryShowViewer(viewable,photoIndex);
  box.append(img);grid.append(box);
  }
+}
+async function galleryLoadCover(card){
+ const {data:photos,count,error}=await supabaseClient.from("gallery_photos")
+  .select("storage_path,name",{count:"exact"}).eq("album_id",card.dataset.album)
+  .order("created_at",{ascending:false}).limit(8);
+ if(error||!card.isConnected)return;
+ if(count!==null)card.querySelector("small").textContent=count===1?"1 foto":count+" foto";
+ const photo=photos.find(photo=>!galleryIsRaw(photo.name));
+ if(!photo)return;
+ const {data}=await supabaseClient.storage.from("job-documents").createSignedUrl(photo.storage_path,3600);
+ if(!data?.signedUrl||!card.isConnected)return;
+ const cover=card.querySelector(".gallery-cover");
+ const image=document.createElement("img");
+ image.alt="";
+ image.loading="lazy";
+ image.decoding="async";
+ image.onerror=()=>image.remove();
+ image.src=data.signedUrl;
+ cover.append(image);
+}
+function galleryIsRaw(name){
+ return /\.(dng|raw|cr2|nef|arw)$/i.test(name||"");
 }
 function galleryShowViewer(items,index){
  galleryViewerItems=items.slice();galleryViewerIndex=index;
  let viewer=ge("galleryViewer");
  if(!viewer){
   viewer=document.createElement("div");viewer.id="galleryViewer";viewer.className="gallery-viewer";
-  viewer.innerHTML='<button type="button" class="gallery-viewer-close" aria-label="Chiudi">✕</button><div class="gallery-viewer-count"></div><button type="button" class="gallery-viewer-menu-button" aria-label="Opzioni foto" aria-expanded="false" title="Opzioni foto">⋮</button><div class="gallery-viewer-menu" hidden><button type="button" class="gallery-menu-download">↓ Scarica foto</button><button type="button" class="gallery-menu-delete">Elimina foto</button></div><div class="gallery-viewer-stage"><img alt="Foto ingrandita"></div><button type="button" class="gallery-viewer-prev" aria-label="Foto precedente">‹</button><button type="button" class="gallery-viewer-next" aria-label="Foto successiva">›</button>';
+  viewer.innerHTML='<button type="button" class="gallery-viewer-close" aria-label="Chiudi">✕</button><div class="gallery-viewer-count"></div><button type="button" class="gallery-viewer-menu-button" aria-label="Opzioni foto" aria-expanded="false" title="Opzioni foto">⋮</button><div class="gallery-viewer-menu" hidden><button type="button" class="gallery-menu-download">Scarica originale</button><button type="button" class="gallery-menu-delete">Elimina foto</button></div><div class="gallery-viewer-stage"><img alt="Foto ingrandita"></div><button type="button" class="gallery-viewer-prev" aria-label="Foto precedente">‹</button><button type="button" class="gallery-viewer-next" aria-label="Foto successiva">›</button>';
   document.body.appendChild(viewer);
   viewer.querySelector(".gallery-viewer-close").onclick=galleryCloseViewer;
   viewer.querySelector(".gallery-viewer-menu-button").onclick=()=>{const menu=viewer.querySelector(".gallery-viewer-menu");menu.hidden=!menu.hidden;viewer.querySelector(".gallery-viewer-menu-button").setAttribute("aria-expanded",String(!menu.hidden));};
@@ -89,7 +103,7 @@ function galleryShowViewer(items,index){
 function galleryUpdateViewer(){
  const viewer=ge("galleryViewer");if(!viewer||!galleryViewerItems.length)return;
  const item=galleryViewerItems[galleryViewerIndex],img=viewer.querySelector("img");
- img.style.display=item.raw?"none":"block";if(!item.raw)img.src=item.url;img.alt=item.name||"Foto";let rawNote=viewer.querySelector(".gallery-raw-note");if(!rawNote){rawNote=document.createElement("div");rawNote.className="gallery-raw-note";viewer.querySelector(".gallery-viewer-stage").append(rawNote);}rawNote.style.display=item.raw?"block":"none";rawNote.textContent=item.raw?"Originale DNG conservato senza modifiche. Usa la freccia in alto per scaricare l’originale.":"";
+ img.style.display=item.raw?"none":"block";if(!item.raw)img.src=item.url;img.alt=item.name||"Foto";let rawNote=viewer.querySelector(".gallery-raw-note");if(!rawNote){rawNote=document.createElement("div");rawNote.className="gallery-raw-note";viewer.querySelector(".gallery-viewer-stage").append(rawNote);}rawNote.style.display=item.raw?"block":"none";rawNote.textContent=item.raw?"Foto RAW. Apri il menu ⋮ per scaricare il file.":"";
  viewer.querySelector(".gallery-viewer-count").textContent=(galleryViewerIndex+1)+" / "+galleryViewerItems.length;
  viewer.querySelector(".gallery-viewer-prev").disabled=galleryViewerIndex===0;
  viewer.querySelector(".gallery-viewer-next").disabled=galleryViewerIndex===galleryViewerItems.length-1;
@@ -196,5 +210,68 @@ function galleryForJob(appointmentId){
  const style=document.createElement("style");style.id="igeaGalleryModernStyle";
  style.textContent=`#galleryContent .gallery-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;margin-top:16px}#galleryContent .gallery-tile{position:relative!important;min-width:0!important;aspect-ratio:1/1!important;overflow:hidden!important;border:0!important;border-radius:7px!important;background:#182233!important;padding:0!important;display:block!important}#galleryContent .gallery-tile>img{display:block;width:100%!important;height:100%!important;object-fit:cover!important;cursor:pointer;border:0!important;border-radius:0!important}#galleryContent .gallery-tile-delete{position:absolute!important;top:6px;right:6px;width:25px!important;height:25px!important;min-width:0!important;min-height:0!important;padding:0!important;border-radius:50%!important;background:rgba(12,18,29,.72)!important;color:white!important;border:1px solid rgba(255,255,255,.35)!important;backdrop-filter:blur(8px);font-size:15px!important;line-height:1!important;opacity:.85}#galleryContent .gallery-tile-delete:active{background:#a52a3d!important}#galleryViewer.gallery-viewer{position:fixed!important;inset:0!important;z-index:99999!important;background:rgba(5,9,17,.98)!important;align-items:center!important;justify-content:center!important;padding:0!important}#galleryViewer .gallery-viewer-stage{position:absolute!important;inset:75px 0 85px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important}#galleryViewer .gallery-viewer-stage img{width:100%!important;height:100%!important;object-fit:contain!important;max-width:100%!important;max-height:100%!important}#galleryViewer .gallery-viewer-close,#galleryViewer .gallery-viewer-download{position:absolute!important;top:calc(16px + env(safe-area-inset-top));width:43px!important;height:43px!important;min-width:0!important;min-height:0!important;border-radius:50%!important;background:rgba(45,56,74,.78)!important;color:#fff!important;border:1px solid #ffffff2a!important;font-size:24px!important;display:grid!important;place-items:center!important;z-index:3!important;padding:0!important}#galleryViewer .gallery-viewer-close{left:17px!important}#galleryViewer .gallery-viewer-download{right:17px!important}#galleryViewer .gallery-viewer-count{position:absolute!important;top:calc(28px + env(safe-area-inset-top));left:75px!important;right:75px!important;text-align:center!important;color:#e8edf6!important;font-size:13px!important;letter-spacing:.8px!important;z-index:2!important}#galleryViewer .gallery-viewer-prev,#galleryViewer .gallery-viewer-next{position:absolute!important;top:50%!important;transform:translateY(-50%)!important;width:38px!important;height:48px!important;min-width:0!important;padding:0!important;border-radius:12px!important;background:#15203388!important;color:white!important;font-size:32px!important;z-index:3!important}#galleryViewer .gallery-viewer-prev{left:8px!important}#galleryViewer .gallery-viewer-next{right:8px!important}#galleryViewer .gallery-viewer-prev:disabled,#galleryViewer .gallery-viewer-next:disabled{opacity:.15!important}@media(max-width:650px){#galleryViewer .gallery-viewer-prev,#galleryViewer .gallery-viewer-next{display:none!important}#galleryContent .gallery-grid{gap:3px!important}#galleryContent .gallery-tile{border-radius:4px!important}}`;
  style.textContent += "\n/* IGEA PRO | Galleria fotografica premium */\n#galleryPanel{background:#080b11!important;border-color:#202b3a!important;color:#f8fafc!important}\n#galleryPanel h2{font-weight:750!important;letter-spacing:-.6px!important}\n#galleryContent .gallery-album-list{display:grid;gap:10px;margin-top:20px}\n#galleryContent .gallery-album{display:flex!important;align-items:center;gap:15px;text-align:left;background:linear-gradient(135deg,#151e2b,#0d121c)!important;border:1px solid #29374a!important;border-radius:19px!important;padding:18px!important;box-shadow:0 8px 24px #0003;color:#f8fafc!important}\n#galleryContent .gallery-album-symbol{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:#123a64;color:#72bbff;font-size:29px}\n#galleryContent .gallery-album-name{flex:1;font-size:16px;font-weight:700;overflow:hidden;text-overflow:ellipsis}\n#galleryContent .gallery-album-arrow{font-size:28px;color:#8ca8c9}\n#galleryContent .gallery-grid{gap:2px!important;margin-top:18px!important}\n#galleryContent .gallery-tile{background:#090e17!important;border-radius:2px!important;content-visibility:auto;contain-intrinsic-size:110px}\n#galleryContent .gallery-tile-delete{opacity:0!important;transition:opacity .15s}\n#galleryContent .gallery-tile:hover .gallery-tile-delete,#galleryContent .gallery-tile:focus-within .gallery-tile-delete{opacity:1!important}\n#galleryViewer.gallery-viewer{background:#000!important}\n#galleryViewer .gallery-viewer-close,#galleryViewer .gallery-viewer-download{background:#1c1c1eaa!important;border:1px solid #ffffff20!important;backdrop-filter:blur(18px)}\n#galleryViewer .gallery-viewer-stage img{user-select:none;-webkit-user-select:none}\n@media(hover:none){#galleryContent .gallery-tile-delete{opacity:.8!important}}\n";
+ style.textContent += `
+#galleryContent .gallery-album-list {
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:14px!important;
+}
+#galleryContent .gallery-album {
+ display:flex!important;
+ flex-direction:column;
+ align-items:stretch!important;
+ gap:0!important;
+ min-width:0;
+ margin:0!important;
+ padding:0!important;
+ overflow:hidden;
+ background:#151d29!important;
+ border:1px solid #263449!important;
+ box-shadow:none!important;
+ text-align:left;
+}
+.gallery-cover {
+ position:relative;
+ display:grid;
+ place-items:center;
+ aspect-ratio:4/3;
+ background:linear-gradient(145deg,#202f45,#141d2b);
+ color:#8097b4;
+}
+.gallery-cover img {
+ position:absolute;
+ inset:0;
+ width:100%;
+ height:100%;
+ object-fit:cover;
+}
+.gallery-card-caption {display:grid;gap:4px;padding:11px 12px 13px;color:#f5f7fb}
+.gallery-card-caption strong {font-size:14px;line-height:1.3;overflow-wrap:anywhere}
+.gallery-card-caption small {color:#a7b5c9;font-size:12px}
+.gallery-card-caption small:empty {display:none}
+#galleryContent .gallery-empty {
+ grid-column:1/-1;
+ padding:22px 16px;
+ border:1px dashed #34445c;
+ border-radius:16px;
+ color:#a7b5c9;
+ text-align:center;
+}
+.gallery-empty strong {color:#f5f7fb}
+.gallery-empty p {margin:6px 0 0}
+#galleryViewer .gallery-viewer-close,
+#galleryViewer .gallery-viewer-menu-button {top:calc(env(safe-area-inset-top) + 12px)!important}
+#galleryViewer .gallery-viewer-close {left:12px!important;right:auto!important}
+#galleryViewer .gallery-viewer-count {
+ top:calc(env(safe-area-inset-top) + 18px)!important;
+ left:50%!important;
+ transform:translateX(-50%);
+ background:transparent!important;
+}
+#galleryViewer .gallery-viewer-menu {top:calc(env(safe-area-inset-top) + 60px)!important}
+@media(min-width:760px) {
+ #galleryContent .gallery-album-list {grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+`;
  document.head.append(style);
 })();
