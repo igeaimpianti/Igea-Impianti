@@ -1,5 +1,7 @@
 "use strict";
 let galleryAlbum=null;
+let galleryViewerItems=[];
+let galleryViewerIndex=0;
 const ge=(id)=>document.getElementById(id);
 async function galleryOpen(){
  showPage("settings");
@@ -35,16 +37,53 @@ async function galleryRender(){
   finally{if(input.isConnected){input.disabled=false;input.value="";}}
  };
  const grid=ge("galleryGrid");
+ const viewable=[];
  if(!photos.length)grid.textContent="Nessuna foto";
  for(const p of photos){
  const {data,error:e}=await supabaseClient.storage.from("job-documents").createSignedUrl(p.storage_path,3600);
  if(e)continue;
  const box=document.createElement("div");box.className="gallery-photo";
- const img=document.createElement("img");img.src=data.signedUrl;img.alt=p.name;img.loading="lazy";img.onclick=()=>window.open(data.signedUrl,"_blank","noopener");
+ const img=document.createElement("img");img.src=data.signedUrl;img.alt=p.name;img.loading="lazy";const photoIndex=viewable.push({url:data.signedUrl,name:p.name})-1;
+ img.onclick=()=>galleryShowViewer(viewable,photoIndex);
  const del=document.createElement("button");del.textContent="Elimina";del.className="secondary";del.onclick=async()=>{if(!confirm("Eliminare questa foto?"))return;const d=await supabaseClient.from("gallery_photos").delete().eq("id",p.id);if(d.error){toast(d.error.message);return;}await supabaseClient.storage.from("job-documents").remove([p.storage_path]);galleryRender();};
  box.append(img,del);grid.append(box);
  }
 }
+function galleryShowViewer(items,index){
+ galleryViewerItems=items.slice();galleryViewerIndex=index;
+ let viewer=ge("galleryViewer");
+ if(!viewer){
+  viewer=document.createElement("div");viewer.id="galleryViewer";viewer.className="gallery-viewer";
+  viewer.innerHTML='<button type="button" class="gallery-viewer-close" aria-label="Chiudi">✕</button><div class="gallery-viewer-count"></div><div class="gallery-viewer-stage"><img alt="Foto ingrandita"></div><button type="button" class="gallery-viewer-prev" aria-label="Foto precedente">‹</button><button type="button" class="gallery-viewer-next" aria-label="Foto successiva">›</button>';
+  document.body.appendChild(viewer);
+  viewer.querySelector(".gallery-viewer-close").onclick=galleryCloseViewer;
+  viewer.querySelector(".gallery-viewer-prev").onclick=()=>galleryMoveViewer(-1);
+  viewer.querySelector(".gallery-viewer-next").onclick=()=>galleryMoveViewer(1);
+  let touchX=null;
+  viewer.addEventListener("touchstart",e=>{if(e.touches.length===1)touchX=e.touches[0].clientX;else touchX=null;},{passive:true});
+  viewer.addEventListener("touchend",e=>{if(touchX===null||!e.changedTouches.length)return;const delta=e.changedTouches[0].clientX-touchX;touchX=null;if(Math.abs(delta)>55)galleryMoveViewer(delta<0?1:-1);},{passive:true});
+ }
+ viewer.style.display="flex";document.body.style.overflow="hidden";
+ galleryUpdateViewer();
+}
+function galleryUpdateViewer(){
+ const viewer=ge("galleryViewer");if(!viewer||!galleryViewerItems.length)return;
+ const item=galleryViewerItems[galleryViewerIndex],img=viewer.querySelector("img");
+ img.src=item.url;img.alt=item.name||"Foto";
+ viewer.querySelector(".gallery-viewer-count").textContent=(galleryViewerIndex+1)+" di "+galleryViewerItems.length;
+ viewer.querySelector(".gallery-viewer-prev").disabled=galleryViewerIndex===0;
+ viewer.querySelector(".gallery-viewer-next").disabled=galleryViewerIndex===galleryViewerItems.length-1;
+}
+function galleryMoveViewer(delta){
+ const next=galleryViewerIndex+delta;
+ if(next<0||next>=galleryViewerItems.length)return;
+ galleryViewerIndex=next;galleryUpdateViewer();
+}
+function galleryCloseViewer(){
+ const viewer=ge("galleryViewer");if(viewer)viewer.style.display="none";
+ document.body.style.overflow="";
+}
+
 async function galleryCreate(){
  const title=prompt("Nome del nuovo album");if(!title?.trim())return;
  const {data,error}=await supabaseClient.from("photo_albums").insert({title:title.trim(),user_id:currentUser.id}).select().single();
