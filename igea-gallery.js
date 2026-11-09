@@ -15,6 +15,7 @@ async function galleryRender(){
  const {data:albums,error}=await supabaseClient.from("photo_albums").select("*").order("created_at",{ascending:false});
  if(error){root.textContent="Errore: "+error.message;return;}
  if(!galleryAlbum){
+ ge("galleryBackSlot")?.replaceChildren();
  root.innerHTML=albums.length?'<div class="gallery-album-list">'+albums.map(a=>'<button class="gallery-album" data-album="'+a.id+'"><span class="gallery-album-symbol" data-cover="'+a.id+'">▦</span><span class="gallery-album-name">'+escapeHTML(a.title)+'</span><span class="gallery-album-arrow">›</span></button>').join("")+'</div>':'<div class="empty">Nessun album. Crea il primo o carica foto in un lavoro.</div>';
  // Retrieve one cover for each album without touching the original photos.
  if(albums.length){
@@ -39,6 +40,7 @@ async function galleryRender(){
  if(err){root.textContent=err.message;return;}
  root.innerHTML='<div class="gallery-album-toolbar"><button id="galleryBack" class="secondary">← Album</button><h3>'+escapeHTML(album.title)+'</h3></div><label class="gallery-upload-label" for="galleryFiles">＋ Carica foto</label><input id="galleryFiles" type="file" accept="image/*" multiple><div id="galleryStatus" class="sub"></div><div class="gallery-grid" id="galleryGrid"></div>';
  ge("galleryBack").onclick=()=>{galleryAlbum=null;galleryRender();};
+ ge("galleryBackSlot")?.append(ge("galleryBack"));
  ge("galleryFiles").onchange=async(e)=>{
   const input=e.target, files=Array.from(input.files||[]), status=ge("galleryStatus");
   if(!files.length)return;
