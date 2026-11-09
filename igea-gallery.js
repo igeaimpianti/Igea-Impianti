@@ -61,10 +61,9 @@ async function galleryRender(){
  const {data,error:e}=result;
  if(e)continue;
  const box=document.createElement("div");box.className="gallery-photo gallery-tile";
- const img=document.createElement("img");const raw=/\.(dng|raw|cr2|nef|arw)$/i.test(p.name||"");if(raw){img.alt="Originale RAW";img.style.display="none";const label=document.createElement("div");label.className="gallery-raw-label";label.textContent="📷 RAW · "+p.name;box.append(label);}else{img.src=data.signedUrl;img.alt=p.name;img.loading="lazy";img.decoding="async";img.fetchPriority="low";}const photoIndex=viewable.push({url:data.signedUrl,name:p.name,raw})-1;
+ const img=document.createElement("img");const raw=/\.(dng|raw|cr2|nef|arw)$/i.test(p.name||"");if(raw){img.alt="Originale RAW";img.style.display="none";const label=document.createElement("div");label.className="gallery-raw-label";label.textContent="📷 RAW · "+p.name;box.append(label);}else{img.src=data.signedUrl;img.alt=p.name;img.loading="lazy";img.decoding="async";img.fetchPriority="low";}const photoIndex=viewable.push({url:data.signedUrl,name:p.name,raw,id:p.id,storagePath:p.storage_path})-1;
  img.onclick=()=>galleryShowViewer(viewable,photoIndex);img.tabIndex=0;img.setAttribute("role","button");img.setAttribute("aria-label","Apri "+(p.name||"foto"));img.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();galleryShowViewer(viewable,photoIndex);}};if(raw)box.querySelector(".gallery-raw-label").onclick=()=>galleryShowViewer(viewable,photoIndex);
- const del=document.createElement("button");del.textContent="✕";del.title="Elimina foto";del.setAttribute("aria-label","Elimina foto");del.className="gallery-tile-delete";del.onclick=async()=>{if(!confirm("Eliminare questa foto?"))return;const d=await supabaseClient.from("gallery_photos").delete().eq("id",p.id);if(d.error){toast(d.error.message);return;}await supabaseClient.storage.from("job-documents").remove([p.storage_path]);galleryRender();};
- box.append(img,del);grid.append(box);
+ box.append(img);grid.append(box);
  }
 }
 function galleryShowViewer(items,index){
@@ -72,17 +71,19 @@ function galleryShowViewer(items,index){
  let viewer=ge("galleryViewer");
  if(!viewer){
   viewer=document.createElement("div");viewer.id="galleryViewer";viewer.className="gallery-viewer";
-  viewer.innerHTML='<button type="button" class="gallery-viewer-close" aria-label="Chiudi">✕</button><div class="gallery-viewer-count"></div><button type="button" class="gallery-viewer-download" aria-label="Scarica foto" title="Scarica foto">↓</button><div class="gallery-viewer-stage"><img alt="Foto ingrandita"></div><button type="button" class="gallery-viewer-prev" aria-label="Foto precedente">‹</button><button type="button" class="gallery-viewer-next" aria-label="Foto successiva">›</button>';
+  viewer.innerHTML='<button type="button" class="gallery-viewer-close" aria-label="Chiudi">✕</button><div class="gallery-viewer-count"></div><button type="button" class="gallery-viewer-menu-button" aria-label="Opzioni foto" aria-expanded="false" title="Opzioni foto">•••</button><div class="gallery-viewer-menu" hidden><button type="button" class="gallery-menu-download">↓ Scarica foto</button><button type="button" class="gallery-menu-delete">Elimina foto</button></div><div class="gallery-viewer-stage"><img alt="Foto ingrandita"></div><button type="button" class="gallery-viewer-prev" aria-label="Foto precedente">‹</button><button type="button" class="gallery-viewer-next" aria-label="Foto successiva">›</button>';
   document.body.appendChild(viewer);
   viewer.querySelector(".gallery-viewer-close").onclick=galleryCloseViewer;
-  viewer.querySelector(".gallery-viewer-download").onclick=galleryDownloadCurrent;
+  viewer.querySelector(".gallery-viewer-menu-button").onclick=()=>{const menu=viewer.querySelector(".gallery-viewer-menu");menu.hidden=!menu.hidden;viewer.querySelector(".gallery-viewer-menu-button").setAttribute("aria-expanded",String(!menu.hidden));};
+  viewer.querySelector(".gallery-menu-download").onclick=()=>{galleryHideMenu();galleryDownloadCurrent();};
+  viewer.querySelector(".gallery-menu-delete").onclick=()=>{galleryHideMenu();galleryDeleteCurrent();};
   viewer.querySelector(".gallery-viewer-prev").onclick=()=>galleryMoveViewer(-1);
   viewer.querySelector(".gallery-viewer-next").onclick=()=>galleryMoveViewer(1);
   let touchX=null;
   viewer.addEventListener("touchstart",e=>{if(e.touches.length===1)touchX=e.touches[0].clientX;else touchX=null;},{passive:true});
   viewer.addEventListener("touchend",e=>{if(touchX===null||!e.changedTouches.length)return;const delta=e.changedTouches[0].clientX-touchX;touchX=null;if(Math.abs(delta)>55)galleryMoveViewer(delta<0?1:-1);},{passive:true});
  }
- viewer.style.display="flex";document.body.style.overflow="hidden";
+ galleryHideMenu();viewer.style.display="flex";document.body.style.overflow="hidden";
  galleryUpdateViewer();
 }
 function galleryUpdateViewer(){
@@ -95,7 +96,7 @@ function galleryUpdateViewer(){
 }
 async function galleryDownloadCurrent(){
  const item=galleryViewerItems[galleryViewerIndex];if(!item)return;
- const btn=ge("galleryViewer")?.querySelector(".gallery-viewer-download");
+ const btn=ge("galleryViewer")?.querySelector(".gallery-menu-download");
  if(btn)btn.disabled=true;
  try{
   const response=await fetch(item.url);if(!response.ok)throw Error("Download non riuscito");
@@ -107,9 +108,20 @@ async function galleryDownloadCurrent(){
 function galleryMoveViewer(delta){
  const next=galleryViewerIndex+delta;
  if(next<0||next>=galleryViewerItems.length)return;
- galleryViewerIndex=next;galleryUpdateViewer();
+ galleryViewerIndex=next;galleryHideMenu();galleryUpdateViewer();
+}
+function galleryHideMenu(){const v=ge("galleryViewer");if(!v)return;const menu=v.querySelector(".gallery-viewer-menu");if(menu)menu.hidden=true;v.querySelector(".gallery-viewer-menu-button")?.setAttribute("aria-expanded","false");}
+async function galleryDeleteCurrent(){
+ const item=galleryViewerItems[galleryViewerIndex];if(!item?.id)return;
+ if(!confirm("Vuoi eliminare definitivamente questa fotografia? Questa operazione non può essere annullata."))return;
+ const result=await supabaseClient.from("gallery_photos").delete().eq("id",item.id);
+ if(result.error){toast("Eliminazione non riuscita: "+result.error.message);return;}
+ const storage=await supabaseClient.storage.from("job-documents").remove([item.storagePath]);
+ if(storage.error)toast("Foto rimossa dall’album, ma eliminazione del file non riuscita: "+storage.error.message);
+ galleryCloseViewer();await galleryRender();toast("Foto eliminata");
 }
 function galleryCloseViewer(){
+ galleryHideMenu();
  const viewer=ge("galleryViewer");if(viewer)viewer.style.display="none";
  document.body.style.overflow="";
 }
