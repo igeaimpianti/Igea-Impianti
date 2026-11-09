@@ -1,6 +1,6 @@
 /* Cache application files only. Supabase records, credentials and documents are never cached. */
-const SHELL_CACHE = "igea-pro-shell-20261109-7";
-const SHELL_FILES = ["./", "./index.html", "./app.js?v=pro-1", "./preventivi.js?v=pro-1", "./igea-pro-ui.js?v=20261109-gallery", "./igea-pro.css?v=pro-1", "./assets/components.css?v=pro-1", "./assets/igea-mark.svg", "./manifest.json?v=pro-1", "./icon.png", "./igea-gallery.js?v=20261109-6", "./igea-jobs.js?v=20261109-2"];
+const SHELL_CACHE = "igea-pro-shell-20261109-8";
+const SHELL_FILES = ["./", "./index.html", "./app.js?v=20261109-8", "./preventivi.js?v=pro-1", "./igea-pro-ui.js?v=20261109-8", "./igea-pro.css?v=pro-1", "./assets/components.css?v=pro-1", "./assets/igea-mark.svg", "./manifest.json?v=pro-1", "./icon.png", "./igea-gallery.js?v=20261109-8", "./igea-jobs.js?v=20261109-2"];
 self.addEventListener("install", event => {
     event.waitUntil(caches.open(SHELL_CACHE).then(cache => cache.addAll(SHELL_FILES)));
     self.skipWaiting();
@@ -22,7 +22,7 @@ self.addEventListener("fetch", event => {
     event.respondWith((async () => {
         const cache = await caches.open(SHELL_CACHE);
         try {
-            const response = await fetch(request);
+            const response = await fetch(request, {cache:"no-store"});
             if (response.ok && shellURLs.includes(url.href)) await cache.put(request, response.clone());
             return response;
         } catch (error) {
