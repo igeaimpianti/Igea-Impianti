@@ -6,24 +6,105 @@ const icon=name=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 let activePage='dashboard';
 let previousFocus=null;
 const originalPage=window.showPage;
-const titles={dashboard:'Panoramica',appointments:'Agenda',clients:'Clienti',quotes:'Preventivi',payments:'Pagamenti',gallery:'Galleria',expenses:'Movimenti',settings:'Impostazioni'};
+const titles={dashboard:'Panoramica',appointments:'Agenda',clients:'Clienti',quotes:'Preventivi',payments:'Pagamenti',gallery:'Galleria','articoli-sito':'Inserisci articoli al sito web',expenses:'Movimenti',settings:'Impostazioni'};
 function closeMore(){
  byId('moreMenu').classList.add('hidden');byId('menuBackdrop').classList.add('hidden');byId('moreButton').setAttribute('aria-expanded','false');
 }
 window.showPage=function(page){
  if(!titles[page])return;
- if(page==='gallery'){
-  document.querySelectorAll('main > section[id]').forEach(el=>el.classList.toggle('hidden',el.id!=='gallery'));
+ if(page==='gallery'||page==='articoli-sito'){
+  document.querySelectorAll('main > section[id]').forEach(el=>el.classList.toggle('hidden',el.id!==page));
  }else{
   originalPage(page);
   byId('gallery')?.classList.add('hidden');
+  byId('articoli-sito')?.classList.add('hidden');
  }
  activePage=page;
  byId('pageTitle').textContent=titles[page];
  document.querySelectorAll('[data-page]').forEach(b=>{const active=b.dataset.page===page;b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
- byId('moreButton').classList.toggle('active',['clients','expenses','settings'].includes(page));
+ byId('moreButton').classList.toggle('active',['clients','expenses','settings','articoli-sito'].includes(page));
+ if(page==='articoli-sito') loadSiteCategories().catch(error=>{byId('site-product-form').querySelector('[role=status]').textContent=error.message;});
  closeMore();window.scrollTo({top:0,behavior:'instant'});
 };
+const siteOrigin='https://igeaimpianti.com';
+const productForm=byId('site-product-form');
+const categoryForm=byId('site-category-form');
+
+async function loadSiteCategories(selected){
+ const response=await fetch(siteOrigin+'/api/catalogo');
+ if(!response.ok)throw new Error('Impossibile caricare le categorie del sito.');
+ const {categories}=await response.json();
+ const product=byId('site-product-category'),parent=byId('site-parent-category');
+ const previous=selected??product.value;
+ product.replaceChildren(new Option('Scegli categoria',''));
+ parent.replaceChildren(new Option('Nessuna · categoria principale',''));
+ for(const group of categories.filter(item=>!item.parent)){
+  parent.add(new Option(group.name,group.id));
+  product.add(new Option(group.name,group.id));
+  for(const child of categories.filter(item=>item.parent===group.id)){
+   product.add(new Option(group.name+' / '+child.name,child.id));
+  }
+ }
+ product.value=previous;
+}
+
+async function prepareSitePhotos(data){
+ const photos=data.getAll('photo');
+ if(photos.length>6)throw new Error('Seleziona al massimo 6 foto.');
+ data.delete('photo');
+ for(const file of photos){
+  if(['image/jpeg','image/png','image/webp'].includes(file.type)&&file.size<=3*1024*1024){
+   data.append('photo',file);continue;
+  }
+  let bitmap;
+  try{bitmap=await createImageBitmap(file);}
+  catch{throw new Error('Questa foto non si apre. Prova con un file JPEG, PNG o WebP.');}
+  const canvas=document.createElement('canvas');
+  const scale=Math.min(1,1600/Math.max(bitmap.width,bitmap.height));
+  canvas.width=Math.max(1,Math.round(bitmap.width*scale));
+  canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+  canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);
+  bitmap.close();
+  const converted=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.88));
+  if(!converted)throw new Error('Conversione della foto non riuscita.');
+  data.append('photo',converted,'foto.jpg');
+ }
+}
+
+for(const form of [productForm,categoryForm]){
+ form.addEventListener('submit',async event=>{
+  event.preventDefault();
+  const button=form.querySelector('button'), status=form.querySelector('[role=status]');
+  button.disabled=true;
+  status.textContent='Salvataggio in corso…';
+  try{
+   const {data:{session}}=await supabaseClient.auth.getSession();
+   if(!session)throw new Error('Accedi al gestionale per pubblicare.');
+   const payload=new FormData(form);
+   const isProduct=form===productForm;
+   if(isProduct)await prepareSitePhotos(payload);
+   const response=await fetch(siteOrigin+'/api/gestione/'+(isProduct?'prodotti':'categorie'),{
+    method:'POST',headers:{Authorization:'Bearer '+session.access_token},body:payload
+   });
+   const result=await response.json();
+   if(!response.ok)throw new Error(result.error||'Salvataggio non riuscito.');
+   form.reset();
+   status.textContent=isProduct?'Prodotto pubblicato sul sito.':'Categoria creata.';
+   if(!isProduct)await loadSiteCategories(result.id);
+  }catch(error){status.textContent=error.message;}
+  finally{button.disabled=false;}
+ });
+}
+
+function openCatalogDeepLink(){
+ if(location.hash==='#articoli-sito'&&byId('loginScreen').classList.contains('hidden')){
+  history.replaceState(null,'',location.pathname+location.search);
+  window.showPage('articoli-sito');
+ }
+}
+new MutationObserver(openCatalogDeepLink).observe(byId('loginScreen'),{attributes:true,attributeFilter:['class']});
+window.addEventListener('hashchange',openCatalogDeepLink);
+openCatalogDeepLink();
 function newRecord(page){
  window.showPage(page);
  if(page==='quotes'){
