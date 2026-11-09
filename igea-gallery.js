@@ -209,8 +209,26 @@ function galleryForJob(appointmentId){
  if(document.getElementById("igeaGalleryModernStyle"))return;
  const style=document.createElement("style");style.id="igeaGalleryModernStyle";
  style.textContent=`#galleryContent .gallery-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;margin-top:16px}#galleryContent .gallery-tile{position:relative!important;min-width:0!important;aspect-ratio:1/1!important;overflow:hidden!important;border:0!important;border-radius:7px!important;background:#182233!important;padding:0!important;display:block!important}#galleryContent .gallery-tile>img{display:block;width:100%!important;height:100%!important;object-fit:cover!important;cursor:pointer;border:0!important;border-radius:0!important}#galleryContent .gallery-tile-delete{position:absolute!important;top:6px;right:6px;width:25px!important;height:25px!important;min-width:0!important;min-height:0!important;padding:0!important;border-radius:50%!important;background:rgba(12,18,29,.72)!important;color:white!important;border:1px solid rgba(255,255,255,.35)!important;backdrop-filter:blur(8px);font-size:15px!important;line-height:1!important;opacity:.85}#galleryContent .gallery-tile-delete:active{background:#a52a3d!important}#galleryViewer.gallery-viewer{position:fixed!important;inset:0!important;z-index:99999!important;background:rgba(5,9,17,.98)!important;align-items:center!important;justify-content:center!important;padding:0!important}#galleryViewer .gallery-viewer-stage{position:absolute!important;inset:75px 0 85px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important}#galleryViewer .gallery-viewer-stage img{width:100%!important;height:100%!important;object-fit:contain!important;max-width:100%!important;max-height:100%!important}#galleryViewer .gallery-viewer-close,#galleryViewer .gallery-viewer-download{position:absolute!important;top:calc(16px + env(safe-area-inset-top));width:43px!important;height:43px!important;min-width:0!important;min-height:0!important;border-radius:50%!important;background:rgba(45,56,74,.78)!important;color:#fff!important;border:1px solid #ffffff2a!important;font-size:24px!important;display:grid!important;place-items:center!important;z-index:3!important;padding:0!important}#galleryViewer .gallery-viewer-close{left:17px!important}#galleryViewer .gallery-viewer-download{right:17px!important}#galleryViewer .gallery-viewer-count{position:absolute!important;top:calc(28px + env(safe-area-inset-top));left:75px!important;right:75px!important;text-align:center!important;color:#e8edf6!important;font-size:13px!important;letter-spacing:.8px!important;z-index:2!important}#galleryViewer .gallery-viewer-prev,#galleryViewer .gallery-viewer-next{position:absolute!important;top:50%!important;transform:translateY(-50%)!important;width:38px!important;height:48px!important;min-width:0!important;padding:0!important;border-radius:12px!important;background:#15203388!important;color:white!important;font-size:32px!important;z-index:3!important}#galleryViewer .gallery-viewer-prev{left:8px!important}#galleryViewer .gallery-viewer-next{right:8px!important}#galleryViewer .gallery-viewer-prev:disabled,#galleryViewer .gallery-viewer-next:disabled{opacity:.15!important}@media(max-width:650px){#galleryViewer .gallery-viewer-prev,#galleryViewer .gallery-viewer-next{display:none!important}#galleryContent .gallery-grid{gap:3px!important}#galleryContent .gallery-tile{border-radius:4px!important}}`;
- style.textContent += "\n/* IGEA PRO | Galleria fotografica premium */\n#galleryPanel{background:#080b11!important;border-color:#202b3a!important;color:#f8fafc!important}\n#galleryPanel h2{font-weight:750!important;letter-spacing:-.6px!important}\n#galleryContent .gallery-album-list{display:grid;gap:10px;margin-top:20px}\n#galleryContent .gallery-album{display:flex!important;align-items:center;gap:15px;text-align:left;background:linear-gradient(135deg,#151e2b,#0d121c)!important;border:1px solid #29374a!important;border-radius:19px!important;padding:18px!important;box-shadow:0 8px 24px #0003;color:#f8fafc!important}\n#galleryContent .gallery-album-symbol{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:#123a64;color:#72bbff;font-size:29px}\n#galleryContent .gallery-album-name{flex:1;font-size:16px;font-weight:700;overflow:hidden;text-overflow:ellipsis}\n#galleryContent .gallery-album-arrow{font-size:28px;color:#8ca8c9}\n#galleryContent .gallery-grid{gap:2px!important;margin-top:18px!important}\n#galleryContent .gallery-tile{background:#090e17!important;border-radius:2px!important;content-visibility:auto;contain-intrinsic-size:110px}\n#galleryContent .gallery-tile-delete{opacity:0!important;transition:opacity .15s}\n#galleryContent .gallery-tile:hover .gallery-tile-delete,#galleryContent .gallery-tile:focus-within .gallery-tile-delete{opacity:1!important}\n#galleryViewer.gallery-viewer{background:#000!important}\n#galleryViewer .gallery-viewer-close,#galleryViewer .gallery-viewer-download{background:#1c1c1eaa!important;border:1px solid #ffffff20!important;backdrop-filter:blur(18px)}\n#galleryViewer .gallery-viewer-stage img{user-select:none;-webkit-user-select:none}\n@media(hover:none){#galleryContent .gallery-tile-delete{opacity:.8!important}}\n";
+ style.textContent += "\n/* IGEA PRO | Galleria fotografica premium */\n#galleryPanel{color:#f8fafc!important}\n#galleryPanel h2{font-weight:750!important;letter-spacing:-.6px!important}\n#galleryContent .gallery-album-list{display:grid;gap:10px;margin-top:20px}\n#galleryContent .gallery-album{display:flex!important;align-items:center;gap:15px;text-align:left;background:linear-gradient(135deg,#151e2b,#0d121c)!important;border:1px solid #29374a!important;border-radius:19px!important;padding:18px!important;box-shadow:0 8px 24px #0003;color:#f8fafc!important}\n#galleryContent .gallery-album-symbol{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:#123a64;color:#72bbff;font-size:29px}\n#galleryContent .gallery-album-name{flex:1;font-size:16px;font-weight:700;overflow:hidden;text-overflow:ellipsis}\n#galleryContent .gallery-album-arrow{font-size:28px;color:#8ca8c9}\n#galleryContent .gallery-grid{gap:2px!important;margin-top:18px!important}\n#galleryContent .gallery-tile{background:#090e17!important;border-radius:2px!important;content-visibility:auto;contain-intrinsic-size:110px}\n#galleryContent .gallery-tile-delete{opacity:0!important;transition:opacity .15s}\n#galleryContent .gallery-tile:hover .gallery-tile-delete,#galleryContent .gallery-tile:focus-within .gallery-tile-delete{opacity:1!important}\n#galleryViewer.gallery-viewer{background:#000!important}\n#galleryViewer .gallery-viewer-close,#galleryViewer .gallery-viewer-download{background:#1c1c1eaa!important;border:1px solid #ffffff20!important;backdrop-filter:blur(18px)}\n#galleryViewer .gallery-viewer-stage img{user-select:none;-webkit-user-select:none}\n@media(hover:none){#galleryContent .gallery-tile-delete{opacity:.8!important}}\n";
  style.textContent += `
+#gallery #galleryPanel,
+#gallery #galleryContent,
+#gallery #galleryBackSlot {
+ background:none!important;
+ border:0!important;
+ box-shadow:none!important;
+}
+#gallery .gallery-add-button,
+#gallery #galleryBackSlot #galleryBack,
+#gallery #galleryContent .gallery-upload-label {
+ background:none!important;
+ border:0!important;
+ box-shadow:none!important;
+ color:#f5f7fb!important;
+ min-height:44px;
+}
+#gallery #galleryBackSlot #galleryBack,
+#gallery #galleryContent .gallery-upload-label {padding-inline:0!important}
 #galleryContent .gallery-album-list {
  display:grid;
  grid-template-columns:repeat(2,minmax(0,1fr));
@@ -225,8 +243,9 @@ function galleryForJob(appointmentId){
  margin:0!important;
  padding:0!important;
  overflow:hidden;
- background:#151d29!important;
- border:1px solid #263449!important;
+ background:transparent!important;
+ border:0!important;
+ border-radius:0!important;
  box-shadow:none!important;
  text-align:left;
 }
@@ -235,7 +254,9 @@ function galleryForJob(appointmentId){
  display:grid;
  place-items:center;
  aspect-ratio:4/3;
- background:linear-gradient(145deg,#202f45,#141d2b);
+ overflow:hidden;
+ border-radius:12px;
+ background:#202126;
  color:#8097b4;
 }
 .gallery-cover img {
@@ -245,7 +266,7 @@ function galleryForJob(appointmentId){
  height:100%;
  object-fit:cover;
 }
-.gallery-card-caption {display:grid;gap:4px;padding:11px 12px 13px;color:#f5f7fb}
+.gallery-card-caption {display:grid;gap:4px;padding:9px 0 12px;color:#f5f7fb}
 .gallery-card-caption strong {font-size:14px;line-height:1.3;overflow-wrap:anywhere}
 .gallery-card-caption small {color:#a7b5c9;font-size:12px}
 .gallery-card-caption small:empty {display:none}
