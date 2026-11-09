@@ -28,9 +28,9 @@ async function galleryRender(){
   const input=e.target, files=Array.from(input.files||[]), status=ge("galleryStatus");
   if(!files.length)return;
   input.disabled=true;
-  status.textContent="Caricamento di "+files.length+" foto in corso...";
+  status.textContent="Preparazione di "+files.length+" originali (nessuna compressione)...";
   try{
-    const result=await galleryUpload(files,galleryAlbum,null);
+    const result=await galleryUpload(files,galleryAlbum,null,(done,total,name)=>{const el=ge("galleryStatus");if(el)el.textContent="Caricamento originali: "+done+"/"+total+" · "+name;});
     if(result.done){await galleryRender();const updated=ge("galleryStatus");if(updated)updated.textContent=result.done+" foto caricate correttamente"+(result.errors.length?" · "+result.errors.join(" | "):"");}
     else status.textContent="Caricamento non riuscito: "+(result.errors.join(" | ")||"errore sconosciuto");
   }catch(error){status.textContent="Errore caricamento: "+(error.message||String(error));}
@@ -43,10 +43,10 @@ async function galleryRender(){
  const {data,error:e}=await supabaseClient.storage.from("job-documents").createSignedUrl(p.storage_path,3600);
  if(e)continue;
  const box=document.createElement("div");box.className="gallery-photo";
- const img=document.createElement("img");img.src=data.signedUrl;img.alt=p.name;img.loading="lazy";const photoIndex=viewable.push({url:data.signedUrl,name:p.name})-1;
- img.onclick=()=>galleryShowViewer(viewable,photoIndex);
+ const img=document.createElement("img");const raw=/\.(dng|raw|cr2|nef|arw)$/i.test(p.name||"");if(raw){img.alt="Originale RAW";img.style.display="none";const label=document.createElement("div");label.className="gallery-raw-label";label.textContent="📷 RAW · "+p.name;box.append(label);}else{img.src=data.signedUrl;img.alt=p.name;img.loading="lazy";}const photoIndex=viewable.push({url:data.signedUrl,name:p.name,raw})-1;
+ img.onclick=()=>galleryShowViewer(viewable,photoIndex);if(raw)box.querySelector(".gallery-raw-label").onclick=()=>galleryShowViewer(viewable,photoIndex);
  const del=document.createElement("button");del.textContent="Elimina";del.className="secondary";del.onclick=async()=>{if(!confirm("Eliminare questa foto?"))return;const d=await supabaseClient.from("gallery_photos").delete().eq("id",p.id);if(d.error){toast(d.error.message);return;}await supabaseClient.storage.from("job-documents").remove([p.storage_path]);galleryRender();};
- box.append(img,del);grid.append(box);
+ const download=document.createElement("a");download.href=data.signedUrl;download.download=p.name;download.textContent="Scarica originale";download.className="secondary";box.append(img,download,del);grid.append(box);
  }
 }
 function galleryShowViewer(items,index){
@@ -69,7 +69,7 @@ function galleryShowViewer(items,index){
 function galleryUpdateViewer(){
  const viewer=ge("galleryViewer");if(!viewer||!galleryViewerItems.length)return;
  const item=galleryViewerItems[galleryViewerIndex],img=viewer.querySelector("img");
- img.src=item.url;img.alt=item.name||"Foto";
+ img.style.display=item.raw?"none":"block";if(!item.raw)img.src=item.url;img.alt=item.name||"Foto";let rawNote=viewer.querySelector(".gallery-raw-note");if(!rawNote){rawNote=document.createElement("div");rawNote.className="gallery-raw-note";viewer.querySelector(".gallery-viewer-stage").append(rawNote);}rawNote.style.display=item.raw?"block":"none";rawNote.textContent=item.raw?"Originale DNG conservato senza modifiche. Usa Scarica originale dalla galleria per aprirlo in un’app compatibile.":"";
  viewer.querySelector(".gallery-viewer-count").textContent=(galleryViewerIndex+1)+" di "+galleryViewerItems.length;
  viewer.querySelector(".gallery-viewer-prev").disabled=galleryViewerIndex===0;
  viewer.querySelector(".gallery-viewer-next").disabled=galleryViewerIndex===galleryViewerItems.length-1;
@@ -98,21 +98,20 @@ async function galleryClientAlbum(clientId){
  if(q.error){const retry=await supabaseClient.from("photo_albums").select("id").eq("client_id",clientId).single();if(retry.error)throw q.error;return retry.data.id;}
  return q.data.id;
 }
-async function galleryUpload(files,albumId,appointmentId){
+async function galleryUpload(files,albumId,appointmentId,onProgress){
  if(!currentUser)throw Error("Accesso richiesto");
- let done=0;const errors=[];
- for(const file of Array.from(files||[])){
-  if(!file.type.startsWith("image/")){errors.push(file.name+": formato non riconosciuto");continue;}
-  if(file.size>15*1024*1024){errors.push(file.name+": supera 15 MB");continue;}
+ let done=0;const errors=[];const allFiles=Array.from(files||[]);let processed=0;
+ for(const file of allFiles){
+  if(!file.type.startsWith("image/")&&!/\.(dng|raw|cr2|nef|arw)$/i.test(file.name)){errors.push(file.name+": formato non riconosciuto");processed++;onProgress?.(processed,allFiles.length,file.name);continue;}
   try{
    const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
    const path=currentUser.id+"/gallery/"+albumId+"/"+crypto.randomUUID()+"."+ext;
-   const up=await supabaseClient.storage.from("job-documents").upload(path,file,{contentType:file.type,upsert:false});
+   const up=await supabaseClient.storage.from("job-documents").upload(path,file,{contentType:file.type||"application/octet-stream",upsert:false,cacheControl:"3600"});
    if(up.error)throw Error("Storage: "+up.error.message);
    const ins=await supabaseClient.from("gallery_photos").insert({user_id:currentUser.id,album_id:albumId,appointment_id:appointmentId,name:file.name,storage_path:path});
    if(ins.error){await supabaseClient.storage.from("job-documents").remove([path]);throw Error("Database: "+ins.error.message);}
    done++;
-  }catch(error){errors.push(file.name+": "+(error.message||String(error)));}
+  }catch(error){errors.push(file.name+": "+(error.message||String(error))+" (verifica limite file del bucket Supabase)");}finally{processed++;onProgress?.(processed,allFiles.length,file.name);}
  }
  if(errors.length)toast("Foto non caricate: "+errors.join(" | "));
  else if(done)toast(done+" foto caricate");
