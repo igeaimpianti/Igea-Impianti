@@ -38,7 +38,7 @@ async function registerNotificationDevice(){
        Notification.permission !== "granted" || !currentUser) return false;
 
     notificationRegistration =
-        await navigator.serviceWorker.register("./sw.js?v=pro-1");
+        await navigator.serviceWorker.register("./sw.js?v=20261109-7");
     await navigator.serviceWorker.ready;
 
     let subscription =
