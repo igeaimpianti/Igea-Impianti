@@ -1,6 +1,6 @@
 /* Cache application files only. Supabase records, credentials and documents are never cached. */
-const SHELL_CACHE = "igea-pro-shell-20261109-12";
-const SHELL_FILES = ["./", "./index.html", "./app.js?v=20261109-8", "./preventivi.js?v=pro-1", "./igea-pro-ui.js?v=20261109-8", "./igea-pro.css?v=pro-1", "./assets/components.css?v=pro-1", "./assets/igea-mark.svg", "./manifest.json?v=pro-1", "./icon.png", "./igea-gallery.js?v=20261109-12", "./igea-jobs.js?v=20261109-2"];
+const SHELL_CACHE = "igea-pro-shell-20261109-13";
+const SHELL_FILES = ["./", "./index.html", "./app.js?v=20261109-8", "./preventivi.js?v=pro-1", "./igea-pro-ui.js?v=20261109-8", "./igea-pro.css?v=pro-1", "./assets/components.css?v=pro-1", "./assets/igea-mark.svg", "./manifest.json?v=pro-1", "./icon.png", "./igea-gallery.js?v=20261109-13", "./igea-jobs.js?v=20261109-2"];
 self.addEventListener("install", event => {
     event.waitUntil(caches.open(SHELL_CACHE).then(cache => cache.addAll(SHELL_FILES)));
     self.skipWaiting();
