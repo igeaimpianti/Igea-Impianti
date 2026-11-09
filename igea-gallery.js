@@ -22,7 +22,18 @@ async function galleryRender(){
  if(err){root.textContent=err.message;return;}
  root.innerHTML='<button id="galleryBack" class="secondary">← Album</button><h3>'+escapeHTML(album.title)+'</h3><input id="galleryFiles" type="file" accept="image/*" multiple><div id="galleryStatus" class="sub"></div><div class="gallery-grid" id="galleryGrid"></div>';
  ge("galleryBack").onclick=()=>{galleryAlbum=null;galleryRender();};
- ge("galleryFiles").onchange=async(e)=>{await galleryUpload(e.target.files,galleryAlbum,null);await galleryRender();};
+ ge("galleryFiles").onchange=async(e)=>{
+  const input=e.target, files=Array.from(input.files||[]), status=ge("galleryStatus");
+  if(!files.length)return;
+  input.disabled=true;
+  status.textContent="Caricamento di "+files.length+" foto in corso...";
+  try{
+    const result=await galleryUpload(files,galleryAlbum,null);
+    if(result.done){await galleryRender();const updated=ge("galleryStatus");if(updated)updated.textContent=result.done+" foto caricate correttamente"+(result.errors.length?" · "+result.errors.join(" | "):"");}
+    else status.textContent="Caricamento non riuscito: "+(result.errors.join(" | ")||"errore sconosciuto");
+  }catch(error){status.textContent="Errore caricamento: "+(error.message||String(error));}
+  finally{if(input.isConnected){input.disabled=false;input.value="";}}
+ };
  const grid=ge("galleryGrid");
  if(!photos.length)grid.textContent="Nessuna foto";
  for(const p of photos){
@@ -50,20 +61,25 @@ async function galleryClientAlbum(clientId){
 }
 async function galleryUpload(files,albumId,appointmentId){
  if(!currentUser)throw Error("Accesso richiesto");
- let done=0;
+ let done=0;const errors=[];
  for(const file of Array.from(files||[])){
- if(!file.type.startsWith("image/"))continue;
- if(file.size>15*1024*1024){toast("Foto oltre 15 MB: "+file.name);continue;}
- const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"");
- const path=currentUser.id+"/gallery/"+albumId+"/"+crypto.randomUUID()+"."+ext;
- const up=await supabaseClient.storage.from("job-documents").upload(path,file,{contentType:file.type,upsert:false});
- if(up.error){toast(up.error.message);continue;}
- const ins=await supabaseClient.from("gallery_photos").insert({user_id:currentUser.id,album_id:albumId,appointment_id:appointmentId,name:file.name,storage_path:path});
- if(ins.error){await supabaseClient.storage.from("job-documents").remove([path]);toast(ins.error.message);continue;}
- done++;
+  if(!file.type.startsWith("image/")){errors.push(file.name+": formato non riconosciuto");continue;}
+  if(file.size>15*1024*1024){errors.push(file.name+": supera 15 MB");continue;}
+  try{
+   const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+   const path=currentUser.id+"/gallery/"+albumId+"/"+crypto.randomUUID()+"."+ext;
+   const up=await supabaseClient.storage.from("job-documents").upload(path,file,{contentType:file.type,upsert:false});
+   if(up.error)throw Error("Storage: "+up.error.message);
+   const ins=await supabaseClient.from("gallery_photos").insert({user_id:currentUser.id,album_id:albumId,appointment_id:appointmentId,name:file.name,storage_path:path});
+   if(ins.error){await supabaseClient.storage.from("job-documents").remove([path]);throw Error("Database: "+ins.error.message);}
+   done++;
+  }catch(error){errors.push(file.name+": "+(error.message||String(error)));}
  }
- toast(done+" foto caricate");
+ if(errors.length)toast("Foto non caricate: "+errors.join(" | "));
+ else if(done)toast(done+" foto caricate");
+ return {done,errors};
 }
+
 function galleryForJob(appointmentId){
  const a=appointments.find(x=>String(x.id)===String(appointmentId));
  if(!a?.client_id){toast("Seleziona un cliente per il lavoro");return;}
