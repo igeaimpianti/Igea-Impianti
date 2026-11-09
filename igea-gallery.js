@@ -15,14 +15,29 @@ async function galleryRender(){
  const {data:albums,error}=await supabaseClient.from("photo_albums").select("*").order("created_at",{ascending:false});
  if(error){root.textContent="Errore: "+error.message;return;}
  if(!galleryAlbum){
- root.innerHTML=albums.length?'<div class="gallery-album-list">'+albums.map(a=>'<button class="gallery-album" data-album="'+a.id+'"><span class="gallery-album-symbol">▦</span><span class="gallery-album-name">'+escapeHTML(a.title)+'</span><span class="gallery-album-arrow">›</span></button>').join("")+'</div>':'<div class="empty">Nessun album. Crea il primo o carica foto in un lavoro.</div>';
+ root.innerHTML=albums.length?'<div class="gallery-album-list">'+albums.map(a=>'<button class="gallery-album" data-album="'+a.id+'"><span class="gallery-album-symbol" data-cover="'+a.id+'">▦</span><span class="gallery-album-name">'+escapeHTML(a.title)+'</span><span class="gallery-album-arrow">›</span></button>').join("")+'</div>':'<div class="empty">Nessun album. Crea il primo o carica foto in un lavoro.</div>';
+ // Retrieve one cover for each album without touching the original photos.
+ if(albums.length){
+  try{
+   const ids=albums.map(a=>a.id);
+   const {data:covers,error:coverError}=await supabaseClient.from("gallery_photos").select("album_id,storage_path,name,created_at").in("album_id",ids).order("created_at",{ascending:false}).limit(300);
+   if(!coverError&&covers){
+    const seen=new Set();
+    await Promise.all(covers.filter(p=>{if(seen.has(p.album_id))return false;seen.add(p.album_id);return !/\\.(dng|raw|cr2|nef|arw)$/i.test(p.name||"");}).map(async p=>{
+     const {data}=await supabaseClient.storage.from("job-documents").createSignedUrl(p.storage_path,3600);
+     const cover=Array.from(root.querySelectorAll("[data-cover]")).find(el=>el.dataset.cover===String(p.album_id));
+     if(data?.signedUrl&&cover){const img=document.createElement("img");img.src=data.signedUrl;img.alt="Anteprima album";img.loading="lazy";img.decoding="async";cover.replaceChildren(img);}
+    }));
+   }
+  }catch(e){console.warn("Anteprime album:",e);}
+ }
  root.querySelectorAll("[data-album]").forEach(b=>b.onclick=()=>{galleryAlbum=b.dataset.album;galleryRender();});
  return;
  }
  const album=albums.find(a=>a.id===galleryAlbum);if(!album){galleryAlbum=null;return galleryRender();}
  const {data:photos,error:err}=await supabaseClient.from("gallery_photos").select("*").eq("album_id",galleryAlbum).order("created_at",{ascending:false});
  if(err){root.textContent=err.message;return;}
- root.innerHTML='<button id="galleryBack" class="secondary">← Album</button><h3>'+escapeHTML(album.title)+'</h3><input id="galleryFiles" type="file" accept="image/*" multiple><div id="galleryStatus" class="sub"></div><div class="gallery-grid" id="galleryGrid"></div>';
+ root.innerHTML='<div class="gallery-album-toolbar"><button id="galleryBack" class="secondary">← Album</button><h3>'+escapeHTML(album.title)+'</h3></div><label class="gallery-upload-label" for="galleryFiles">＋ Carica foto</label><input id="galleryFiles" type="file" accept="image/*" multiple><div id="galleryStatus" class="sub"></div><div class="gallery-grid" id="galleryGrid"></div>';
  ge("galleryBack").onclick=()=>{galleryAlbum=null;galleryRender();};
  ge("galleryFiles").onchange=async(e)=>{
   const input=e.target, files=Array.from(input.files||[]), status=ge("galleryStatus");
