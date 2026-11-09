@@ -6,13 +6,19 @@ const icon=name=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 let activePage='dashboard';
 let previousFocus=null;
 const originalPage=window.showPage;
-const titles={dashboard:'Panoramica',appointments:'Agenda',clients:'Clienti',quotes:'Preventivi',payments:'Pagamenti',expenses:'Movimenti',settings:'Impostazioni'};
+const titles={dashboard:'Panoramica',appointments:'Agenda',clients:'Clienti',quotes:'Preventivi',payments:'Pagamenti',gallery:'Galleria',expenses:'Movimenti',settings:'Impostazioni'};
 function closeMore(){
  byId('moreMenu').classList.add('hidden');byId('menuBackdrop').classList.add('hidden');byId('moreButton').setAttribute('aria-expanded','false');
 }
 window.showPage=function(page){
  if(!titles[page])return;
- originalPage(page);activePage=page;
+ if(page==='gallery'){
+  document.querySelectorAll('main > section[id]').forEach(el=>el.classList.toggle('hidden',el.id!=='gallery'));
+ }else{
+  originalPage(page);
+  byId('gallery')?.classList.add('hidden');
+ }
+ activePage=page;
  byId('pageTitle').textContent=titles[page];
  document.querySelectorAll('[data-page]').forEach(b=>{const active=b.dataset.page===page;b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
  byId('moreButton').classList.toggle('active',['clients','expenses','settings'].includes(page));
