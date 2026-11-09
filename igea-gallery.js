@@ -42,11 +42,11 @@ async function galleryRender(){
  for(const p of photos){
  const {data,error:e}=await supabaseClient.storage.from("job-documents").createSignedUrl(p.storage_path,3600);
  if(e)continue;
- const box=document.createElement("div");box.className="gallery-photo";
+ const box=document.createElement("div");box.className="gallery-photo gallery-tile";
  const img=document.createElement("img");const raw=/\.(dng|raw|cr2|nef|arw)$/i.test(p.name||"");if(raw){img.alt="Originale RAW";img.style.display="none";const label=document.createElement("div");label.className="gallery-raw-label";label.textContent="📷 RAW · "+p.name;box.append(label);}else{img.src=data.signedUrl;img.alt=p.name;img.loading="lazy";}const photoIndex=viewable.push({url:data.signedUrl,name:p.name,raw})-1;
- img.onclick=()=>galleryShowViewer(viewable,photoIndex);if(raw)box.querySelector(".gallery-raw-label").onclick=()=>galleryShowViewer(viewable,photoIndex);
- const del=document.createElement("button");del.textContent="Elimina";del.className="secondary";del.onclick=async()=>{if(!confirm("Eliminare questa foto?"))return;const d=await supabaseClient.from("gallery_photos").delete().eq("id",p.id);if(d.error){toast(d.error.message);return;}await supabaseClient.storage.from("job-documents").remove([p.storage_path]);galleryRender();};
- const download=document.createElement("a");download.href=data.signedUrl;download.download=p.name;download.textContent="Scarica originale";download.className="secondary";box.append(img,download,del);grid.append(box);
+ img.onclick=()=>galleryShowViewer(viewable,photoIndex);img.tabIndex=0;img.setAttribute("role","button");img.setAttribute("aria-label","Apri "+(p.name||"foto"));img.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();galleryShowViewer(viewable,photoIndex);}};if(raw)box.querySelector(".gallery-raw-label").onclick=()=>galleryShowViewer(viewable,photoIndex);
+ const del=document.createElement("button");del.textContent="✕";del.title="Elimina foto";del.setAttribute("aria-label","Elimina foto");del.className="gallery-tile-delete";del.onclick=async()=>{if(!confirm("Eliminare questa foto?"))return;const d=await supabaseClient.from("gallery_photos").delete().eq("id",p.id);if(d.error){toast(d.error.message);return;}await supabaseClient.storage.from("job-documents").remove([p.storage_path]);galleryRender();};
+ box.append(img,del);grid.append(box);
  }
 }
 function galleryShowViewer(items,index){
@@ -54,9 +54,10 @@ function galleryShowViewer(items,index){
  let viewer=ge("galleryViewer");
  if(!viewer){
   viewer=document.createElement("div");viewer.id="galleryViewer";viewer.className="gallery-viewer";
-  viewer.innerHTML='<button type="button" class="gallery-viewer-close" aria-label="Chiudi">✕</button><div class="gallery-viewer-count"></div><div class="gallery-viewer-stage"><img alt="Foto ingrandita"></div><button type="button" class="gallery-viewer-prev" aria-label="Foto precedente">‹</button><button type="button" class="gallery-viewer-next" aria-label="Foto successiva">›</button>';
+  viewer.innerHTML='<button type="button" class="gallery-viewer-close" aria-label="Chiudi">✕</button><div class="gallery-viewer-count"></div><button type="button" class="gallery-viewer-download" aria-label="Scarica foto" title="Scarica foto">↓</button><div class="gallery-viewer-stage"><img alt="Foto ingrandita"></div><button type="button" class="gallery-viewer-prev" aria-label="Foto precedente">‹</button><button type="button" class="gallery-viewer-next" aria-label="Foto successiva">›</button>';
   document.body.appendChild(viewer);
   viewer.querySelector(".gallery-viewer-close").onclick=galleryCloseViewer;
+  viewer.querySelector(".gallery-viewer-download").onclick=galleryDownloadCurrent;
   viewer.querySelector(".gallery-viewer-prev").onclick=()=>galleryMoveViewer(-1);
   viewer.querySelector(".gallery-viewer-next").onclick=()=>galleryMoveViewer(1);
   let touchX=null;
@@ -69,10 +70,21 @@ function galleryShowViewer(items,index){
 function galleryUpdateViewer(){
  const viewer=ge("galleryViewer");if(!viewer||!galleryViewerItems.length)return;
  const item=galleryViewerItems[galleryViewerIndex],img=viewer.querySelector("img");
- img.style.display=item.raw?"none":"block";if(!item.raw)img.src=item.url;img.alt=item.name||"Foto";let rawNote=viewer.querySelector(".gallery-raw-note");if(!rawNote){rawNote=document.createElement("div");rawNote.className="gallery-raw-note";viewer.querySelector(".gallery-viewer-stage").append(rawNote);}rawNote.style.display=item.raw?"block":"none";rawNote.textContent=item.raw?"Originale DNG conservato senza modifiche. Usa Scarica originale dalla galleria per aprirlo in un’app compatibile.":"";
- viewer.querySelector(".gallery-viewer-count").textContent=(galleryViewerIndex+1)+" di "+galleryViewerItems.length;
+ img.style.display=item.raw?"none":"block";if(!item.raw)img.src=item.url;img.alt=item.name||"Foto";let rawNote=viewer.querySelector(".gallery-raw-note");if(!rawNote){rawNote=document.createElement("div");rawNote.className="gallery-raw-note";viewer.querySelector(".gallery-viewer-stage").append(rawNote);}rawNote.style.display=item.raw?"block":"none";rawNote.textContent=item.raw?"Originale DNG conservato senza modifiche. Usa la freccia in alto per scaricare l’originale.":"";
+ viewer.querySelector(".gallery-viewer-count").textContent=(galleryViewerIndex+1)+" / "+galleryViewerItems.length;
  viewer.querySelector(".gallery-viewer-prev").disabled=galleryViewerIndex===0;
  viewer.querySelector(".gallery-viewer-next").disabled=galleryViewerIndex===galleryViewerItems.length-1;
+}
+async function galleryDownloadCurrent(){
+ const item=galleryViewerItems[galleryViewerIndex];if(!item)return;
+ const btn=ge("galleryViewer")?.querySelector(".gallery-viewer-download");
+ if(btn)btn.disabled=true;
+ try{
+  const response=await fetch(item.url);if(!response.ok)throw Error("Download non riuscito");
+  const blob=await response.blob();const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download=item.name||"foto.jpg";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+ }catch(e){const a=document.createElement("a");a.href=item.url;a.download=item.name||"foto";a.target="_blank";a.rel="noopener";document.body.append(a);a.click();a.remove();}
+ finally{if(btn)btn.disabled=false;}
 }
 function galleryMoveViewer(delta){
  const next=galleryViewerIndex+delta;
@@ -145,3 +157,11 @@ function galleryForJob(appointmentId){
  input.onchange=async()=>{try{const id=await galleryClientAlbum(a.client_id);await galleryUpload(input.files,id,appointmentId);}catch(e){toast(e.message);}};
  input.click();
 }
+
+/* Galleria fotografica: griglia e visualizzatore in stile iPhone */
+(function galleryInstallStyle(){
+ if(document.getElementById("igeaGalleryModernStyle"))return;
+ const style=document.createElement("style");style.id="igeaGalleryModernStyle";
+ style.textContent=`#galleryContent .gallery-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;margin-top:16px}#galleryContent .gallery-tile{position:relative!important;min-width:0!important;aspect-ratio:1/1!important;overflow:hidden!important;border:0!important;border-radius:7px!important;background:#182233!important;padding:0!important;display:block!important}#galleryContent .gallery-tile>img{display:block;width:100%!important;height:100%!important;object-fit:cover!important;cursor:pointer;border:0!important;border-radius:0!important}#galleryContent .gallery-tile-delete{position:absolute!important;top:6px;right:6px;width:25px!important;height:25px!important;min-width:0!important;min-height:0!important;padding:0!important;border-radius:50%!important;background:rgba(12,18,29,.72)!important;color:white!important;border:1px solid rgba(255,255,255,.35)!important;backdrop-filter:blur(8px);font-size:15px!important;line-height:1!important;opacity:.85}#galleryContent .gallery-tile-delete:active{background:#a52a3d!important}#galleryViewer.gallery-viewer{position:fixed!important;inset:0!important;z-index:99999!important;background:rgba(5,9,17,.98)!important;align-items:center!important;justify-content:center!important;padding:0!important}#galleryViewer .gallery-viewer-stage{position:absolute!important;inset:75px 0 85px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important}#galleryViewer .gallery-viewer-stage img{width:100%!important;height:100%!important;object-fit:contain!important;max-width:100%!important;max-height:100%!important}#galleryViewer .gallery-viewer-close,#galleryViewer .gallery-viewer-download{position:absolute!important;top:calc(16px + env(safe-area-inset-top));width:43px!important;height:43px!important;min-width:0!important;min-height:0!important;border-radius:50%!important;background:rgba(45,56,74,.78)!important;color:#fff!important;border:1px solid #ffffff2a!important;font-size:24px!important;display:grid!important;place-items:center!important;z-index:3!important;padding:0!important}#galleryViewer .gallery-viewer-close{left:17px!important}#galleryViewer .gallery-viewer-download{right:17px!important}#galleryViewer .gallery-viewer-count{position:absolute!important;top:calc(28px + env(safe-area-inset-top));left:75px!important;right:75px!important;text-align:center!important;color:#e8edf6!important;font-size:13px!important;letter-spacing:.8px!important;z-index:2!important}#galleryViewer .gallery-viewer-prev,#galleryViewer .gallery-viewer-next{position:absolute!important;top:50%!important;transform:translateY(-50%)!important;width:38px!important;height:48px!important;min-width:0!important;padding:0!important;border-radius:12px!important;background:#15203388!important;color:white!important;font-size:32px!important;z-index:3!important}#galleryViewer .gallery-viewer-prev{left:8px!important}#galleryViewer .gallery-viewer-next{right:8px!important}#galleryViewer .gallery-viewer-prev:disabled,#galleryViewer .gallery-viewer-next:disabled{opacity:.15!important}@media(max-width:650px){#galleryViewer .gallery-viewer-prev,#galleryViewer .gallery-viewer-next{display:none!important}#galleryContent .gallery-grid{gap:3px!important}#galleryContent .gallery-tile{border-radius:4px!important}}`;
+ document.head.append(style);
+})();
