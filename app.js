@@ -534,6 +534,7 @@ function showPage(page){
         "clients",
         "appointments",
         "payments",
+        "gallery",
         "expenses",
         "settings"
     ];
@@ -558,6 +559,7 @@ function showPage(page){
         "Clients",
         "Appointments",
         "Payments",
+        "Gallery",
         "Expenses"
     ];
 
@@ -585,6 +587,7 @@ function showPage(page){
         clients:"Clienti",
         appointments:"Appuntamenti",
         payments:"Pagamenti",
+        gallery:"Galleria",
         expenses:"Movimenti",
         settings:"Impostazioni"
 
