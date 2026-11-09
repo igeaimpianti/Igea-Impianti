@@ -135,7 +135,7 @@ async function galleryUpload(files,albumId,appointmentId,onProgress){
  let done=0;const errors=[];const allFiles=Array.from(files||[]);let processed=0;
  const queue=allFiles.slice();
  const uploadOne=async(file)=>{
-  if(!file.type.startsWith("image/")&&!/\.(dng|raw|cr2|nef|arw)$/i.test(file.name)){errors.push(file.name+": formato non riconosciuto");processed++;onProgress?.(processed,allFiles.length,file.name);continue;}
+  if(!file.type.startsWith("image/")&&!/\.(dng|raw|cr2|nef|arw)$/i.test(file.name)){errors.push(file.name+": formato non riconosciuto");processed++;onProgress?.(processed,allFiles.length,file.name);return;}
   try{
    const prepared=await galleryOptimize(file);
    const ext=(prepared.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
