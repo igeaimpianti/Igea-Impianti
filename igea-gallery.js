@@ -99,21 +99,22 @@ async function galleryClientAlbum(clientId){
  return q.data.id;
 }
 async function galleryOptimize(file){
- // RAW is not reliably decodable by Safari canvas; preserve the original.
- if(/\.(dng|raw|cr2|nef|arw)$/i.test(file.name))return file;
- if(!/^image\/(jpeg|png|webp|heic|heif)$/i.test(file.type))return file;
+ const raw=/\.(dng|raw|cr2|nef|arw)$/i.test(file.name);
+ if(raw)throw Error("RAW/DNG: conversione non disponibile su questo dispositivo. Il file originale non è stato caricato.");
+ if(file.type==="image/png")return file;
+ if(!/^image\/(jpeg|webp|heic|heif)$/i.test(file.type))throw Error("Formato immagine non supportato");
  let bitmap;
  try{
   bitmap=await createImageBitmap(file,{imageOrientation:"from-image"});
   const canvas=document.createElement("canvas");
   canvas.width=bitmap.width;canvas.height=bitmap.height;
   const ctx=canvas.getContext("2d");
-  if(!ctx) return file;
+  if(!ctx)throw Error("Impossibile preparare la foto");
   ctx.drawImage(bitmap,0,0);
-  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.95));
-  if(!blob||blob.size>=file.size)return file;
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.98));
+  if(!blob)throw Error("Conversione JPEG non riuscita");
   return new File([blob],file.name.replace(/\.[^.]+$/,"")+".jpg",{type:"image/jpeg",lastModified:file.lastModified});
- }catch(_){return file;}
+ }catch(e){throw Error("Conversione non riuscita: "+e.message);}
  finally{bitmap?.close?.();}
 }
 async function galleryUpload(files,albumId,appointmentId,onProgress){
