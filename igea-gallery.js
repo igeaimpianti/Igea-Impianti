@@ -4,11 +4,11 @@ let galleryViewerItems=[];
 let galleryViewerIndex=0;
 const ge=(id)=>document.getElementById(id);
 async function galleryOpen(){
- showPage("settings");
+ showPage("gallery");
  ge("galleryPanel").classList.remove("hidden");
  galleryAlbum=null;
  await galleryRender();
- ge("galleryPanel").scrollIntoView({behavior:"smooth"});
+
 }
 async function galleryRender(){
  const root=ge("galleryContent");root.textContent="Caricamento...";
