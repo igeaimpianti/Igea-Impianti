@@ -1,0 +1,29 @@
+/* IGEA PRO · visual refinement 2026-11-09. Presentation only. */
+:root{--bg:#0b1120;--panel:#151f31;--panel-soft:#1b2940;--line:#2a3a53;--text:#f5f8ff;--muted:#a8b6ca;--blue:#4c9dff;--green:#53d7b2;--red:#ff8d9c;--amber:#ffd08b;--radius:20px}
+html,body{background:#0b1120}
+body{background:radial-gradient(ellipse 90% 48% at 85% -12%,#1b3864 0%,transparent 70%),#0b1120;color:var(--text)}
+.sidebar{background:linear-gradient(180deg,#111c2e,#0d1524);border-right-color:#27364e}
+header{background:#0b1424ef;border-bottom-color:#27364e}
+.brand-mark{background:linear-gradient(140deg,#61b8ff,#2468df);box-shadow:0 8px 22px #2879e533}
+.pro-label,.blueText{color:#91c8ff!important}
+.nav button.active{background:linear-gradient(95deg,#203d65,#1b304c);color:#c4e2ff;box-shadow:inset 3px 0 #62b6ff}
+.nav button:hover:not(.active),.sidebar-tools button:hover{background:#1c2c45}
+.primary{background:linear-gradient(120deg,#358ef5,#2866d9);border-color:#5fa9ff;box-shadow:0 5px 18px #2879e522}
+.primary:hover{background:linear-gradient(120deg,#50a5ff,#317de9)}
+.secondary{background:#22314a;border-color:#354d6e;color:#eef5ff}
+.secondary:hover{background:#2b4060}
+.card,.metric-card,.item,.quote-row{background:linear-gradient(155deg,#19263a,#141e30);border-color:#2b3d57;box-shadow:0 9px 28px #00000016}
+.balance-card{background:linear-gradient(130deg,#287cde,#174c9a 80%);border-color:#5aa5f5}
+.balance-card .balance-art{color:#ffffff12}
+.extra-summary .grid2{background:#142136;border-color:#30425d}
+.extra-summary .stat{border-color:#30425d}
+input,select,textarea{background:#101b2c;border-color:#354762;color:#f4f8ff}
+input:focus,select:focus,textarea:focus{border-color:#63b2ff;box-shadow:0 0 0 3px #4c9dff26}
+input::placeholder,textarea::placeholder{color:#94a5bd}
+label,.sub,.muted{color:#adbbcf}
+.text-button,a{color:#a6d3ff}
+.status-dot{background:#53d7b2}
+.badge{border-radius:999px}
+button{transition:background .18s,border-color .18s,color .18s,transform .18s}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline-color:#9bd0ff}
+@media(max-width:760px){main{padding-left:16px;padding-right:16px}.card{border-radius:18px}.financial-cards{gap:10px}.balance-card,.metric-card{padding:17px}.page-heading{gap:12px}}
