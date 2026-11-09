@@ -28,9 +28,9 @@ async function galleryRender(){
   const input=e.target, files=Array.from(input.files||[]), status=ge("galleryStatus");
   if(!files.length)return;
   input.disabled=true;
-  status.textContent="Preparazione di "+files.length+" originali (nessuna compressione)...";
+  status.textContent="Ottimizzazione delle foto compatibili e caricamento di "+files.length+" file...";
   try{
-    const result=await galleryUpload(files,galleryAlbum,null,(done,total,name)=>{const el=ge("galleryStatus");if(el)el.textContent="Caricamento originali: "+done+"/"+total+" · "+name;});
+    const result=await galleryUpload(files,galleryAlbum,null,(done,total,name)=>{const el=ge("galleryStatus");if(el)el.textContent="Elaborazione foto: "+done+"/"+total+" · "+name;});
     if(result.done){await galleryRender();const updated=ge("galleryStatus");if(updated)updated.textContent=result.done+" foto caricate correttamente"+(result.errors.length?" · "+result.errors.join(" | "):"");}
     else status.textContent="Caricamento non riuscito: "+(result.errors.join(" | ")||"errore sconosciuto");
   }catch(error){status.textContent="Errore caricamento: "+(error.message||String(error));}
@@ -98,17 +98,36 @@ async function galleryClientAlbum(clientId){
  if(q.error){const retry=await supabaseClient.from("photo_albums").select("id").eq("client_id",clientId).single();if(retry.error)throw q.error;return retry.data.id;}
  return q.data.id;
 }
+async function galleryOptimize(file){
+ // RAW is not reliably decodable by Safari canvas; preserve the original.
+ if(/\.(dng|raw|cr2|nef|arw)$/i.test(file.name))return file;
+ if(!/^image\/(jpeg|png|webp|heic|heif)$/i.test(file.type))return file;
+ let bitmap;
+ try{
+  bitmap=await createImageBitmap(file,{imageOrientation:"from-image"});
+  const canvas=document.createElement("canvas");
+  canvas.width=bitmap.width;canvas.height=bitmap.height;
+  const ctx=canvas.getContext("2d");
+  if(!ctx) return file;
+  ctx.drawImage(bitmap,0,0);
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.95));
+  if(!blob||blob.size>=file.size)return file;
+  return new File([blob],file.name.replace(/\.[^.]+$/,"")+".jpg",{type:"image/jpeg",lastModified:file.lastModified});
+ }catch(_){return file;}
+ finally{bitmap?.close?.();}
+}
 async function galleryUpload(files,albumId,appointmentId,onProgress){
  if(!currentUser)throw Error("Accesso richiesto");
  let done=0;const errors=[];const allFiles=Array.from(files||[]);let processed=0;
  for(const file of allFiles){
   if(!file.type.startsWith("image/")&&!/\.(dng|raw|cr2|nef|arw)$/i.test(file.name)){errors.push(file.name+": formato non riconosciuto");processed++;onProgress?.(processed,allFiles.length,file.name);continue;}
   try{
-   const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+   const prepared=await galleryOptimize(file);
+   const ext=(prepared.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
    const path=currentUser.id+"/gallery/"+albumId+"/"+crypto.randomUUID()+"."+ext;
-   const up=await supabaseClient.storage.from("job-documents").upload(path,file,{contentType:file.type||"application/octet-stream",upsert:false,cacheControl:"3600"});
+   const up=await supabaseClient.storage.from("job-documents").upload(path,prepared,{contentType:prepared.type||"application/octet-stream",upsert:false,cacheControl:"3600"});
    if(up.error)throw Error("Storage: "+up.error.message);
-   const ins=await supabaseClient.from("gallery_photos").insert({user_id:currentUser.id,album_id:albumId,appointment_id:appointmentId,name:file.name,storage_path:path});
+   const ins=await supabaseClient.from("gallery_photos").insert({user_id:currentUser.id,album_id:albumId,appointment_id:appointmentId,name:prepared.name,storage_path:path});
    if(ins.error){await supabaseClient.storage.from("job-documents").remove([path]);throw Error("Database: "+ins.error.message);}
    done++;
   }catch(error){errors.push(file.name+": "+(error.message||String(error))+" (verifica limite file del bucket Supabase)");}finally{processed++;onProgress?.(processed,allFiles.length,file.name);}
