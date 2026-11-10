@@ -154,24 +154,11 @@
 
 </section>
 <section id="articoli-sito" class="hidden">
-<div class="page-heading"><h1>Inserisci articoli al sito web</h1><p><a href="https://igeaimpianti.com/prodotti" target="_blank" rel="noopener">Apri il catalogo pubblico ↗</a></p></div>
-<form id="site-product-form" class="card">
-<h2>Nuovo prodotto</h2>
-<label for="site-title">Titolo</label><input id="site-title" name="title" maxlength="120" required>
-<label for="site-article">Codice articolo</label><input id="site-article" name="article" maxlength="80" required>
-<label for="site-description">Descrizione</label><textarea id="site-description" name="description" maxlength="1000" rows="4" required></textarea>
-<label for="site-product-category">Categoria / Sottocategoria obbligatoria</label><select id="site-product-category" name="category" required></select>
-<label for="site-photos">Foto (da 1 a 6)</label><input id="site-photos" name="photo" type="file" accept="image/*" multiple required>
-<p>La prima foto sarà la copertina.</p>
-<button class="blue">Pubblica prodotto</button><p role="status"></p>
-</form>
-<form id="site-category-form" class="card">
-<h2>Nuova categoria o sottocategoria</h2>
-<label for="site-category-name">Nome</label><input id="site-category-name" name="name" maxlength="80" required>
-<label for="site-parent-category">Categoria principale (selezionala per creare una sottocategoria)</label><select id="site-parent-category" name="parent"></select>
-<button class="blue">Salva categoria / sottocategoria</button><p role="status"></p>
-</form>
-</section>
+<div class="page-heading"><h1>Catalogo prodotti</h1><p>Gestisci categorie, sottocategorie e articoli pubblicati sul sito.</p></div>
+<form id="site-category-form" class="card"><h2>1. Crea categoria</h2><label for="site-category-name">Nome categoria</label><input id="site-category-name" maxlength="80" required placeholder="Es. Videosorveglianza"><button class="blue">Crea categoria</button><p role="status"></p></form>
+<form id="site-subcategory-form" class="card"><h2>2. Crea sottocategoria</h2><label for="site-parent-category">Categoria di appartenenza</label><select id="site-parent-category" required></select><label for="site-subcategory-name">Nome sottocategoria</label><input id="site-subcategory-name" maxlength="80" required placeholder="Es. Telecamere IP"><button class="blue">Crea sottocategoria</button><p role="status"></p></form>
+<form id="site-product-form" class="card"><h2>3. Inserisci articolo</h2><label for="site-title">Titolo</label><input id="site-title" maxlength="120" required><label for="site-article">Codice articolo</label><input id="site-article" maxlength="80" required><label for="site-description">Descrizione</label><textarea id="site-description" maxlength="1000" rows="4" required></textarea><label for="site-product-main-category">Categoria</label><select id="site-product-main-category" required></select><label for="site-product-category">Sottocategoria</label><select id="site-product-category" required disabled></select><label for="site-photos">Foto prodotto (da 1 a 6)</label><input id="site-photos" type="file" accept="image/*" multiple required><p>La prima foto sarà la copertina.</p><button class="blue">Pubblica prodotto</button><p role="status"></p></form>
+<div class="card"><h2>Categorie e sottocategorie esistenti</h2><div id="site-catalog-list"></div></div></section>
 <section id="gallery" class="hidden"><div class="page-heading gallery-page-heading"><div class="gallery-heading-row"><h1>La tua galleria</h1><button class="gallery-add-button" type="button" onclick="galleryCreate()" aria-label="Crea nuovo album" title="Nuovo album">＋</button></div><p>Album fotografici dei tuoi lavori, organizzati per cliente.</p></div><div id="galleryPanel"><div class="gallery-actions"><div id="galleryBackSlot"></div></div><div id="galleryContent"></div></div></section>
 <section id="payments" class="hidden"><div class="page-heading"><div><span class="eyebrow">IGEA IMPIANTI PRO / PAGAMENTI</span><h1>Ogni incasso conta.</h1><p>Acconti, rate e importi da incassare, sotto controllo.</p></div></div>
 
