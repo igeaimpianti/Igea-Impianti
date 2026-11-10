@@ -30,72 +30,64 @@ const siteOrigin='https://igeaimpianti.com';
 const productForm=byId('site-product-form');
 const categoryForm=byId('site-category-form');
 
-async function loadSiteCategories(selected){
- const response=await fetch(siteOrigin+'/api/catalogo');
- if(!response.ok)throw new Error('Impossibile caricare le categorie del sito.');
- const {categories}=await response.json();
- const product=byId('site-product-category'),parent=byId('site-parent-category');
- const previous=selected??product.value;
- product.replaceChildren(new Option('Scegli categoria',''));
- parent.replaceChildren(new Option('Nessuna · categoria principale',''));
- for(const group of categories.filter(item=>!item.parent)){
-  parent.add(new Option(group.name,group.id));
-  product.add(new Option(group.name,group.id));
-  for(const child of categories.filter(item=>item.parent===group.id)){
-   product.add(new Option(group.name+' / '+child.name,child.id));
+
+let catalogCategories=[],catalogSubcategories=[];
+const catalogStatus=(form,message)=>{form.querySelector('[role=status]').textContent=message;};
+const catalogSlug=name=>name.toLocaleLowerCase('it').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+async function catalogRows(table){
+ const {data,error}=await supabaseClient.from(table).select('*').order('sort_order',{ascending:true}).order('name',{ascending:true});
+ if(error)throw error;return data||[];
+}
+async function loadSiteCategories(){
+ [catalogCategories,catalogSubcategories]=await Promise.all([catalogRows('catalog_categories'),catalogRows('catalog_subcategories')]);
+ const category=byId('site-parent-category'),productCategory=byId('site-product-category');
+ const oldCategory=category.value,oldProduct=productCategory.value;
+ category.replaceChildren(new Option('Seleziona categoria principale',''));
+ productCategory.replaceChildren(new Option('Seleziona sottocategoria',''));
+ for(const group of catalogCategories){
+  category.add(new Option(group.name,group.id));
+  for(const child of catalogSubcategories.filter(x=>x.category_id===group.id))productCategory.add(new Option(group.name+' / '+child.name,child.id));
+ }
+ category.value=oldCategory;productCategory.value=oldProduct;
+ const list=byId('site-catalog-list');
+ if(list){
+  list.replaceChildren();
+  for(const group of catalogCategories){
+   const line=document.createElement('div');line.style.cssText='padding:12px 0;border-bottom:1px solid #ffffff20';
+   const name=document.createElement('strong');name.textContent=group.name;line.append(name);
+   const children=catalogSubcategories.filter(x=>x.category_id===group.id);
+   const detail=document.createElement('div');detail.className='sub';detail.textContent=children.length?children.map(x=>x.name).join(' · '):'Nessuna sottocategoria';
+   line.append(detail);list.append(line);
   }
  }
- product.value=previous;
 }
-
-async function prepareSitePhotos(data){
- const photos=data.getAll('photo');
- if(photos.length>6)throw new Error('Seleziona al massimo 6 foto.');
- data.delete('photo');
- for(const file of photos){
-  if(['image/jpeg','image/png','image/webp'].includes(file.type)&&file.size<=3*1024*1024){
-   data.append('photo',file);continue;
-  }
-  let bitmap;
-  try{bitmap=await createImageBitmap(file);}
-  catch{throw new Error('Questa foto non si apre. Prova con un file JPEG, PNG o WebP.');}
-  const canvas=document.createElement('canvas');
-  const scale=Math.min(1,1600/Math.max(bitmap.width,bitmap.height));
-  canvas.width=Math.max(1,Math.round(bitmap.width*scale));
-  canvas.height=Math.max(1,Math.round(bitmap.height*scale));
-  canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);
-  bitmap.close();
-  const converted=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.88));
-  if(!converted)throw new Error('Conversione della foto non riuscita.');
-  data.append('photo',converted,'foto.jpg');
- }
-}
-
-for(const form of [productForm,categoryForm]){
- form.addEventListener('submit',async event=>{
-  event.preventDefault();
-  const button=form.querySelector('button'), status=form.querySelector('[role=status]');
-  button.disabled=true;
-  status.textContent='Salvataggio in corso…';
-  try{
-   const {data:{session}}=await supabaseClient.auth.getSession();
-   if(!session)throw new Error('Accedi al gestionale per pubblicare.');
-   const payload=new FormData(form);
-   const isProduct=form===productForm;
-   if(isProduct)await prepareSitePhotos(payload);
-   const response=await fetch(siteOrigin+'/api/gestione/'+(isProduct?'prodotti':'categorie'),{
-    method:'POST',headers:{Authorization:'Bearer '+session.access_token},body:payload
-   });
-   const result=await response.json();
-   if(!response.ok)throw new Error(result.error||'Salvataggio non riuscito.');
-   form.reset();
-   status.textContent=isProduct?'Prodotto pubblicato sul sito.':'Categoria creata.';
-   if(!isProduct)await loadSiteCategories(result.id);
-  }catch(error){status.textContent=error.message;}
-  finally{button.disabled=false;}
- });
-}
-
+categoryForm.addEventListener('submit',async event=>{
+ event.preventDefault();const button=categoryForm.querySelector('button');button.disabled=true;
+ try{
+  const name=byId('site-category-name').value.trim(),parent=byId('site-parent-category').value;
+  if(!name)throw new Error('Inserisci il nome.');
+  const table=parent?'catalog_subcategories':'catalog_categories';
+  const payload=parent?{name,category_id:parent,is_published:true}:{name,slug:catalogSlug(name)+'-'+Date.now().toString(36),is_published:true};
+  const {error}=await supabaseClient.from(table).insert(payload);
+  if(error)throw error;
+  categoryForm.reset();await loadSiteCategories();catalogStatus(categoryForm,parent?'Sottocategoria creata.':'Categoria creata.');
+ }catch(error){catalogStatus(categoryForm,'Errore: '+error.message);}
+ finally{button.disabled=false;}
+});
+productForm.addEventListener('submit',async event=>{
+ event.preventDefault();const button=productForm.querySelector('button');button.disabled=true;
+ try{
+  const subcategory_id=byId('site-product-category').value;
+  if(!subcategory_id)throw new Error('Seleziona una sottocategoria.');
+  const name=byId('site-title').value.trim(),description=byId('site-description').value.trim();
+  const image_url=byId('site-image-url').value.trim();
+  if(image_url&&!/^https:\/\//i.test(image_url))throw new Error('Inserisci un indirizzo immagine HTTPS valido.');
+  const {error}=await supabaseClient.from('catalog_products').insert({name,description,subcategory_id,image_url:image_url||null,is_published:true});
+  if(error)throw error;
+  productForm.reset();catalogStatus(productForm,'Prodotto salvato e pubblicato nel catalogo.');
+ }catch(error){catalogStatus(productForm,'Errore: '+error.message);}
+ finally{button.disabled=false;}
+});
 function openCatalogDeepLink(){
  if(location.hash==='#articoli-sito'&&byId('loginScreen').classList.contains('hidden')){
   history.replaceState(null,'',location.pathname+location.search);
