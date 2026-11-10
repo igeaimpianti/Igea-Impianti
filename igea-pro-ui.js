@@ -33,7 +33,7 @@ const categoryForm=byId('site-category-form');
 
 let catalogCategories=[],catalogSubcategories=[];
 const catalogStatus=(form,message)=>{form.querySelector('[role=status]').textContent=message;};
-const catalogSlug=name=>name.toLocaleLowerCase('it').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const catalogSlug=name=>name.toLocaleLowerCase('it').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 async function catalogRows(table){
  const {data,error}=await supabaseClient.from(table).select('*').order('sort_order',{ascending:true}).order('name',{ascending:true});
  if(error)throw error;return data||[];
