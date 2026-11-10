@@ -6,23 +6,25 @@ const icon=name=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 let activePage='dashboard';
 let previousFocus=null;
 const originalPage=window.showPage;
-const titles={dashboard:'Panoramica',appointments:'Agenda',clients:'Clienti',quotes:'Preventivi',payments:'Pagamenti',gallery:'Galleria','articoli-sito':'Inserisci articoli al sito web',expenses:'Movimenti',settings:'Impostazioni'};
+const titles={dashboard:'Panoramica',appointments:'Agenda',clients:'Clienti',quotes:'Preventivi',payments:'Pagamenti',gallery:'Galleria','articoli-sito':'Inserisci articoli al sito web','gestione-articoli':'Gestione articoli',expenses:'Movimenti',settings:'Impostazioni'};
 function closeMore(){
  byId('moreMenu').classList.add('hidden');byId('menuBackdrop').classList.add('hidden');byId('moreButton').setAttribute('aria-expanded','false');
 }
 window.showPage=function(page){
  if(!titles[page])return;
- if(page==='gallery'||page==='articoli-sito'){
+ if(page==='gallery'||page==='articoli-sito'||page==='gestione-articoli'){
   document.querySelectorAll('main > section[id]').forEach(el=>el.classList.toggle('hidden',el.id!==page));
  }else{
   originalPage(page);
   byId('gallery')?.classList.add('hidden');
   byId('articoli-sito')?.classList.add('hidden');
+  byId('gestione-articoli')?.classList.add('hidden');
  }
  activePage=page;
  byId('pageTitle').textContent=titles[page];
  document.querySelectorAll('[data-page]').forEach(b=>{const active=b.dataset.page===page;b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
- byId('moreButton').classList.toggle('active',['clients','expenses','settings','articoli-sito'].includes(page));
+ byId('moreButton').classList.toggle('active',['clients','expenses','settings','articoli-sito','gestione-articoli'].includes(page));
+ if(page==='gestione-articoli') loadCatalogManager();
  if(page==='articoli-sito') loadSiteCategories().catch(error=>{byId('site-product-form').querySelector('[role=status]').textContent=error.message;});
  closeMore();window.scrollTo({top:0,behavior:'instant'});
 };
@@ -122,6 +124,136 @@ productForm.addEventListener('submit',async event=>{
   for(const path of uploaded)await supabaseClient.storage.from('igea-catalog').remove([path]).catch(()=>{});
  }finally{button.disabled=false;}
 });
+
+/* Catalog management: edits preserve existing product/category relationships. */
+const manager=byId('gestione-articoli');
+const mg=(id)=>byId('mg-'+id);
+const safeText=(value)=>String(value??'');
+let managedProducts=[];
+function managerOption(select,items,placeholder,selected){
+ select.replaceChildren(new Option(placeholder,''));
+ items.forEach(x=>select.add(new Option(x.name,x.id)));
+ select.value=selected||'';
+}
+function managerSubcategories(categoryId,selected){
+ managerOption(mg('subcategory'),catalogSubcategories.filter(x=>x.category_id===categoryId),'Seleziona sottocategoria',selected);
+}
+function managerNotice(message){mg('status').textContent=message;}
+async function managerWrite(table,id,values){
+ const {error}=await supabaseClient.from(table).update(values).eq('id',id);
+ if(error)throw error;
+}
+async function loadCatalogManager(){
+ try{
+  managerNotice('Caricamento catalogo…');
+  await loadSiteCategories();
+  const {data,error}=await supabaseClient.from('catalog_products').select('*').order('name',{ascending:true});
+  if(error)throw error;
+  managedProducts=data||[];
+  managerOption(mg('filter-category'),catalogCategories,'Tutte le categorie',mg('filter-category').value);
+  renderCatalogManager();
+  managerNotice(managedProducts.length+' articoli caricati.');
+ }catch(e){managerNotice('Errore caricamento: '+e.message);}
+}
+function managerButton(text,fn,kind){
+ const b=document.createElement('button');b.type='button';b.textContent=text;
+ b.className=kind==='danger'?'':'blue';
+ b.style.cssText='margin:4px 6px 4px 0;padding:9px 13px;width:auto';
+ b.addEventListener('click',fn);return b;
+}
+function managerLine(title,detail,actions){
+ const line=document.createElement('div');line.style.cssText='padding:13px 0;border-bottom:1px solid #ffffff24';
+ const heading=document.createElement('strong');heading.textContent=title;line.append(heading);
+ if(detail){const d=document.createElement('p');d.className='sub';d.textContent=detail;line.append(d);}
+ const controls=document.createElement('div');actions.forEach(x=>controls.append(x));line.append(controls);return line;
+}
+function renderCatalogManager(){
+ const categories=mg('categories'),products=mg('products');categories.replaceChildren();products.replaceChildren();
+ for(const cat of catalogCategories){
+  categories.append(managerLine(cat.name,'Categoria',[
+   managerButton('Modifica',()=>editManagerCategory(cat)),
+   managerButton('Elimina',()=>deleteManagerCategory(cat),'danger')
+  ]));
+  for(const sub of catalogSubcategories.filter(x=>x.category_id===cat.id)){
+   categories.append(managerLine('↳ '+sub.name,'Sottocategoria',[
+    managerButton('Modifica',()=>editManagerSubcategory(sub)),
+    managerButton('Elimina',()=>deleteManagerSubcategory(sub),'danger')
+   ]));
+  }
+ }
+ const term=mg('search').value.trim().toLocaleLowerCase('it');
+ const filter=mg('filter-category').value;
+ const shown=managedProducts.filter(p=>{
+  const sub=catalogSubcategories.find(x=>x.id===p.subcategory_id);
+  return (!filter||sub?.category_id===filter)&&(!term||[p.name,p.brand,p.description].some(v=>safeText(v).toLocaleLowerCase('it').includes(term)));
+ });
+ for(const p of shown){
+  const sub=catalogSubcategories.find(x=>x.id===p.subcategory_id);
+  const cat=catalogCategories.find(x=>x.id===sub?.category_id);
+  products.append(managerLine(p.name,safeText(p.brand)+' · '+safeText(cat?.name)+' / '+safeText(sub?.name)+' · '+(p.is_published?'Visibile':'Nascosto'),[
+   managerButton('Modifica',()=>editManagerProduct(p)),
+   managerButton(p.is_published?'Nascondi':'Pubblica',async()=>{try{await managerWrite('catalog_products',p.id,{is_published:!p.is_published});await loadCatalogManager();}catch(e){managerNotice(e.message);}}),
+   managerButton('Elimina',()=>deleteManagerProduct(p),'danger')
+  ]));
+ }
+ if(!shown.length)products.textContent='Nessun articolo trovato.';
+}
+function editManagerCategory(cat){
+ const name=prompt('Nome categoria',cat.name);
+ if(name===null||!name.trim())return;
+ (async()=>{try{await managerWrite('catalog_categories',cat.id,{name:name.trim()});await loadCatalogManager();}catch(e){managerNotice(e.message);}})();
+}
+function editManagerSubcategory(sub){
+ mg('sub-edit').hidden=false;mg('sub-id').value=sub.id;mg('sub-name').value=sub.name;
+ managerOption(mg('sub-parent'),catalogCategories,'Seleziona categoria',sub.category_id);
+ mg('sub-edit').scrollIntoView({behavior:'smooth',block:'center'});
+}
+async function deleteManagerCategory(cat){
+ if(catalogSubcategories.some(x=>x.category_id===cat.id))return managerNotice('Sposta o elimina prima le sottocategorie di questa categoria.');
+ if(!confirm('Eliminare la categoria "'+cat.name+'"?'))return;
+ await managerDelete('catalog_categories',cat.id);
+}
+async function deleteManagerSubcategory(sub){
+ if(managedProducts.some(x=>x.subcategory_id===sub.id))return managerNotice('Sposta o elimina prima gli articoli associati a questa sottocategoria.');
+ if(!confirm('Eliminare la sottocategoria "'+sub.name+'"?'))return;
+ await managerDelete('catalog_subcategories',sub.id);
+}
+async function deleteManagerProduct(p){
+ if(!confirm('Eliminare definitivamente l’articolo "'+p.name+'"?'))return;
+ await managerDelete('catalog_products',p.id);
+}
+async function managerDelete(table,id){
+ try{const {error}=await supabaseClient.from(table).delete().eq('id',id);if(error)throw error;await loadCatalogManager();}catch(e){managerNotice('Eliminazione non riuscita: '+e.message);}
+}
+function editManagerProduct(p){
+ mg('product-edit').hidden=false;mg('product-id').value=p.id;mg('name').value=p.name||'';
+ mg('code').value=p.brand||'';mg('description').value=p.description||'';
+ mg('published').checked=!!p.is_published;
+ const sub=catalogSubcategories.find(x=>x.id===p.subcategory_id);
+ managerOption(mg('category'),catalogCategories,'Seleziona categoria',sub?.category_id);
+ managerSubcategories(sub?.category_id,p.subcategory_id);
+ mg('product-edit').scrollIntoView({behavior:'smooth',block:'start'});
+}
+mg('category').addEventListener('change',()=>managerSubcategories(mg('category').value,''));
+mg('search').addEventListener('input',renderCatalogManager);
+mg('filter-category').addEventListener('change',renderCatalogManager);
+mg('cancel-product').addEventListener('click',()=>{mg('product-edit').hidden=true;});
+mg('cancel-sub').addEventListener('click',()=>{mg('sub-edit').hidden=true;});
+mg('sub-edit').addEventListener('submit',async e=>{
+ e.preventDefault();try{
+  await managerWrite('catalog_subcategories',mg('sub-id').value,{name:mg('sub-name').value.trim(),category_id:mg('sub-parent').value});
+  mg('sub-edit').hidden=true;await loadCatalogManager();
+ }catch(error){managerNotice(error.message);}
+});
+mg('product-edit').addEventListener('submit',async e=>{
+ e.preventDefault();try{
+  const sub=mg('subcategory').value;
+  if(!catalogSubcategories.some(x=>x.id===sub&&x.category_id===mg('category').value))throw new Error('Seleziona una sottocategoria valida.');
+  await managerWrite('catalog_products',mg('product-id').value,{name:mg('name').value.trim(),brand:mg('code').value.trim(),description:mg('description').value.trim(),subcategory_id:sub,is_published:mg('published').checked});
+  mg('product-edit').hidden=true;await loadCatalogManager();
+ }catch(error){managerNotice(error.message);}
+});
+
 function openCatalogDeepLink(){
  if(location.hash==='#articoli-sito'&&byId('loginScreen').classList.contains('hidden')){
   history.replaceState(null,'',location.pathname+location.search);
