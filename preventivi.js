@@ -13,6 +13,9 @@ const round2 = value => Math.round((Number(value) || 0) * 100) / 100;
 function installQuoteStyles(){
     const style = document.createElement("style");
     style.textContent = `
+        .quote-entry-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+        .quote-entry-actions button{min-width:0;white-space:normal}
+        @media(max-width:520px){.quote-entry-actions{grid-template-columns:1fr}}
         .quote-row{background:#fafafa;border:1px solid #ddd;border-radius:15px;padding:12px;margin-bottom:10px}
         .quote-row-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
         .quote-row .grid-quote{display:grid;grid-template-columns:1fr 88px;gap:8px}
@@ -80,19 +83,17 @@ function installQuotePage(){
             <div class="divider"></div>
 
             <div class="between">
-                <h3>Articoli</h3>
+                <h3>Voci del preventivo</h3>
                 <span id="quoteItemCount" class="badge blue">0 / 30</span>
             </div>
 
             <div id="quoteItems"></div>
 
-            <button
-                id="addQuoteItemButton"
-                class="secondary"
-                style="width:100%"
-                onclick="addQuoteItem()">
-                ＋ Aggiungi articolo
-            </button>
+            <div class="quote-entry-actions">
+                <button id="addQuoteItemButton" class="secondary" onclick="addQuoteItem({},'manual')">✍️ Scrivi voce manuale</button>
+                <button id="addQuoteCatalogButton" class="secondary" onclick="addQuoteItem({},'catalog')">📦 Scegli dal database</button>
+            </div>
+            <p class="sub" style="margin-top:8px">Puoi combinare voci manuali e articoli del catalogo. I prezzi modificati qui non cambiano quelli del database.</p>
 
             <div class="divider"></div>
 
@@ -308,15 +309,7 @@ function refreshQuoteClients(){
     }
 }
 
-window.addQuoteItem=function(
-    item={
-        article_id:"",
-        article:"",
-        description:"",
-        price:"",
-        quantity:1
-    }
-){
+window.addQuoteItem=function(item={},mode="manual"){
 
     if(quoteItems.length>=30){
 
@@ -342,10 +335,17 @@ window.addQuoteItem=function(
             item.price??"",
 
         quantity:
-            item.quantity??1
+            item.quantity??1,
+        entry_mode:
+            item.entry_mode || (item.article_id ? "catalog" : mode)
     });
 
     renderQuoteItems();
+    if(mode==="catalog"){
+        const index=quoteItems.length-1;
+        const input=q("quoteItems")?.querySelectorAll(".quote-article-picker input")[index];
+        if(input){ input.focus(); searchQuoteArticles(index,input.value); }
+    }
 };
 
 window.removeQuoteItem=function(index){
@@ -364,7 +364,10 @@ window.updateQuoteItem=function(
     if(!quoteItems[index])return;
 
     quoteItems[index][field]=value;
-
+    if(field==="article" && quoteItems[index].article_id){
+        quoteItems[index].article_id="";
+        quoteItems[index].entry_mode="manual";
+    }
     updateQuoteTotals();
 };
 
@@ -391,6 +394,7 @@ window.selectSavedArticle=function(
         ...quoteItems[index],
 
         article_id:article.id,
+        entry_mode:"catalog",
 
         article:article.name,
 
@@ -428,12 +432,9 @@ window.searchQuoteArticles=function(
             .trim()
             .toLowerCase();
 
-    if(!query){
-
+    if(!query && quoteItems[index].entry_mode!=="catalog"){
         box.innerHTML="";
-
         box.classList.add("hidden");
-
         return;
     }
 
@@ -509,7 +510,7 @@ function renderQuoteItems(){
             <div class="quote-row-head">
 
                 <b>
-                    Articolo ${index+1}
+                    ${item.entry_mode==="catalog" || item.article_id ? "Dal catalogo" : "Voce manuale"} ${index+1}
                 </b>
 
                 <button
@@ -520,13 +521,13 @@ function renderQuoteItems(){
 
             </div>
 
-            <label>Articolo</label>
+            <label>${item.entry_mode==="catalog" || item.article_id ? "Articolo dal catalogo" : "Titolo della voce"}</label>
 
             <div class="quote-article-picker">
 
                 <input
                     value="${escapeHTML(item.article)}"
-                    placeholder="Scrivi per cercare, es. presa..."
+                    placeholder="${item.entry_mode==="catalog" || item.article_id ? "Cerca articolo nel database..." : "Es. Realizzazione impianto elettrico"}"
                     autocomplete="off"
                     onfocus="searchQuoteArticles(${index},this.value)"
                     oninput="searchQuoteArticles(${index},this.value)">
@@ -605,6 +606,8 @@ function renderQuoteItems(){
         `${quoteItems.length} / 30`;
 
     q("addQuoteItemButton").disabled=
+        quoteItems.length>=30;
+    q("addQuoteCatalogButton").disabled=
         quoteItems.length>=30;
 
     updateQuoteTotals();
@@ -1288,7 +1291,7 @@ window.emitQuote=async function(){
     if(!cleanItems.length){
 
         alert(
-            "Inserisci almeno un articolo."
+            "Inserisci almeno una voce."
         );
 
         return;
@@ -1487,7 +1490,8 @@ window.editQuote=function(id){
         .map(item=>({
             ...item,
             article_id:
-                item.article_id||""
+                item.article_id||"",
+            entry_mode: item.article_id ? "catalog" : "manual"
         }));
 
     if(!quoteItems.length){
