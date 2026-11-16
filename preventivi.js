@@ -2286,6 +2286,11 @@ async function createManualQuotePDF(quote,client,options={}){
     const logo=await loadQuoteLogo();
     const navy=[19,38,58],blue=[20,121,201],ice=[233,240,245],pale=[246,249,251],ink=[18,24,32];
     const width=210,height=297,left=15,right=195;
+    // Compatta automaticamente un preventivo con una sola lavorazione manuale,
+    // evitando una pagina aggiuntiva soltanto per totale, note e firma.
+    const oneManual=items.length===1 && !items[0]?.article_id;
+    const compact=oneManual && (String(items[0].description||"").length+String(items[0].text||"").length)<1900;
+    const limitY=compact?274:265;
     const items=Array.isArray(quote.items)?quote.items:[];
     const moneyText=n=>money(Number(n)||0);
     const safe=v=>String(v??"");
@@ -2317,8 +2322,8 @@ async function createManualQuotePDF(quote,client,options={}){
     doc.setTextColor(201,213,222);doc.setFont("helvetica","normal");doc.setFontSize(7);
     doc.text("VALIDO "+(quote.validity_days||30)+" GIORNI",189,57,{align:"right"});
 
-    const cardY=69;
-    const cardH=Math.max(35,17+Math.max(companyLines.length,clientLines.length)*4.5);
+    const cardY=compact?65:69;
+    const cardH=compact?34:Math.max(35,17+Math.max(companyLines.length,clientLines.length)*4.5);
     doc.setFillColor(...pale);doc.roundedRect(15,cardY,86,cardH,2.5,2.5,"F");
     doc.setFillColor(255,255,255);doc.setDrawColor(207,216,223);
     doc.roundedRect(109,cardY,86,cardH,2.5,2.5,"FD");
@@ -2332,17 +2337,17 @@ async function createManualQuotePDF(quote,client,options={}){
     if(clientLines.length>1)
         doc.text(clientLines.slice(1).flatMap(line=>doc.splitTextToSize(safe(line),76)),114,cardY+22,{lineHeightFactor:1.3});
 
-    let y=cardY+cardH+9;
+    let y=cardY+cardH+(compact?5:9);
     if(quote.subject){
         doc.setFont("helvetica","normal");doc.setFontSize(8.5);
         const subjectLines=doc.splitTextToSize(safe(quote.subject),147);
-        const subjectH=Math.max(15,9+subjectLines.length*4.2);
+        const subjectH=compact?Math.max(12,6+subjectLines.length*3.9):Math.max(15,9+subjectLines.length*4.2);
         doc.setFillColor(255,255,255);doc.roundedRect(left,y,180,subjectH,2.5,2.5,"F");
         doc.setTextColor(...blue);doc.setFont("helvetica","bold");doc.setFontSize(8);
         doc.text("OGGETTO",20,y+7);
         doc.setFont("helvetica","normal");doc.setTextColor(...ink);doc.setFontSize(8.5);
         doc.text(subjectLines,43,y+7);
-        y+=subjectH+7;
+        y+=subjectH+(compact?4:7);
     }
 
     // Le voci manuali usano tutta la larghezza utile del foglio:
@@ -2361,45 +2366,45 @@ async function createManualQuotePDF(quote,client,options={}){
         y+=9;
     }
     function ensureRoom(mm){
-        if(y+mm>265)continuationPage();
+        if(y+mm>limitY)continuationPage();
     }
     function writeWideText(value,size=9,lineH=4.6){
         const paragraphs=safe(value).split(/\r?\n/);
         doc.setFont("helvetica","normal");doc.setFontSize(size);doc.setTextColor(...ink);
         for(const p of paragraphs){
-            const lines=doc.splitTextToSize(p.trim()||" ",168);
+            const lines=doc.splitTextToSize(p.trim()||" ",compact?174:168);
             for(const line of lines){
                 ensureRoom(lineH+2);
                 doc.text(line,21,y);
                 y+=lineH;
             }
-            if(p.trim())y+=1.4;
+            if(p.trim())y+=compact?0.4:1.4;
         }
     }
 
     for(let i=0;i<manualItems.length;i++){
         const item=manualItems[i];
-        ensureRoom(26);
+        ensureRoom(compact?18:26);
         doc.setFillColor(...navy);
         doc.rect(15,y,180,8,"F");
         doc.setFont("helvetica","bold");doc.setTextColor(255,255,255);doc.setFontSize(8.8);
         const titleLines=doc.splitTextToSize((i+1)+". "+safe(item.article||"Lavorazione"),160);
         // Mantiene il titolo leggibile anche quando supera una riga.
         doc.text(titleLines[0]||"Lavorazione",19,y+5.4);
-        y+=13;
+        y+=compact?10:13;
         if(titleLines.length>1){
             doc.setFont("helvetica","bold");doc.setFontSize(8.5);doc.setTextColor(...navy);
             for(const line of titleLines.slice(1)){ensureRoom(6);doc.text(line,21,y);y+=5;}
         }
-        if(item.description){writeWideText(item.description,9,4.5);y+=3;}
-        if(item.text){writeWideText(item.text,9,4.6);y+=4;}
-        ensureRoom(12);
+        if(item.description){writeWideText(item.description,compact?8.3:9,compact?3.8:4.5);y+=compact?1:3;}
+        if(item.text){writeWideText(item.text,compact?8.3:9,compact?3.8:4.6);y+=compact?1:4;}
+        ensureRoom(compact?9:12);
         doc.setDrawColor(218,225,232);doc.line(19,y,191,y);
         doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(88,98,108);
         doc.text("Q.tà "+safe(item.quantity)+"  |  Prezzo unitario "+moneyText(item.price),21,y+5);
         doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(...blue);
         doc.text(moneyText(item.total),189,y+5,{align:"right"});
-        y+=14;
+        y+=compact?10:14;
     }
 
     if(catalogItems.length){
@@ -2430,34 +2435,34 @@ async function createManualQuotePDF(quote,client,options={}){
         y=doc.lastAutoTable.finalY+10;
     }
 
-    ensureRoom(37);
-    doc.setFillColor(...pale);doc.roundedRect(109,y,86,23,2.5,2.5,"F");
+    ensureRoom(compact?22:37);
+    doc.setFillColor(...pale);doc.roundedRect(109,y,86,compact?18:23,2.5,2.5,"F");
     doc.setFont("helvetica","bold");doc.setTextColor(...ink);doc.setFontSize(8.5);
     doc.text("TOTALE PREVENTIVO",114,y+8);
     doc.setTextColor(...blue);doc.setFontSize(16);
-    doc.text(moneyText(quote.total),190,y+16,{align:"right"});
+    doc.text(moneyText(quote.total),190,y+(compact?14:16),{align:"right"});
     doc.setFont("helvetica","normal");doc.setTextColor(...ink);doc.setFontSize(8.5);
     doc.text("Validità: "+(quote.validity_days||30)+" giorni dalla data di emissione",15,y+8);
-    y+=32;
+    y+=compact?21:32;
     if(quote.notes){
-        ensureRoom(15);
+        ensureRoom(compact?11:15);
         doc.setFont("helvetica","normal");doc.setFontSize(8.5);
         const lines=doc.splitTextToSize(safe(quote.notes),180);
         doc.setFont("helvetica","bold");doc.setFontSize(8);doc.setTextColor(...blue);
         doc.text("NOTE E CONDIZIONI",left,y);
-        y+=7;
-        doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(...ink);
+        y+=compact?5:7;
+        doc.setFont("helvetica","normal");doc.setFontSize(compact?7.6:8.5);doc.setTextColor(...ink);
         for(const line of lines){
             ensureRoom(5);
             doc.text(line,left,y);
-            y+=4.5;
+            y+=compact?3.6:4.5;
         }
-        y+=6;
+        y+=compact?2:6;
     }
-    ensureRoom(23);
-    doc.setDrawColor(170,176,182);doc.line(125,y+10,195,y+10);
+    ensureRoom(compact?12:23);
+    doc.setDrawColor(170,176,182);doc.line(125,y+(compact?4:10),195,y+(compact?4:10));
     doc.setFont("helvetica","normal");doc.setTextColor(90,97,105);doc.setFontSize(7.5);
-    doc.text("Firma del cliente per accettazione",160,y+15,{align:"center"});
+    doc.text("Firma del cliente per accettazione",160,y+(compact?8:15),{align:"center"});
     const count=doc.getNumberOfPages();
     for(let p=1;p<=count;p++){
         doc.setPage(p);
