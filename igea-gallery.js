@@ -39,6 +39,10 @@ async function galleryRender(){
  const renameButton=document.createElement("button");renameButton.type="button";renameButton.className="secondary";renameButton.textContent="✏️ Rinomina album";renameButton.style.marginTop="8px";
  renameButton.onclick=()=>galleryRenameAlbum(album);
  root.querySelector(".gallery-album-toolbar")?.append(renameButton);
+ const linkButton=document.createElement("button");linkButton.type="button";linkButton.className="secondary";
+ linkButton.textContent=galleryLinkedWork(album)?"🔗 Cambia lavoro associato":"🔗 Associa a un lavoro";
+ linkButton.onclick=()=>galleryAssociateWork(album);
+ root.querySelector(".gallery-album-toolbar").append(linkButton);
  const linkedWork=galleryLinkedWork(album);
  if(linkedWork){
   const button=document.createElement("button");button.className="secondary";button.type="button";button.textContent="🔗 Apri lavoro associato";
@@ -105,6 +109,41 @@ async function galleryRenameAlbum(album){
  const {data,error}=await supabaseClient.from("photo_albums").update({title:updatedTitle}).eq("id",album.id).select("id").single();
  if(error||!data){toast("Impossibile rinominare l’album: "+(error?.message||"permesso negato"));return;}
  await galleryRender();toast("Nome dell’album aggiornato");
+}
+async function galleryAssociateWork(album){
+ const jobs=(Array.isArray(appointments)?appointments:[]).filter(a=>a.id&&a.status!=="annullato").sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+ if(!jobs.length){toast("Nessun lavoro disponibile");return;}
+ document.getElementById("galleryWorkModal")?.remove();
+ const overlay=document.createElement("div");overlay.id="galleryWorkModal";overlay.style.cssText="position:fixed;inset:0;z-index:100200;background:#000c;display:grid;place-items:center;padding:16px";
+ const panel=document.createElement("section");panel.style.cssText="width:min(100%,520px);max-height:85vh;display:flex;flex-direction:column;gap:12px;background:#182335;color:white;border:1px solid #455a74;border-radius:18px;padding:18px";
+ const title=document.createElement("h3");title.textContent="Associa a un lavoro";title.style.margin="0";
+ const input=document.createElement("input");input.type="search";input.placeholder="Cerca cliente, lavoro o data";input.style.cssText="padding:12px;background:#0e1725;color:white;border:1px solid #455a74;border-radius:10px";
+ const list=document.createElement("div");list.style.cssText="overflow-y:auto;display:grid;gap:8px";
+ const cancel=document.createElement("button");cancel.type="button";cancel.className="secondary";cancel.textContent="Annulla";cancel.onclick=()=>overlay.remove();
+ panel.append(title,input,list,cancel);overlay.append(panel);document.body.append(overlay);
+ overlay.onclick=e=>{if(e.target===overlay)overlay.remove()};overlay.onkeydown=e=>{if(e.key==="Escape")overlay.remove()};
+ const draw=()=>{
+  list.replaceChildren();const q=input.value.toLocaleLowerCase("it").trim();
+  const filtered=jobs.filter(a=>[findClient(a.client_id)?.name,a.title,a.description,a.notes,a.date,a.status].join(" ").toLocaleLowerCase("it").includes(q));
+  if(!filtered.length){list.textContent="Nessun lavoro trovato";return;}
+  for(const job of filtered){
+   const b=document.createElement("button");b.type="button";b.style.cssText="padding:12px;text-align:left;border:1px solid #364c68;border-radius:12px;background:#243249;color:white;display:grid;gap:4px";
+   const primary=document.createElement("strong");primary.textContent=findClient(job.client_id)?.name||"Cliente";
+   const secondary=document.createElement("small");secondary.textContent=[job.date||"Senza data",job.status==="completato"?"Completato":"Da completare",job.title||job.description||job.notes||""].filter(Boolean).join(" · ");
+   b.append(primary,secondary);
+   b.onclick=async()=>{
+    b.disabled=true;
+    try{
+     const title=galleryAlbumDisplayTitle(album.title)+" · #L-"+String(job.id).slice(0,8);
+     const saved=await supabaseClient.from("photo_albums").update({title}).eq("id",album.id).select("id").single();
+     if(saved.error||!saved.data)throw saved.error||Error("Salvataggio non consentito");
+     const photos=await supabaseClient.from("gallery_photos").update({appointment_id:job.id}).eq("album_id",album.id);
+     if(photos.error){await supabaseClient.from("photo_albums").update({title:album.title}).eq("id",album.id);throw photos.error;}
+     overlay.remove();await galleryRender();toast("Album associato al lavoro");
+    }catch(err){toast("Errore associazione: "+(err.message||err));b.disabled=false;}
+   };list.append(b);
+  }
+ };input.oninput=draw;draw();input.focus();
 }
 function galleryJobAlbumTitle(appointment){
  const client=findClient(appointment.client_id);
