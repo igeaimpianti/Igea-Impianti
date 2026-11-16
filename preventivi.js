@@ -2391,13 +2391,14 @@ async function createManualQuotePDF(quote,client,options={}){
         const titleLines=doc.splitTextToSize((i+1)+". "+safe(item.article||"Lavorazione"),160);
         // Mantiene il titolo leggibile anche quando supera una riga.
         doc.text(titleLines[0]||"Lavorazione",19,y+5.4);
-        y+=compact?10:13;
+        // Distanza reale tra barra blu e prima riga: niente sovrapposizione.
+        y+=compact?15:17;
         if(titleLines.length>1){
             doc.setFont("helvetica","bold");doc.setFontSize(8.5);doc.setTextColor(...navy);
             for(const line of titleLines.slice(1)){ensureRoom(6);doc.text(line,21,y);y+=5;}
         }
-        if(item.description){writeWideText(item.description,compact?8.3:9,compact?3.8:4.5);y+=compact?1:3;}
-        if(item.text){writeWideText(item.text,compact?8.3:9,compact?3.8:4.6);y+=compact?1:4;}
+        if(item.description){writeWideText(item.description,compact?8.5:9,compact?4.1:4.5);y+=compact?2:3;}
+        if(item.text){writeWideText(item.text,compact?8.5:9,compact?4.1:4.6);y+=compact?2:4;}
         ensureRoom(compact?9:12);
         doc.setDrawColor(218,225,232);doc.line(19,y,191,y);
         doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(88,98,108);
