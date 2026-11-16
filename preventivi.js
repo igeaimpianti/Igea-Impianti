@@ -2345,47 +2345,91 @@ async function createManualQuotePDF(quote,client,options={}){
         y+=subjectH+7;
     }
 
-    const rows=items.map((item,index)=>{
-        const parts=[safe(item.description).trim(),safe(item.text).trim()].filter(Boolean);
-        return [
-            String(index+1),safe(item.article),parts.join("\n\n"),
-            safe(item.quantity).replace(".",","),moneyText(item.price),moneyText(item.total)
-        ];
-    });
-    // A text-heavy manual description can continue onto a following page without clipping.
-    doc.autoTable({
-        startY:y,
-        margin:{left:15,right:15,top:22,bottom:27},
-        head:[["#","ARTICOLO","DESCRIZIONE","Q.TÀ","PREZZO UNIT.","TOTALE"]],
-        body:rows,theme:"plain",showHead:"everyPage",rowPageBreak:"auto",
-        styles:{
-            font:"helvetica",fontSize:8,overflow:"linebreak",cellPadding:{top:3,bottom:3,left:2,right:2},
-            textColor:ink,valign:"middle",lineColor:[225,228,232],lineWidth:{bottom:0.25}
-        },
-        bodyStyles:{minCellHeight:12},
-        headStyles:{fillColor:navy,textColor:[255,255,255],fontStyle:"bold",fontSize:7.2,lineWidth:0},
-        alternateRowStyles:{fillColor:[243,247,250]},
-        columnStyles:{
-            0:{cellWidth:8,halign:"center"},
-            1:{cellWidth:37,fontStyle:"bold"},
-            2:{cellWidth:61},
-            3:{cellWidth:13,halign:"right"},
-            4:{cellWidth:30,halign:"right"},
-            5:{cellWidth:31,halign:"right",fontStyle:"bold"}
-        },
-        willDrawPage:data=>{
-            if(data.pageNumber>1)newPageBackground();
-        }
-    });
+    // Le voci manuali usano tutta la larghezza utile del foglio:
+    // titolo e testo in orizzontale, non nella stretta colonna descrizione.
+    const manualItems=items.filter(item=>!item.article_id);
+    const catalogItems=items.filter(item=>!!item.article_id);
 
-    y=doc.lastAutoTable.finalY+10;
+    function continuationPage(){
+        doc.addPage();
+        newPageBackground();
+        y=65;
+        doc.setFont("helvetica","bold");
+        doc.setTextColor(...navy);
+        doc.setFontSize(10);
+        doc.text("CONTINUAZIONE LAVORAZIONI",15,y);
+        y+=9;
+    }
     function ensureRoom(mm){
-        if(y+mm>265){
-            doc.addPage();
-            newPageBackground();
-            y=65;
+        if(y+mm>265)continuationPage();
+    }
+    function writeWideText(value,size=9,lineH=4.6){
+        const paragraphs=safe(value).split(/\r?\n/);
+        doc.setFont("helvetica","normal");doc.setFontSize(size);doc.setTextColor(...ink);
+        for(const p of paragraphs){
+            const lines=doc.splitTextToSize(p.trim()||" ",168);
+            for(const line of lines){
+                ensureRoom(lineH+2);
+                doc.text(line,21,y);
+                y+=lineH;
+            }
+            if(p.trim())y+=1.4;
         }
     }
+
+    for(let i=0;i<manualItems.length;i++){
+        const item=manualItems[i];
+        ensureRoom(26);
+        doc.setFillColor(...navy);
+        doc.rect(15,y,180,8,"F");
+        doc.setFont("helvetica","bold");doc.setTextColor(255,255,255);doc.setFontSize(8.8);
+        const titleLines=doc.splitTextToSize((i+1)+". "+safe(item.article||"Lavorazione"),160);
+        // Mantiene il titolo leggibile anche quando supera una riga.
+        doc.text(titleLines[0]||"Lavorazione",19,y+5.4);
+        y+=13;
+        if(titleLines.length>1){
+            doc.setFont("helvetica","bold");doc.setFontSize(8.5);doc.setTextColor(...navy);
+            for(const line of titleLines.slice(1)){ensureRoom(6);doc.text(line,21,y);y+=5;}
+        }
+        if(item.description){writeWideText(item.description,9,4.5);y+=3;}
+        if(item.text){writeWideText(item.text,9,4.6);y+=4;}
+        ensureRoom(12);
+        doc.setDrawColor(218,225,232);doc.line(19,y,191,y);
+        doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(88,98,108);
+        doc.text("Q.tà "+safe(item.quantity)+"  |  Prezzo unitario "+moneyText(item.price),21,y+5);
+        doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(...blue);
+        doc.text(moneyText(item.total),189,y+5,{align:"right"});
+        y+=14;
+    }
+
+    if(catalogItems.length){
+        ensureRoom(25);
+        doc.autoTable({
+            startY:y,
+            margin:{left:15,right:15,top:22,bottom:27},
+            head:[["#","ARTICOLO","DESCRIZIONE","Q.TÀ","PREZZO UNIT.","TOTALE"]],
+            body:catalogItems.map((item,index)=>[
+                String(index+1),safe(item.article),safe(item.description),
+                safe(item.quantity).replace(".",","),moneyText(item.price),moneyText(item.total)
+            ]),
+            theme:"plain",showHead:"everyPage",rowPageBreak:"auto",
+            styles:{
+                font:"helvetica",fontSize:8,overflow:"linebreak",
+                cellPadding:{top:3,bottom:3,left:2,right:2},
+                textColor:ink,valign:"middle",lineColor:[225,228,232],lineWidth:{bottom:0.25}
+            },
+            headStyles:{fillColor:navy,textColor:[255,255,255],fontStyle:"bold",fontSize:7.2,lineWidth:0},
+            alternateRowStyles:{fillColor:[243,247,250]},
+            columnStyles:{
+                0:{cellWidth:8,halign:"center"},1:{cellWidth:37,fontStyle:"bold"},
+                2:{cellWidth:61},3:{cellWidth:13,halign:"right"},
+                4:{cellWidth:30,halign:"right"},5:{cellWidth:31,halign:"right",fontStyle:"bold"}
+            },
+            willDrawPage:data=>{if(data.pageNumber>1)newPageBackground();}
+        });
+        y=doc.lastAutoTable.finalY+10;
+    }
+
     ensureRoom(37);
     doc.setFillColor(...pale);doc.roundedRect(109,y,86,23,2.5,2.5,"F");
     doc.setFont("helvetica","bold");doc.setTextColor(...ink);doc.setFontSize(8.5);
