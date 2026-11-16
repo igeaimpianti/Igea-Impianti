@@ -2,6 +2,7 @@
 let galleryAlbum=null;
 let galleryViewerItems=[];
 let galleryViewerIndex=0;
+let gallerySearchTerm='';
 const ge=(id)=>document.getElementById(id);
 async function galleryOpen(){
  showPage("gallery");
@@ -16,11 +17,13 @@ async function galleryRender(){
  if(error){root.textContent="Errore: "+error.message;return;}
  if(!galleryAlbum){
  ge("galleryBackSlot")?.replaceChildren();
- root.innerHTML=albums.length?'<div class="gallery-album-list">'+albums.map(album=>
+ const filtered=albums.filter(album=>!gallerySearchTerm.trim()||[album.title,galleryAlbumDisplayTitle(album.title),new Date(album.created_at).toLocaleDateString("it-IT")].join(" ").toLocaleLowerCase("it").includes(gallerySearchTerm.trim().toLocaleLowerCase("it")));
+ root.innerHTML='<div class="field" style="margin-bottom:16px"><label for="gallerySearch">Cerca cliente, lavoro o data</label><input id="gallerySearch" type="search" placeholder="Cerca album..." value="'+escapeHTML(gallerySearchTerm)+'"></div>'+(filtered.length?'<div class="gallery-album-list">'+filtered.map(album=>
   '<button type="button" class="gallery-album" data-album="'+escapeHTML(String(album.id))+'">'+
   '<span class="gallery-cover" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="9" cy="9" r="1.5"/><path d="m3 17 5-4 4 3 4-5 5 5"/></svg></span>'+
-  '<span class="gallery-card-caption"><strong>'+escapeHTML(album.title)+'</strong><small></small></span></button>'
- ).join("")+'</div>':'<div class="gallery-empty"><strong>Nessun album</strong><p>Usa il + per creare un album o aggiungi foto dalla scheda di un lavoro.</p></div>';
+  '<span class="gallery-card-caption"><strong>'+escapeHTML(galleryAlbumDisplayTitle(album.title))+'</strong><small>Creato il '+escapeHTML(new Date(album.created_at).toLocaleDateString('it-IT'))+'</small><small data-gallery-count></small></span></button>'
+ ).join("")+'</div>':'<div class="gallery-empty"><strong>Nessun album trovato</strong><p>Usa + per creare un album.</p></div>');
+ ge("gallerySearch").oninput=e=>{const start=e.target.selectionStart;gallerySearchTerm=e.target.value;galleryRender();requestAnimationFrame(()=>{const input=ge("gallerySearch");if(input){input.focus();input.setSelectionRange(start,start);}});};
  for(const card of root.querySelectorAll("[data-album]")){
   card.onclick=()=>{galleryAlbum=card.dataset.album;galleryRender();};
   galleryLoadCover(card).catch(error=>console.warn("Copertina album",error));
@@ -30,7 +33,7 @@ async function galleryRender(){
  const album=albums.find(a=>a.id===galleryAlbum);if(!album){galleryAlbum=null;return galleryRender();}
  const {data:photos,error:err}=await supabaseClient.from("gallery_photos").select("*").eq("album_id",galleryAlbum).order("created_at",{ascending:false});
  if(err){root.textContent=err.message;return;}
- root.innerHTML='<div class="gallery-album-toolbar"><button id="galleryBack" class="secondary">← Album</button><h3>'+escapeHTML(album.title)+'</h3></div><label class="gallery-upload-label" for="galleryFiles">＋ Carica foto</label><input id="galleryFiles" type="file" accept="image/*" multiple><div id="galleryStatus" class="sub"></div><div class="gallery-grid" id="galleryGrid"></div>';
+ root.innerHTML='<div class="gallery-album-toolbar"><button id="galleryBack" class="secondary">← Album</button><h3>'+escapeHTML(galleryAlbumDisplayTitle(album.title))+'</h3><p class="sub">Creato il '+escapeHTML(new Date(album.created_at).toLocaleDateString('it-IT'))+'</p></div>'<label class="gallery-upload-label" for="galleryFiles">＋ Carica foto</label><input id="galleryFiles" type="file" accept="image/*" multiple><div id="galleryStatus" class="sub"></div><div class="gallery-grid" id="galleryGrid"></div>';
  ge("galleryBack").onclick=()=>{galleryAlbum=null;galleryRender();};
  ge("galleryBackSlot")?.append(ge("galleryBack"));
  ge("galleryFiles").onchange=async(e)=>{
@@ -63,7 +66,7 @@ async function galleryLoadCover(card){
   .select("storage_path,name",{count:"exact"}).eq("album_id",card.dataset.album)
   .order("created_at",{ascending:false}).limit(8);
  if(error||!card.isConnected)return;
- if(count!==null)card.querySelector("small").textContent=count===1?"1 foto":count+" foto";
+ if(count!==null){const countLabel=card.querySelector("[data-gallery-count]");if(countLabel)countLabel.textContent=count===1?"1 foto":count+" foto";}
  const photo=photos.find(photo=>!galleryIsRaw(photo.name));
  if(!photo)return;
  const {data}=await supabaseClient.storage.from("job-documents").createSignedUrl(photo.storage_path,3600);
@@ -76,6 +79,29 @@ async function galleryLoadCover(card){
  image.onerror=()=>image.remove();
  image.src=data.signedUrl;
  cover.append(image);
+}
+function galleryAlbumDisplayTitle(title){return String(title||"").replace(/\\s*·\\s*#L-[0-9a-f]{8}$/i,"");}
+function galleryJobAlbumTitle(appointment){
+ const client=findClient(appointment.client_id);
+ const when=appointment.date?new Date(appointment.date+"T12:00:00").toLocaleDateString("it-IT"):"Senza data";
+ return (client?.name||"Cliente")+" · "+when+" · #L-"+String(appointment.id).slice(0,8);
+}
+async function galleryEnsureJobAlbum(appointment){
+ if(!currentUser||!appointment?.client_id)throw Error("Cliente e accesso richiesti");
+ const title=galleryJobAlbumTitle(appointment);
+ let q=await supabaseClient.from("photo_albums").select("id").eq("title",title).limit(1);
+ if(q.error)throw q.error;
+ if(q.data?.length)return q.data[0].id;
+ // Nessun client_id sull'album dedicato: mantiene intatti gli album unici per cliente già esistenti.
+ q=await supabaseClient.from("photo_albums").insert({title,user_id:currentUser.id}).select("id").single();
+ if(q.error)throw q.error;
+ return q.data.id;
+}
+async function gallerySaveCompletedJobPhotos(appointment,files){
+ const albumId=await galleryEnsureJobAlbum(appointment);
+ const selected=Array.from(files||[]);
+ if(selected.length){const result=await galleryUpload(selected,albumId,appointment.id);if(result.errors.length)throw Error(result.errors.join(" | "));}
+ return albumId;
 }
 function galleryIsRaw(name){
  return /\.(dng|raw|cr2|nef|arw)$/i.test(name||"");
@@ -200,7 +226,7 @@ function galleryForJob(appointmentId){
  const a=appointments.find(x=>String(x.id)===String(appointmentId));
  if(!a?.client_id){toast("Seleziona un cliente per il lavoro");return;}
  const input=document.createElement("input");input.type="file";input.accept="image/*";input.multiple=true;
- input.onchange=async()=>{try{const id=await galleryClientAlbum(a.client_id);await galleryUpload(input.files,id,appointmentId);}catch(e){toast(e.message);}};
+ input.onchange=async()=>{try{const id=await galleryEnsureJobAlbum(a);await galleryUpload(input.files,id,appointmentId);}catch(e){toast(e.message);}};
  input.click();
 }
 
