@@ -1868,6 +1868,7 @@ function openCompletedAppointmentDetail(id){
         }
 
         <h3 style="margin-top:18px">📎 Documenti allegati</h3>
+        <button class="secondary" style="width:100%;margin-bottom:10px" onclick="galleryOpenJobAlbum('${appointment.id}')">📷 Apri album fotografico del lavoro</button>
         <button class="blue" style="width:100%;margin-bottom:10px" onclick="startDocumentScanAndUpload('${appointment.id}')">
             📷 Scansiona e aggiungi documento
         </button>
@@ -2178,6 +2179,7 @@ function completeAppointment(id){
         </div>
 
 
+       <div class="item" style="margin:14px 0;border:1px solid #36506a;border-radius:14px;padding:14px"><label for="completionPhotos" style="display:block;font-weight:750;margin-bottom:8px">📷 Fotografie del lavoro (facoltative)</label><input id="completionPhotos" type="file" accept="image/*" multiple style="width:100%"><div class="sub" style="margin-top:8px">Alla conferma verrà creato automaticamente un album dedicato a questo lavoro, anche senza foto. Potrai aggiungerne altre in seguito.</div></div>
        <label>
     Importo totale del lavoro
 </label>
@@ -3714,6 +3716,14 @@ if(newExpenseToInsert > 0){
         alert("Lavoro completato, ma non sono riuscito a salvare uno dei documenti:\n"+documentError.message);
     }
 
+
+    try{
+        const selectedCompletionPhotos=Array.from($("completionPhotos")?.files||[]);
+        await gallerySaveCompletedJobPhotos(updatedAppointment,selectedCompletionPhotos);
+    }catch(photoError){
+        console.error("Album lavoro:",photoError);
+        alert("Il lavoro è completato, ma l’album o alcune fotografie non sono stati salvati: "+photoError.message+". Potrai riprovare dalla scheda del lavoro.");
+    }
 
     closeModal();
 
