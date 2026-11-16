@@ -2282,97 +2282,151 @@ function loadQuoteLogo(){
 
 async function createManualQuotePDF(quote,client,options={}){
     const {jsPDF}=window.jspdf;
-    const items=quote.items||[];
-    const manual=items.filter(item=>!item.article_id);
-    const catalog=items.filter(item=>!!item.article_id);
-    const doc=new jsPDF({unit:"mm",format:"a4",orientation:"landscape"});
-    const navy=[19,38,58],blue=[20,121,201];
+    const doc=new jsPDF({unit:"mm",format:"a4",orientation:"portrait"});
+    const logo=await loadQuoteLogo();
+    const navy=[19,38,58],blue=[20,121,201],ice=[233,240,245],pale=[246,249,251],ink=[18,24,32];
+    const width=210,height=297,left=15,right=195;
+    const items=Array.isArray(quote.items)?quote.items:[];
     const moneyText=n=>money(Number(n)||0);
-    let y=20;
-    function header(section){
-        const w=doc.internal.pageSize.getWidth();
-        doc.setFillColor(...navy);doc.rect(0,0,w,16,"F");
-        doc.setFont("helvetica","bold");doc.setFontSize(13);doc.setTextColor(255,255,255);
-        doc.text("IGEA IMPIANTI",15,10.5);
-        doc.setFontSize(9);doc.text("PREVENTIVO "+String(quote.quote_number||""),w-15,10.5,{align:"right"});
-        y=27;doc.setTextColor(...navy);doc.setFontSize(12);doc.text(section,15,y);y+=9;
+    const safe=v=>String(v??"");
+    const companyLines=["Titolare: Ciro Igea","Via Maria Maligran 15 - 80147 Napoli (NA)","Codice fiscale: GIECRI93S14F839O"];
+    const clientLines=[
+        client?.name||"Cliente non indicato",client?.address||"",client?.city||"",
+        client?.phone?"Tel. "+client.phone:"",client?.email||""
+    ].filter(Boolean);
+    function newPageBackground(){
+        doc.setFillColor(...ice);doc.rect(0,0,width,height,"F");
+        doc.setFillColor(255,255,255);doc.rect(0,0,width,51,"F");
+        doc.setFillColor(...blue);doc.rect(0,51,width,2.5,"F");
     }
-    function nextIfNeeded(height){
-        const h=doc.internal.pageSize.getHeight();
-        if(y+height>h-22){doc.addPage();header("PREVENTIVO - CONTINUA");}
+    newPageBackground();
+    if(logo){
+        try{doc.addImage(logo,"PNG",20,3,170,43,undefined,"FAST");}
+        catch(error){console.warn("Logo preventivo non inserito",error);}
+    }else{
+        doc.setFont("helvetica","bold");doc.setFontSize(19);doc.setTextColor(...navy);
+        doc.text("IGEA IMPIANTI",15,22);
     }
-    function textBlock(value,x,width,fontSize=9,leading=4.7){
-        doc.setFontSize(fontSize);
-        const lines=doc.splitTextToSize(String(value||""),width);
-        doc.text(lines,x,y);y+=Math.max(leading,lines.length*leading);
+    doc.setFillColor(...navy);doc.roundedRect(116,38,79,25,3,3,"F");
+    doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");
+    doc.setFontSize(14);doc.text("PREVENTIVO",122,47);
+    doc.setTextColor(117,198,242);doc.setFontSize(8.5);
+    doc.text(safe(quote.quote_number||"-"),122,57);
+    doc.setTextColor(255,255,255);doc.setFontSize(8);
+    doc.text(formatDate(quote.quote_date),189,47,{align:"right"});
+    doc.setTextColor(201,213,222);doc.setFont("helvetica","normal");doc.setFontSize(7);
+    doc.text("VALIDO "+(quote.validity_days||30)+" GIORNI",189,57,{align:"right"});
+
+    const cardY=69;
+    const cardH=Math.max(35,17+Math.max(companyLines.length,clientLines.length)*4.5);
+    doc.setFillColor(...pale);doc.roundedRect(15,cardY,86,cardH,2.5,2.5,"F");
+    doc.setFillColor(255,255,255);doc.setDrawColor(207,216,223);
+    doc.roundedRect(109,cardY,86,cardH,2.5,2.5,"FD");
+    doc.setFont("helvetica","bold");doc.setFontSize(8);doc.setTextColor(...blue);
+    doc.text("FORNITORE",20,cardY+10);doc.text("DESTINATARIO",114,cardY+10);
+    doc.setFontSize(9);doc.setTextColor(...ink);
+    doc.text("IGEA IMPIANTI",20,cardY+17);
+    doc.text(doc.splitTextToSize(safe(clientLines[0]),77),114,cardY+17);
+    doc.setFont("helvetica","normal");doc.setFontSize(7.7);
+    doc.text(companyLines,20,cardY+22,{lineHeightFactor:1.3});
+    if(clientLines.length>1)
+        doc.text(clientLines.slice(1).flatMap(line=>doc.splitTextToSize(safe(line),76)),114,cardY+22,{lineHeightFactor:1.3});
+
+    let y=cardY+cardH+9;
+    if(quote.subject){
+        doc.setFont("helvetica","normal");doc.setFontSize(8.5);
+        const subjectLines=doc.splitTextToSize(safe(quote.subject),147);
+        const subjectH=Math.max(15,9+subjectLines.length*4.2);
+        doc.setFillColor(255,255,255);doc.roundedRect(left,y,180,subjectH,2.5,2.5,"F");
+        doc.setTextColor(...blue);doc.setFont("helvetica","bold");doc.setFontSize(8);
+        doc.text("OGGETTO",20,y+7);
+        doc.setFont("helvetica","normal");doc.setTextColor(...ink);doc.setFontSize(8.5);
+        doc.text(subjectLines,43,y+7);
+        y+=subjectH+7;
     }
-    header("LAVORAZIONI E DESCRIZIONE");
-    doc.setFont("helvetica","normal");doc.setTextColor(45,55,65);
-    textBlock("Cliente: "+String(client?.name||"")+"    Data: "+formatDate(quote.quote_date)+"    Validità: "+(quote.validity_days||30)+" giorni",15,265,8);
-    if(quote.subject){nextIfNeeded(12);doc.setFont("helvetica","bold");textBlock(quote.subject,15,265,11,5.5);}
-    for(let i=0;i<manual.length;i++){
-        const item=manual[i];
-        doc.setFont("helvetica","normal");doc.setFontSize(9);
-        const descriptionLines=doc.splitTextToSize(String(item.description||""),260);
-        const bodyLines=doc.splitTextToSize(String(item.text||""),260);
-        const height=16+descriptionLines.length*4.5+bodyLines.length*4.5+9;
-        nextIfNeeded(Math.min(height,165));
-        doc.setDrawColor(218,224,231);doc.line(15,y-2,282,y-2);
-        doc.setFont("helvetica","bold");doc.setTextColor(...navy);doc.setFontSize(11);
-        doc.text(String(item.article||"Lavorazione"),15,y+4);
-        doc.setFontSize(10);doc.setTextColor(...blue);
-        doc.text(moneyText(item.total),282,y+4,{align:"right"});
-        y+=11;
-        doc.setTextColor(40,48,56);doc.setFont("helvetica","normal");
-        if(item.description){textBlock(item.description,15,260,9,4.7);y+=2;}
-        if(item.text){
-            for(const paragraph of String(item.text).split("\n")){
-                const lines=doc.splitTextToSize(paragraph||" ",260);
-                for(const line of lines){nextIfNeeded(5);doc.setFontSize(9);doc.text(line,15,y);y+=4.8;}
-                y+=2;
-            }
+
+    const rows=items.map((item,index)=>{
+        const parts=[safe(item.description).trim(),safe(item.text).trim()].filter(Boolean);
+        return [
+            String(index+1),safe(item.article),parts.join("\n\n"),
+            safe(item.quantity).replace(".",","),moneyText(item.price),moneyText(item.total)
+        ];
+    });
+    // A text-heavy manual description can continue onto a following page without clipping.
+    doc.autoTable({
+        startY:y,
+        margin:{left:15,right:15,top:22,bottom:27},
+        head:[["#","ARTICOLO","DESCRIZIONE","Q.TÀ","PREZZO UNIT.","TOTALE"]],
+        body:rows,theme:"plain",showHead:"everyPage",rowPageBreak:"auto",
+        styles:{
+            font:"helvetica",fontSize:8,overflow:"linebreak",cellPadding:{top:3,bottom:3,left:2,right:2},
+            textColor:ink,valign:"middle",lineColor:[225,228,232],lineWidth:{bottom:0.25}
+        },
+        bodyStyles:{minCellHeight:12},
+        headStyles:{fillColor:navy,textColor:[255,255,255],fontStyle:"bold",fontSize:7.2,lineWidth:0},
+        alternateRowStyles:{fillColor:[243,247,250]},
+        columnStyles:{
+            0:{cellWidth:8,halign:"center"},
+            1:{cellWidth:37,fontStyle:"bold"},
+            2:{cellWidth:61},
+            3:{cellWidth:13,halign:"right"},
+            4:{cellWidth:30,halign:"right"},
+            5:{cellWidth:31,halign:"right",fontStyle:"bold"}
+        },
+        willDrawPage:data=>{
+            if(data.pageNumber>1)newPageBackground();
         }
-        nextIfNeeded(8);
-        doc.setFontSize(8);doc.setTextColor(90,98,108);
-        doc.text("Quantità: "+String(item.quantity)+"  |  Prezzo unitario: "+moneyText(item.price),15,y);y+=10;
+    });
+
+    y=doc.lastAutoTable.finalY+10;
+    function ensureRoom(mm){
+        if(y+mm>265){
+            doc.addPage();
+            newPageBackground();
+            y=65;
+        }
     }
-    if(catalog.length){
-        doc.addPage("a4","portrait");header("ARTICOLI DA CATALOGO");
-        doc.autoTable({
-            startY:y,margin:{left:15,right:15,bottom:25},
-            head:[["#","ARTICOLO","DESCRIZIONE","Q.TÀ","PREZZO","TOTALE"]],
-            body:catalog.map((item,i)=>[String(i+1),String(item.article||""),String(item.description||""),String(item.quantity),moneyText(item.price),moneyText(item.total)]),
-            theme:"striped",styles:{fontSize:8,cellPadding:3,overflow:"linebreak"},
-            headStyles:{fillColor:navy,textColor:[255,255,255]},
-            columnStyles:{0:{cellWidth:9},3:{cellWidth:15},4:{cellWidth:29},5:{cellWidth:29}}
-        });
-        y=doc.lastAutoTable.finalY+12;
-    }
-    nextIfNeeded(36);
-    doc.setDrawColor(218,224,231);doc.line(15,y-2,doc.internal.pageSize.getWidth()-15,y-2);
-    doc.setFont("helvetica","bold");doc.setFontSize(13);doc.setTextColor(...navy);
-    doc.text("TOTALE PREVENTIVO: "+moneyText(quote.total),15,y+7);y+=16;
+    ensureRoom(37);
+    doc.setFillColor(...pale);doc.roundedRect(109,y,86,23,2.5,2.5,"F");
+    doc.setFont("helvetica","bold");doc.setTextColor(...ink);doc.setFontSize(8.5);
+    doc.text("TOTALE PREVENTIVO",114,y+8);
+    doc.setTextColor(...blue);doc.setFontSize(16);
+    doc.text(moneyText(quote.total),190,y+16,{align:"right"});
+    doc.setFont("helvetica","normal");doc.setTextColor(...ink);doc.setFontSize(8.5);
+    doc.text("Validità: "+(quote.validity_days||30)+" giorni dalla data di emissione",15,y+8);
+    y+=32;
     if(quote.notes){
-        doc.setFont("helvetica","normal");doc.setTextColor(55,65,75);
-        for(const line of doc.splitTextToSize(quote.notes,doc.internal.pageSize.getWidth()-30)){
-            nextIfNeeded(6);doc.setFontSize(8);doc.text(line,15,y);y+=4.5;
+        ensureRoom(15);
+        doc.setFont("helvetica","normal");doc.setFontSize(8.5);
+        const lines=doc.splitTextToSize(safe(quote.notes),180);
+        doc.setFont("helvetica","bold");doc.setFontSize(8);doc.setTextColor(...blue);
+        doc.text("NOTE E CONDIZIONI",left,y);
+        y+=7;
+        doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(...ink);
+        for(const line of lines){
+            ensureRoom(5);
+            doc.text(line,left,y);
+            y+=4.5;
         }
+        y+=6;
     }
-    nextIfNeeded(16);doc.setDrawColor(120,130,140);
-    const w=doc.internal.pageSize.getWidth();
-    doc.line(w-80,y+9,w-15,y+9);
-    doc.setFontSize(8);doc.text("Firma del cliente per accettazione",w-47.5,y+14,{align:"center"});
-    const pages=doc.getNumberOfPages();
-    for(let p=1;p<=pages;p++){
-        doc.setPage(p);const pw=doc.internal.pageSize.getWidth(),ph=doc.internal.pageSize.getHeight();
-        doc.setFillColor(...navy);doc.rect(0,ph-12,pw,12,"F");
-        doc.setTextColor(255,255,255);doc.setFontSize(7);
-        doc.text("IGEA IMPIANTI",15,ph-5);
-        doc.text("PAGINA "+p+" DI "+pages,pw-15,ph-5,{align:"right"});
+    ensureRoom(23);
+    doc.setDrawColor(170,176,182);doc.line(125,y+10,195,y+10);
+    doc.setFont("helvetica","normal");doc.setTextColor(90,97,105);doc.setFontSize(7.5);
+    doc.text("Firma del cliente per accettazione",160,y+15,{align:"center"});
+    const count=doc.getNumberOfPages();
+    for(let p=1;p<=count;p++){
+        doc.setPage(p);
+        doc.setFillColor(...navy);doc.rect(0,278,width,19,"F");
+        doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(...blue);
+        doc.text("IGEA IMPIANTI",left,288);
+        doc.setTextColor(255,255,255);
+        doc.text("PREVENTIVO "+safe(quote.quote_number||"-")+" - PAGINA "+p+" DI "+count,right,288,{align:"right"});
     }
-    const fileName=String(quote.quote_number||"preventivo")+"-"+String(client?.name||"cliente").replace(/[^a-z0-9]+/gi,"-")+".pdf";
+    const fileName=safe(quote.quote_number||"preventivo")+"-"+safe(client?.name||"cliente").replace(/[^a-z0-9]+/gi,"-")+".pdf";
     if(options.output==="blob")return {blob:doc.output("blob"),fileName};
-    doc.save(fileName);return {fileName};
+    doc.save(fileName);
+    return {fileName};
 }
 
 async function createQuotePDF(
