@@ -36,6 +36,12 @@ async function galleryRender(){
  root.innerHTML='<div class="gallery-album-toolbar"><button id="galleryBack" class="secondary">← Album</button><h3>'+escapeHTML(galleryAlbumDisplayTitle(album.title))+'</h3><p class="sub">Creato il '+escapeHTML(new Date(album.created_at).toLocaleDateString('it-IT'))+'</p></div>'<label class="gallery-upload-label" for="galleryFiles">＋ Carica foto</label><input id="galleryFiles" type="file" accept="image/*" multiple><div id="galleryStatus" class="sub"></div><div class="gallery-grid" id="galleryGrid"></div>';
  ge("galleryBack").onclick=()=>{galleryAlbum=null;galleryRender();};
  ge("galleryBackSlot")?.append(ge("galleryBack"));
+ const linkedWork=appointments.find(a=>galleryJobAlbumTitle(a)===album.title);
+ if(linkedWork){
+  const button=document.createElement("button");button.className="secondary";button.type="button";button.textContent="🔗 Apri lavoro associato";
+  button.onclick=()=>{showPage("appointments");if(linkedWork.status==="completato")openCompletedAppointmentDetail(linkedWork.id)};
+  root.querySelector(".gallery-album-toolbar")?.append(button);
+ }
  ge("galleryFiles").onchange=async(e)=>{
   const input=e.target, files=Array.from(input.files||[]), status=ge("galleryStatus");
   if(!files.length)return;
@@ -80,7 +86,7 @@ async function galleryLoadCover(card){
  image.src=data.signedUrl;
  cover.append(image);
 }
-function galleryAlbumDisplayTitle(title){return String(title||"").replace(/\\s*·\\s*#L-[0-9a-f]{8}$/i,"");}
+function galleryAlbumDisplayTitle(title){return String(title||"").replace(/\s*·\s*#L-[0-9a-f]{8}$/i,"");}
 function galleryJobAlbumTitle(appointment){
  const client=findClient(appointment.client_id);
  const when=appointment.date?new Date(appointment.date+"T12:00:00").toLocaleDateString("it-IT"):"Senza data";
@@ -102,6 +108,12 @@ async function gallerySaveCompletedJobPhotos(appointment,files){
  const selected=Array.from(files||[]);
  if(selected.length){const result=await galleryUpload(selected,albumId,appointment.id);if(result.errors.length)throw Error(result.errors.join(" | "));}
  return albumId;
+}
+async function galleryOpenJobAlbum(appointmentId){
+ const appointment=appointments.find(a=>String(a.id)===String(appointmentId));
+ if(!appointment){toast("Lavoro non trovato");return}
+ try{galleryAlbum=await galleryEnsureJobAlbum(appointment);showPage("gallery");ge("galleryPanel").classList.remove("hidden");await galleryRender();}
+ catch(error){toast("Impossibile aprire l’album: "+error.message)}
 }
 function galleryIsRaw(name){
  return /\.(dng|raw|cr2|nef|arw)$/i.test(name||"");
