@@ -331,6 +331,9 @@ window.addQuoteItem=function(item={},mode="manual"){
         description:
             String(item.description||""),
 
+        text:
+            String(item.text||""),
+
         price:
             item.price??"",
 
@@ -529,8 +532,8 @@ function renderQuoteItems(){
                     value="${escapeHTML(item.article)}"
                     placeholder="${item.entry_mode==="catalog" || item.article_id ? "Cerca articolo nel database..." : "Es. Realizzazione impianto elettrico"}"
                     autocomplete="off"
-                    onfocus="searchQuoteArticles(${index},this.value)"
-                    oninput="searchQuoteArticles(${index},this.value)">
+                    onfocus="${item.entry_mode==='catalog' ? `searchQuoteArticles(${index},this.value)` : ``}"
+                    oninput="${item.entry_mode==='catalog' ? `searchQuoteArticles(${index},this.value)` : `updateQuoteItem(${index},\'article\',this.value)`}">
 
                 <div
                     id="quoteArticleResults${index}"
@@ -540,10 +543,11 @@ function renderQuoteItems(){
             </div>
 
             <label>Descrizione</label>
-
-            <textarea
-                placeholder="Descrizione articolo o lavorazione"
-                oninput="updateQuoteItem(${index},'description',this.value)">${escapeHTML(item.description)}</textarea>
+            <textarea placeholder="Breve descrizione della lavorazione" oninput="updateQuoteItem(${index},'description',this.value)">${escapeHTML(item.description)}</textarea>
+            ${item.entry_mode==="catalog" || item.article_id ? "" : `
+                <label>Testo</label>
+                <textarea rows="5" placeholder="Scrivi il testo completo del preventivo..." oninput="updateQuoteItem(${index},'text',this.value)">${escapeHTML(item.text||"")}</textarea>
+            `}
 
             <div class="grid-quote">
 
@@ -1275,6 +1279,9 @@ window.emitQuote=async function(){
                     item.description||""
                 ).trim(),
 
+            text:
+                String(item.text||"").trim(),
+
             price:
                 round2(item.price),
 
@@ -1491,7 +1498,8 @@ window.editQuote=function(id){
             ...item,
             article_id:
                 item.article_id||"",
-            entry_mode: item.article_id ? "catalog" : "manual"
+            entry_mode: item.article_id ? "catalog" : "manual",
+            text: item.text || ""
         }));
 
     if(!quoteItems.length){
@@ -2271,6 +2279,102 @@ function loadQuoteLogo(){
     );
 }
 
+
+async function createManualQuotePDF(quote,client,options={}){
+    const {jsPDF}=window.jspdf;
+    const items=quote.items||[];
+    const manual=items.filter(item=>!item.article_id);
+    const catalog=items.filter(item=>!!item.article_id);
+    const doc=new jsPDF({unit:"mm",format:"a4",orientation:"landscape"});
+    const navy=[19,38,58],blue=[20,121,201];
+    const moneyText=n=>money(Number(n)||0);
+    let y=20;
+    function header(section){
+        const w=doc.internal.pageSize.getWidth();
+        doc.setFillColor(...navy);doc.rect(0,0,w,16,"F");
+        doc.setFont("helvetica","bold");doc.setFontSize(13);doc.setTextColor(255,255,255);
+        doc.text("IGEA IMPIANTI",15,10.5);
+        doc.setFontSize(9);doc.text("PREVENTIVO "+String(quote.quote_number||""),w-15,10.5,{align:"right"});
+        y=27;doc.setTextColor(...navy);doc.setFontSize(12);doc.text(section,15,y);y+=9;
+    }
+    function nextIfNeeded(height){
+        const h=doc.internal.pageSize.getHeight();
+        if(y+height>h-22){doc.addPage();header("PREVENTIVO - CONTINUA");}
+    }
+    function textBlock(value,x,width,fontSize=9,leading=4.7){
+        doc.setFontSize(fontSize);
+        const lines=doc.splitTextToSize(String(value||""),width);
+        doc.text(lines,x,y);y+=Math.max(leading,lines.length*leading);
+    }
+    header("LAVORAZIONI E DESCRIZIONE");
+    doc.setFont("helvetica","normal");doc.setTextColor(45,55,65);
+    textBlock("Cliente: "+String(client?.name||"")+"    Data: "+formatDate(quote.quote_date)+"    Validità: "+(quote.validity_days||30)+" giorni",15,265,8);
+    if(quote.subject){nextIfNeeded(12);doc.setFont("helvetica","bold");textBlock(quote.subject,15,265,11,5.5);}
+    for(let i=0;i<manual.length;i++){
+        const item=manual[i];
+        doc.setFont("helvetica","normal");doc.setFontSize(9);
+        const descriptionLines=doc.splitTextToSize(String(item.description||""),260);
+        const bodyLines=doc.splitTextToSize(String(item.text||""),260);
+        const height=16+descriptionLines.length*4.5+bodyLines.length*4.5+9;
+        nextIfNeeded(Math.min(height,165));
+        doc.setDrawColor(218,224,231);doc.line(15,y-2,282,y-2);
+        doc.setFont("helvetica","bold");doc.setTextColor(...navy);doc.setFontSize(11);
+        doc.text(String(item.article||"Lavorazione"),15,y+4);
+        doc.setFontSize(10);doc.setTextColor(...blue);
+        doc.text(moneyText(item.total),282,y+4,{align:"right"});
+        y+=11;
+        doc.setTextColor(40,48,56);doc.setFont("helvetica","normal");
+        if(item.description){textBlock(item.description,15,260,9,4.7);y+=2;}
+        if(item.text){
+            for(const paragraph of String(item.text).split("\n")){
+                const lines=doc.splitTextToSize(paragraph||" ",260);
+                for(const line of lines){nextIfNeeded(5);doc.setFontSize(9);doc.text(line,15,y);y+=4.8;}
+                y+=2;
+            }
+        }
+        nextIfNeeded(8);
+        doc.setFontSize(8);doc.setTextColor(90,98,108);
+        doc.text("Quantità: "+String(item.quantity)+"  |  Prezzo unitario: "+moneyText(item.price),15,y);y+=10;
+    }
+    if(catalog.length){
+        doc.addPage("a4","portrait");header("ARTICOLI DA CATALOGO");
+        doc.autoTable({
+            startY:y,margin:{left:15,right:15,bottom:25},
+            head:[["#","ARTICOLO","DESCRIZIONE","Q.TÀ","PREZZO","TOTALE"]],
+            body:catalog.map((item,i)=>[String(i+1),String(item.article||""),String(item.description||""),String(item.quantity),moneyText(item.price),moneyText(item.total)]),
+            theme:"striped",styles:{fontSize:8,cellPadding:3,overflow:"linebreak"},
+            headStyles:{fillColor:navy,textColor:[255,255,255]},
+            columnStyles:{0:{cellWidth:9},3:{cellWidth:15},4:{cellWidth:29},5:{cellWidth:29}}
+        });
+        y=doc.lastAutoTable.finalY+12;
+    }
+    nextIfNeeded(36);
+    doc.setDrawColor(218,224,231);doc.line(15,y-2,doc.internal.pageSize.getWidth()-15,y-2);
+    doc.setFont("helvetica","bold");doc.setFontSize(13);doc.setTextColor(...navy);
+    doc.text("TOTALE PREVENTIVO: "+moneyText(quote.total),15,y+7);y+=16;
+    if(quote.notes){
+        doc.setFont("helvetica","normal");doc.setTextColor(55,65,75);
+        for(const line of doc.splitTextToSize(quote.notes,doc.internal.pageSize.getWidth()-30)){
+            nextIfNeeded(6);doc.setFontSize(8);doc.text(line,15,y);y+=4.5;
+        }
+    }
+    nextIfNeeded(16);doc.setDrawColor(120,130,140);
+    const w=doc.internal.pageSize.getWidth();
+    doc.line(w-80,y+9,w-15,y+9);
+    doc.setFontSize(8);doc.text("Firma del cliente per accettazione",w-47.5,y+14,{align:"center"});
+    const pages=doc.getNumberOfPages();
+    for(let p=1;p<=pages;p++){
+        doc.setPage(p);const pw=doc.internal.pageSize.getWidth(),ph=doc.internal.pageSize.getHeight();
+        doc.setFillColor(...navy);doc.rect(0,ph-12,pw,12,"F");
+        doc.setTextColor(255,255,255);doc.setFontSize(7);
+        doc.text("IGEA IMPIANTI",15,ph-5);
+        doc.text("PAGINA "+p+" DI "+pages,pw-15,ph-5,{align:"right"});
+    }
+    const fileName=String(quote.quote_number||"preventivo")+"-"+String(client?.name||"cliente").replace(/[^a-z0-9]+/gi,"-")+".pdf";
+    if(options.output==="blob")return {blob:doc.output("blob"),fileName};
+    doc.save(fileName);return {fileName};
+}
+
 async function createQuotePDF(
     quote,
     client,
@@ -2284,6 +2388,10 @@ async function createQuotePDF(
         );
 
         return;
+    }
+
+    if((quote.items||[]).some(item=>!item.article_id)){
+        return createManualQuotePDF(quote,client,options);
     }
 
     const {
@@ -3255,6 +3363,9 @@ function buildAIQuotePreviewData(client){
 
         description:
             String(item.description || "").trim(),
+
+        text:
+            String(item.text || "").trim(),
 
         price:
             round2(item.price),
