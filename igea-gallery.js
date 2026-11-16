@@ -36,7 +36,10 @@ async function galleryRender(){
  root.innerHTML='<div class="gallery-album-toolbar"><button id="galleryBack" class="secondary">← Album</button><h3>'+escapeHTML(galleryAlbumDisplayTitle(album.title))+'</h3><p class="sub">Creato il '+escapeHTML(new Date(album.created_at).toLocaleDateString('it-IT'))+'</p></div><label class="gallery-upload-label" for="galleryFiles">＋ Carica foto</label><input id="galleryFiles" type="file" accept="image/*" multiple><div id="galleryStatus" class="sub"></div><div class="gallery-grid" id="galleryGrid"></div>';
  ge("galleryBack").onclick=()=>{galleryAlbum=null;galleryRender();};
  ge("galleryBackSlot")?.append(ge("galleryBack"));
- const linkedWork=appointments.find(a=>galleryJobAlbumTitle(a)===album.title);
+ const renameButton=document.createElement("button");renameButton.type="button";renameButton.className="secondary";renameButton.textContent="✏️ Rinomina album";renameButton.style.marginTop="8px";
+ renameButton.onclick=()=>galleryRenameAlbum(album);
+ root.querySelector(".gallery-album-toolbar")?.append(renameButton);
+ const linkedWork=galleryLinkedWork(album);
  if(linkedWork){
   const button=document.createElement("button");button.className="secondary";button.type="button";button.textContent="🔗 Apri lavoro associato";
   button.onclick=()=>{showPage("appointments");if(linkedWork.status==="completato")openCompletedAppointmentDetail(linkedWork.id)};
@@ -87,6 +90,22 @@ async function galleryLoadCover(card){
  cover.append(image);
 }
 function galleryAlbumDisplayTitle(title){return String(title||"").replace(/\s*·\s*#L-[0-9a-f]{8}$/i,"");}
+function galleryAlbumWorkSuffix(title){return String(title||"").match(/(\s*·\s*#L-[0-9a-f]{8})$/i)?.[1]||"";}
+function galleryLinkedWork(album){const marker=String(album?.title||"").match(/#L-([0-9a-f]{8})$/i)?.[1];return marker?appointments.find(a=>String(a.id).slice(0,8).toLowerCase()===marker.toLowerCase()):null;}
+async function galleryRenameAlbum(album){
+ const previous=galleryAlbumDisplayTitle(album.title);
+ const answer=prompt("Nuovo nome dell’album",previous);
+ if(answer===null)return;
+ const name=answer.trim();
+ if(!name){toast("Inserisci un nome per l’album");return;}
+ if(name.length>140){toast("Nome troppo lungo: massimo 140 caratteri");return;}
+ const suffix=galleryAlbumWorkSuffix(album.title);
+ const updatedTitle=name+suffix;
+ if(updatedTitle===album.title)return;
+ const {data,error}=await supabaseClient.from("photo_albums").update({title:updatedTitle}).eq("id",album.id).select("id").single();
+ if(error||!data){toast("Impossibile rinominare l’album: "+(error?.message||"permesso negato"));return;}
+ await galleryRender();toast("Nome dell’album aggiornato");
+}
 function galleryJobAlbumTitle(appointment){
  const client=findClient(appointment.client_id);
  const when=appointment.date?new Date(appointment.date+"T12:00:00").toLocaleDateString("it-IT"):"Senza data";
@@ -95,7 +114,7 @@ function galleryJobAlbumTitle(appointment){
 async function galleryEnsureJobAlbum(appointment){
  if(!currentUser||!appointment?.client_id)throw Error("Cliente e accesso richiesti");
  const title=galleryJobAlbumTitle(appointment);
- let q=await supabaseClient.from("photo_albums").select("id").eq("title",title).limit(1);
+ let q=await supabaseClient.from("photo_albums").select("id").ilike("title","%#L-"+String(appointment.id).slice(0,8)).limit(1);
  if(q.error)throw q.error;
  if(q.data?.length)return q.data[0].id;
  // Nessun client_id sull'album dedicato: mantiene intatti gli album unici per cliente già esistenti.
