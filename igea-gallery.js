@@ -33,7 +33,7 @@ async function galleryRender(){
  const album=albums.find(a=>a.id===galleryAlbum);if(!album){galleryAlbum=null;return galleryRender();}
  const {data:photos,error:err}=await supabaseClient.from("gallery_photos").select("*").eq("album_id",galleryAlbum).order("created_at",{ascending:false});
  if(err){root.textContent=err.message;return;}
- root.innerHTML='<div class="gallery-album-toolbar"><button id="galleryBack" class="secondary">← Album</button><h3>'+escapeHTML(galleryAlbumDisplayTitle(album.title))+'</h3><p class="sub">Creato il '+escapeHTML(new Date(album.created_at).toLocaleDateString('it-IT'))+'</p></div>'<label class="gallery-upload-label" for="galleryFiles">＋ Carica foto</label><input id="galleryFiles" type="file" accept="image/*" multiple><div id="galleryStatus" class="sub"></div><div class="gallery-grid" id="galleryGrid"></div>';
+ root.innerHTML='<div class="gallery-album-toolbar"><button id="galleryBack" class="secondary">← Album</button><h3>'+escapeHTML(galleryAlbumDisplayTitle(album.title))+'</h3><p class="sub">Creato il '+escapeHTML(new Date(album.created_at).toLocaleDateString('it-IT'))+'</p></div><label class="gallery-upload-label" for="galleryFiles">＋ Carica foto</label><input id="galleryFiles" type="file" accept="image/*" multiple><div id="galleryStatus" class="sub"></div><div class="gallery-grid" id="galleryGrid"></div>';
  ge("galleryBack").onclick=()=>{galleryAlbum=null;galleryRender();};
  ge("galleryBackSlot")?.append(ge("galleryBack"));
  const linkedWork=appointments.find(a=>galleryJobAlbumTitle(a)===album.title);
@@ -48,7 +48,7 @@ async function galleryRender(){
   input.disabled=true;
   status.textContent="Ottimizzazione delle foto compatibili e caricamento di "+files.length+" file...";
   try{
-    const result=await galleryUpload(files,galleryAlbum,null,(done,total,name)=>{const el=ge("galleryStatus");if(el)el.textContent="Elaborazione foto: "+done+"/"+total+" · "+name;});
+    const result=await galleryUpload(files,galleryAlbum,linkedWork?.id||null,(done,total,name)=>{const el=ge("galleryStatus");if(el)el.textContent="Elaborazione foto: "+done+"/"+total+" · "+name;});
     if(result.done){await galleryRender();const updated=ge("galleryStatus");if(updated)updated.textContent=result.done+" foto caricate correttamente"+(result.errors.length?" · "+result.errors.join(" | "):"");}
     else status.textContent="Caricamento non riuscito: "+(result.errors.join(" | ")||"errore sconosciuto");
   }catch(error){status.textContent="Errore caricamento: "+(error.message||String(error));}
