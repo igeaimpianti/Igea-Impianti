@@ -2286,12 +2286,12 @@ async function createManualQuotePDF(quote,client,options={}){
     const logo=await loadQuoteLogo();
     const navy=[19,38,58],blue=[20,121,201],ice=[233,240,245],pale=[246,249,251],ink=[18,24,32];
     const width=210,height=297,left=15,right=195;
+    const items=Array.isArray(quote.items)?quote.items:[];
     // Compatta automaticamente un preventivo con una sola lavorazione manuale,
     // evitando una pagina aggiuntiva soltanto per totale, note e firma.
     const oneManual=items.length===1 && !items[0]?.article_id;
     const compact=oneManual && (String(items[0].description||"").length+String(items[0].text||"").length)<1900;
     const limitY=compact?274:265;
-    const items=Array.isArray(quote.items)?quote.items:[];
     const moneyText=n=>money(Number(n)||0);
     const safe=v=>String(v??"");
     const companyLines=["Titolare: Ciro Igea","Via Maria Maligran 15 - 80147 Napoli (NA)","Codice fiscale: GIECRI93S14F839O"];
